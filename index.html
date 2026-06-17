@@ -380,14 +380,19 @@ let supabase=null, demoPaid=false;
 async function getSupabase(){
   if(supabase) return supabase;
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true,
+            lock: (name, acquireTimeout, fn) => fn() }   // bypass navigator.locks (prevents silent hangs)
+  });
   return supabase;
 }
 async function hasAccess(userId){
   if(DEMO_MODE) return demoPaid;
-  const sb = await getSupabase();
-  const { data } = await sb.from('entitlements').select('has_access').eq('user_id',userId).maybeSingle();
-  return !!(data && data.has_access);
+  try{
+    const sb = await getSupabase();
+    const { data } = await sb.from('entitlements').select('has_access').eq('user_id',userId).maybeSingle();
+    return !!(data && data.has_access);
+  }catch(e){ return false; }
 }
 async function currentUser(){
   if(DEMO_MODE) return { id:'demo-user' };
@@ -407,15 +412,21 @@ formSignup.addEventListener('submit', async e=>{
   const email=document.getElementById('su-email').value.trim();
   const pass=document.getElementById('su-pass').value;
   const err=document.getElementById('su-err');
+  const btn=formSignup.querySelector('button[type="submit"]');
+  err.classList.remove('note');
   if(!email.includes('@')){ err.textContent='Enter a valid email to continue.'; return; }
   if(pass.length<8){ err.textContent='Password needs at least 8 characters.'; return; }
   err.textContent='';
   if(DEMO_MODE){ show('paywall'); document.getElementById('gateDemoNote').style.display='block'; return; }
-  const sb = await getSupabase();
-  const { data, error } = await sb.auth.signUp({ email, password:pass });
-  if(error){ err.textContent=error.message; return; }
-  if(data.session){ route(); }
-  else { err.classList.add('note'); err.textContent='Check your email to confirm your account, then sign in.'; setTab(false); }
+  const label=btn.textContent; btn.disabled=true; btn.textContent='Creating account…';
+  try{
+    const sb = await getSupabase();
+    const { data, error } = await sb.auth.signUp({ email, password:pass });
+    if(error){ err.textContent=error.message; return; }
+    if(data.session){ await route(); }
+    else { err.classList.add('note'); err.textContent='Check your email to confirm your account, then sign in.'; setTab(false); }
+  }catch(ex){ err.textContent=(ex&&ex.message)||'Something went wrong — please try again.'; }
+  finally{ btn.disabled=false; btn.textContent=label; }
 });
 
 // sign in
@@ -424,13 +435,18 @@ formSignin.addEventListener('submit', async e=>{
   const email=document.getElementById('si-email').value.trim();
   const pass=document.getElementById('si-pass').value;
   const err=document.getElementById('si-err');
+  const btn=formSignin.querySelector('button[type="submit"]');
   if(!email.includes('@')||!pass){ err.textContent='Enter your email and password.'; return; }
   err.textContent='';
   if(DEMO_MODE){ show('paywall'); document.getElementById('gateDemoNote').style.display='block'; return; }
-  const sb = await getSupabase();
-  const { error } = await sb.auth.signInWithPassword({ email, password:pass });
-  if(error){ err.textContent=error.message; return; }
-  route();
+  const label=btn.textContent; btn.disabled=true; btn.textContent='Signing in…';
+  try{
+    const sb = await getSupabase();
+    const { error } = await sb.auth.signInWithPassword({ email, password:pass });
+    if(error){ err.textContent=error.message; return; }
+    await route();
+  }catch(ex){ err.textContent=(ex&&ex.message)||'Something went wrong — please try again.'; }
+  finally{ btn.disabled=false; btn.textContent=label; }
 });
 
 async function signOut(){ if(!DEMO_MODE){ const sb=await getSupabase(); await sb.auth.signOut(); } demoPaid=false; setTab(true); show('landing'); }
