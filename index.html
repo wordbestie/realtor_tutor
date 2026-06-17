@@ -39,25 +39,27 @@
   /* hero: white placeholder, video plays underneath, text overlaid left */
   .hero{position:relative;width:100%;min-height:90vh;display:flex;align-items:center;overflow:hidden;background:#fff}
   .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border:0;background:#fff;z-index:0}
-  .hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.6) 38%,rgba(255,255,255,0) 72%)}
-  .hero-content{position:relative;z-index:2;width:100%;max-width:1080px;margin:0 auto;padding:128px 24px 64px;text-align:left}
-  .hero-content h1{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,6vw,4rem);line-height:1.02;letter-spacing:-.025em;margin:0;max-width:17ch}
+  .hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(270deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.6) 38%,rgba(255,255,255,0) 72%)}
+  .hero-content{position:relative;z-index:2;width:100%;max-width:1080px;margin:0 auto;padding:128px 24px 64px;text-align:right}
+  .hero-content h1{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,6vw,4rem);line-height:1.02;letter-spacing:-.025em;margin:0 0 0 auto;max-width:17ch}
   .cut{position:relative;white-space:nowrap;color:var(--ink)}
   .cut::after{content:"";position:absolute;left:-4%;right:-4%;top:54%;height:8px;background:var(--gold);border-radius:6px;transform:rotate(-4deg);transform-origin:center}
   /* subtext + byline live below the hero, centered on paper */
   .pitch{padding:96px 0 56px;text-align:center}
-  .pitch p.sub{font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);max-width:760px;margin:0 auto;line-height:1.55;font-weight:500}
-  .pitch ul.checklist{list-style:none;padding:0;margin:16px auto 0;width:fit-content;max-width:760px;text-align:left;font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);line-height:1.55;font-weight:500}
-  .pitch ul.checklist li{position:relative;padding-left:1.9em;margin:.4em 0}
-  .pitch ul.checklist li::before{content:"✔️";position:absolute;left:0;top:0}
+  .pitch p.sub{font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);max-width:600px;margin:0 auto;line-height:1.5;font-weight:500;text-wrap:balance}
+  .pitch p.lead{font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);max-width:720px;margin:16px auto 0;line-height:1.5;font-weight:500;text-wrap:balance}
+  .pitch .hl{background:#FBE38E;font-weight:800;padding:.05em .24em;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+  .pitch ul.checklist{list-style:none;padding:0;margin:14px auto 0;width:fit-content;max-width:760px;text-align:left;font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);line-height:1.3;font-weight:500}
+  .pitch ul.checklist li{position:relative;padding-left:1.7em;margin:.1em 0}
+  .pitch ul.checklist li::before{content:"\2714";position:absolute;left:0;top:0;color:var(--green);font-weight:900}
 
   /* tutor byline with profile circle */
-  .byline{display:flex;align-items:center;justify-content:center;gap:16px;margin:44px auto 0}
-  .avatar{position:relative;width:66px;height:66px;border-radius:50%;flex:0 0 auto;overflow:hidden;background:var(--ink);
-    display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--gold)}
-  .avatar span{font-family:var(--display);font-weight:800;color:#fff;font-size:1.35rem;letter-spacing:.02em}
+  .byline{display:flex;align-items:center;justify-content:center;gap:22px;margin:40px auto 0}
+  .avatar{position:relative;width:104px;height:104px;border-radius:50%;flex:0 0 auto;overflow:hidden;background:var(--ink);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px var(--paper),0 0 0 6px var(--gold)}
+  .avatar span{font-family:var(--display);font-weight:800;color:#fff;font-size:2rem;letter-spacing:.02em}
   .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .byline-text{font-family:var(--display);font-weight:800;font-size:clamp(1.3rem,2.4vw,1.8rem);letter-spacing:-.01em;margin:0}
+  .byline-text{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3vw,2.3rem);letter-spacing:-.01em;margin:0}
 
   .auth{padding:48px 0 80px;display:flex;justify-content:center}
   .card{background:var(--card);border:1px solid var(--line);border-radius:20px;width:100%;max-width:440px;padding:8px;box-shadow:0 30px 60px -40px rgba(16,48,42,.4)}
@@ -227,12 +229,13 @@
   </div>
 
   <div class="pitch wrap">
-    <p class="sub">You don't need to give up 50% to a team repeatedly just to get help as a real estate agent. <strong>You need a friendly fellow agent to be your tutor</strong> so you can:</p>
+    <p class="sub">You don't need to give up 50% to a team repeatedly just to get help as a real estate agent.</p>
+    <p class="lead"><strong class="hl">You need a friendly fellow agent to be your tutor</strong> so you can:</p>
     <ul class="checklist">
       <li>learn the ropes</li>
       <li>don't drop any balls</li>
       <li>automate what can be automated</li>
-      <li>kill it in the market</li>
+      <li>gain confidence to kill it in the market</li>
     </ul>
     <div class="byline">
       <!-- Photo embedded inline. To swap: replace this data URI with src="tutor.jpg" and drop a new tutor.jpg beside index.html. -->
