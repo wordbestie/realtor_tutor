@@ -5,8 +5,8 @@
    Both index.html and every wizard read from this one file.
    These two values are safe to expose publicly.
    ================================================================ */
-window.RT_SUPABASE_URL      = https://jcqotsaxpemrblhqoils.supabase.co;
-window.RT_SUPABASE_ANON_KEY = sb_publishable_5e9ks4XWisKN50099EXNdA_WalYwdMe;
+window.RT_SUPABASE_URL      = 'https://jcqotsaxpemrblhqoils.supabase.co';
+window.RT_SUPABASE_ANON_KEY = 'sb_publishable_5e9ks4XWisKN50099EXNdA_WalYwdMe';
 
 // While the keys are placeholders, the whole site runs in DEMO MODE
 // (everything is clickable, nothing is actually checked). Real keys
