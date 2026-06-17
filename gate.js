@@ -26,7 +26,10 @@ window.requireMemberAccess = async function (opts) {
   if (window.RT_DEMO_MODE) return true;
   try {
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const sb = createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY);
+    const sb = createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY, {
+  auth: { persistSession:true, autoRefreshToken:true,
+          lock: (name, acquireTimeout, fn) => fn() }
+});
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { location.replace(home); return false; }
     const { data } = await sb
