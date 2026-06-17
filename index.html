@@ -386,24 +386,37 @@ async function getSupabase(){
   });
   return supabase;
 }
+function withTimeout(promise, ms, stepLabel){
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timed out while '+stepLabel)), ms))
+  ]);
+}
 async function hasAccess(userId){
   if(DEMO_MODE) return demoPaid;
-  try{
-    const sb = await getSupabase();
-    const { data } = await sb.from('entitlements').select('has_access').eq('user_id',userId).maybeSingle();
-    return !!(data && data.has_access);
-  }catch(e){ return false; }
+  const sb = await getSupabase();
+  const q = sb.from('entitlements').select('has_access').eq('user_id',userId).maybeSingle();
+  const { data, error } = await withTimeout(q, 8000, 'checking your access');
+  if(error) throw new Error(error.message||'access check failed');
+  return !!(data && data.has_access);
 }
 async function currentUser(){
   if(DEMO_MODE) return { id:'demo-user' };
   const sb = await getSupabase();
-  const { data:{ session } } = await sb.auth.getSession();
+  const { data:{ session } } = await withTimeout(sb.auth.getSession(), 8000, 'reading your session');
   return session ? session.user : null;
 }
+// used right after a successful sign-in/up: we already hold the session, so skip getSession
+async function enterAppAfterAuth(user){
+  const ok = await hasAccess(user.id);
+  ok ? show('app') : show('paywall');
+}
 async function route(){
-  const user = await currentUser();
-  if(!user){ show('landing'); return; }
-  (await hasAccess(user.id)) ? show('app') : show('paywall');
+  try{
+    const user = await currentUser();
+    if(!user){ show('landing'); return; }
+    (await hasAccess(user.id)) ? show('app') : show('paywall');
+  }catch(e){ console.warn('route:', e); show('landing'); }
 }
 
 // sign up
@@ -423,7 +436,7 @@ formSignup.addEventListener('submit', async e=>{
     const sb = await getSupabase();
     const { data, error } = await sb.auth.signUp({ email, password:pass });
     if(error){ err.textContent=error.message; return; }
-    if(data.session){ await route(); }
+    if(data.session){ await enterAppAfterAuth(data.session.user); }
     else { err.classList.add('note'); err.textContent='Check your email to confirm your account, then sign in.'; setTab(false); }
   }catch(ex){ err.textContent=(ex&&ex.message)||'Something went wrong — please try again.'; }
   finally{ btn.disabled=false; btn.textContent=label; }
@@ -442,9 +455,11 @@ formSignin.addEventListener('submit', async e=>{
   const label=btn.textContent; btn.disabled=true; btn.textContent='Signing in…';
   try{
     const sb = await getSupabase();
-    const { error } = await sb.auth.signInWithPassword({ email, password:pass });
+    const { data, error } = await sb.auth.signInWithPassword({ email, password:pass });
     if(error){ err.textContent=error.message; return; }
-    await route();
+    const user = (data && data.session) ? data.session.user : await currentUser();
+    if(!user){ err.textContent='Signed in but no session came back — please try again.'; return; }
+    await enterAppAfterAuth(user);
   }catch(ex){ err.textContent=(ex&&ex.message)||'Something went wrong — please try again.'; }
   finally{ btn.disabled=false; btn.textContent=label; }
 });
