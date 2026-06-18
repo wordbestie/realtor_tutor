@@ -196,6 +196,15 @@
   .wz-open svg{width:16px;height:16px}
   .wz-open.soon-tag{color:var(--muted);margin-top:10px}
 
+  /* ---------------- WELCOME BANNER ---------------- */
+  .welcome{display:flex;align-items:flex-start;gap:14px;background:linear-gradient(180deg,#EAF5EE,#FBFAF4);border:1px solid rgba(46,125,91,.4);border-radius:14px;padding:16px 18px;margin-bottom:22px;box-shadow:0 18px 40px -30px rgba(46,125,91,.5)}
+  .welcome-ic{flex:0 0 30px;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+  .welcome-body{flex:1;display:flex;flex-direction:column;gap:3px}
+  .welcome-body strong{font-family:var(--display);font-weight:800;font-size:1.05rem;color:var(--ink)}
+  .welcome-body span{color:var(--muted);font-size:.92rem}
+  .welcome-x{flex:0 0 auto;background:none;border:0;color:var(--muted);font-size:1.5rem;line-height:1;cursor:pointer;padding:0 4px;border-radius:6px}
+  .welcome-x:hover{color:var(--ink)}
+
   /* ---------------- FOOTER ---------------- */
   .site-foot{border-top:1px solid var(--line);background:var(--paper)}
   .foot-wrap{max-width:1080px;margin:0 auto;padding:40px 24px 30px;display:flex;flex-wrap:wrap;align-items:center;gap:18px 32px}
@@ -393,6 +402,14 @@
     </div>
   </header>
   <main class="app-main wrap">
+    <div class="welcome" id="welcomeBanner" role="status" style="display:none">
+      <div class="welcome-ic">✓</div>
+      <div class="welcome-body">
+        <strong>You're in — payment received!</strong>
+        <span>Welcome to Realtor Tutor. A receipt is on its way to your email. Let's get to work.</span>
+      </div>
+      <button class="welcome-x" id="welcomeX" type="button" aria-label="Dismiss">&times;</button>
+    </div>
     <div class="greet">
       <h2>Let's get to work &amp; make that money. 💪💰</h2>
       <p>Each wizard &amp; video below walks you through the task step by step.<br>If you need help, email <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a>.</p>
@@ -472,7 +489,12 @@ const SOCIAL = {
    3) VIEWS
    ================================================================ */
 const views = { landing:document.getElementById('landing'), paywall:document.getElementById('paywall'), app:document.getElementById('app') };
-function show(name){ Object.entries(views).forEach(([k,el])=>el.classList.toggle('is-active',k===name)); window.scrollTo(0,0); }
+function show(name){ Object.entries(views).forEach(([k,el])=>el.classList.toggle('is-active',k===name)); window.scrollTo(0,0); if(name==='app') maybeWelcome(); }
+function maybeWelcome(){
+  if(sessionStorage.getItem('rt_welcome')!=='1') return;
+  sessionStorage.removeItem('rt_welcome');
+  const b=document.getElementById('welcomeBanner'); if(b) b.style.display='flex';
+}
 
 /* ---- auth tabs ---- */
 const tabSignup=document.getElementById('tabSignup'), tabSignin=document.getElementById('tabSignin');
@@ -590,6 +612,7 @@ formSignin.addEventListener('submit', async e=>{
 async function signOut(){ if(!DEMO_MODE){ const sb=await getSupabase(); await sb.auth.signOut(); } demoPaid=false; setTab(true); show('landing'); }
 document.getElementById('signout').onclick=signOut;
 document.getElementById('gateSignout').onclick=signOut;
+document.getElementById('welcomeX').onclick=()=>{ document.getElementById('welcomeBanner').style.display='none'; };
 
 /* ---- buy: Stripe Checkout via Netlify function ---- */
 const buyBtn=document.getElementById('buyBtn');
@@ -613,6 +636,7 @@ buyBtn.addEventListener('click', async ()=>{
 async function handleReturn(){
   const p=new URLSearchParams(location.search);
   if(p.get('paid')!=='1' || DEMO_MODE) return;
+  sessionStorage.setItem('rt_welcome','1');
   const user=await currentUser(); if(!user) return;
   for(let i=0;i<6;i++){ if(await hasAccess(user.id)){ history.replaceState({},'','/'); show('app'); return; } await new Promise(r=>setTimeout(r,1500)); }
 }
