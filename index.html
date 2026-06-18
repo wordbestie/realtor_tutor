@@ -49,7 +49,7 @@
   .pitch p.sub{font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);max-width:600px;margin:0 auto;line-height:1.5;font-weight:500;text-wrap:balance}
   .pitch p.lead{font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);max-width:720px;margin:16px auto 0;line-height:1.5;font-weight:500;text-wrap:balance}
   .pitch .hl{background:#FBE38E;font-weight:800;padding:.05em .24em;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-  .pitch ul.checklist{list-style:none;padding:0;margin:7px auto 0;width:fit-content;max-width:760px;text-align:left;font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);line-height:1.3;font-weight:500}
+  .pitch ul.checklist{list-style:none;padding:0;margin:1px auto 0;width:fit-content;max-width:760px;text-align:left;font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);line-height:1.3;font-weight:500}
   .pitch ul.checklist li{position:relative;padding-left:1.7em;margin:.1em 0}
   .pitch ul.checklist li::before{content:"\2714";position:absolute;left:0;top:0;color:var(--green);font-weight:900}
 
@@ -215,6 +215,42 @@
     .foot-social{margin-left:0;width:100%}
   }
   @media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+
+  /* ----- topbar: bigger logo, View Demo pill, Login ◆ Sign up ----- */
+  .mark-lg{font-size:1.5rem}
+  .mark-lg .tick{width:13px;height:13px}
+  .topnav{display:flex;align-items:center;gap:16px}
+  .pill{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:.9rem;padding:9px 18px;border-radius:100px;transition:transform .12s,background .2s}
+  .pill:hover{background:var(--ink-2);transform:translateY(-1px)}
+  .topauth{display:inline-flex;align-items:center;gap:11px}
+  .toplink-text{color:var(--ink);text-decoration:none;font-weight:700;font-size:.95rem;transition:color .15s}
+  .toplink-text:hover{color:var(--green)}
+  .topdiamond{width:8px;height:8px;background:var(--gold);transform:rotate(45deg);display:inline-block;border-radius:1px}
+
+  /* ----- collapsible category sections (accordion) ----- */
+  .cat-head{cursor:pointer;user-select:none}
+  .cat-head:hover h3{color:var(--green)}
+  .cat-head .chev{flex:0 0 auto;width:24px;height:24px;display:grid;place-items:center;color:var(--muted);transition:transform .25s ease;transform:rotate(-90deg)}
+  .cat-head .chev svg{width:15px;height:15px}
+  .cat:not(.collapsed) .cat-head .chev{transform:rotate(0deg)}
+  .cat.collapsed .cat-body{display:none}
+  .wz-subsec{margin-top:16px}
+  .wz-subsec .wz-group{cursor:pointer;user-select:none;display:flex;align-items:center;gap:9px;margin:0;padding:0;border-top:0}
+  .wz-subsec .wz-group:hover{color:var(--green)}
+  .wz-subsec .wz-group .chev{width:18px;height:18px;display:grid;place-items:center;color:var(--muted);transition:transform .25s ease;transform:rotate(-90deg)}
+  .wz-subsec .wz-group .chev svg{width:12px;height:12px}
+  .wz-subsec:not(.collapsed) .wz-group .chev{transform:rotate(0deg)}
+  .wz-subsec.collapsed .wz-sublist{display:none}
+  .wz-sublist{display:flex;flex-direction:column;gap:16px;margin-top:14px}
+  @media(max-width:560px){
+    .topbar{padding:16px 14px}
+    .mark-lg{font-size:1.18rem}
+    .mark-lg .tick{width:11px;height:11px}
+    .topnav{gap:9px}
+    .pill{padding:7px 13px;font-size:.82rem}
+    .toplink-text{font-size:.85rem}
+    .topauth{gap:8px}
+  }
 </style>
 </head>
 <body>
@@ -222,8 +258,15 @@
 <!-- ===================== LANDING ===================== -->
 <section id="landing" class="view is-active">
   <div class="topbar">
-    <div class="mark"><span class="tick"></span> Realtor&nbsp;Tutor</div>
-    <a class="toplink" href="#auth" id="topSignin">Sign in</a>
+    <div class="mark mark-lg"><span class="tick"></span> Realtor&nbsp;Tutor</div>
+    <div class="topnav">
+      <a class="pill" href="#demo" id="viewDemo">View Demo</a>
+      <span class="topauth">
+        <a class="toplink-text" href="#auth" id="topLogin">Login</a>
+        <span class="topdiamond"></span>
+        <a class="toplink-text" href="#auth" id="topSignup">Sign up</a>
+      </span>
+    </div>
   </div>
 
   <!-- Hero: white placeholder; your hero.mp4 plays underneath the overlaid text. -->
@@ -237,7 +280,7 @@
   </div>
 
   <div class="pitch wrap">
-    <p class="sub">You don't need to give up 50% to a team repeatedly just to get help as a real estate agent.</p>
+    <p class="sub">You don't need to give up 50% of your money repeatedly to a team split just to get help as a real estate agent.</p>
     <p class="lead"><strong class="hl">You need a friendly fellow agent to be your tutor</strong> so you can:</p>
     <ul class="checklist">
       <li>learn the ropes</li>
@@ -255,21 +298,22 @@
   <div class="auth wrap" id="auth">
     <div class="card">
       <div class="tabs">
-        <button id="tabSignup" class="on" type="button">Create account</button>
-        <button id="tabSignin" type="button">Sign in</button>
+        <button id="tabSignup" class="on" type="button">Sign up</button>
+        <button id="tabSignin" type="button">Login</button>
       </div>
       <form id="formSignup">
-        <div class="plan"><span class="price">$349</span><span>once + HST · lifetime access</span></div>
+        <div class="plan"><span class="price">$349 CAD</span><span>· one-time purchase · lifetime access</span></div>
         <div class="field"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
         <div class="field"><label for="su-pass">Create a password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
-        <button class="btn" type="submit">Create account</button>
-        <p class="fineprint">One payment. No subscription, no per-deal cut. By joining you agree to the <a href="#" data-modal="disclaimer">disclaimer</a>.</p>
+        <button class="btn" type="submit">Sign up</button>
+        <p class="fineprint">One payment. No subscription, no per-deal cut.</p>
+        <p class="fineprint">By joining you agree to the <a href="#" data-modal="disclaimer">disclaimer</a>.</p>
         <div class="err" id="su-err"></div>
       </form>
       <form id="formSignin" style="display:none">
         <div class="field" style="margin-top:8px"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
         <div class="field"><label for="si-pass">Password</label><input id="si-pass" type="password" autocomplete="current-password" placeholder="Your password"></div>
-        <button class="btn" type="submit">Sign in</button>
+        <button class="btn" type="submit">Login</button>
         <p class="fineprint">Members only — this is where the tools live.</p>
         <div class="err" id="si-err"></div>
       </form>
@@ -277,7 +321,7 @@
   </div>
 
   <!-- Edge-to-edge demo. Drop your file in as demo.mp4 (optional demo-poster.jpg). -->
-  <section class="demo">
+  <section class="demo" id="demo">
     <div class="demo-head wrap">
       <h2>See what's inside</h2>
     </div>
@@ -302,7 +346,7 @@
     <div class="gate-card">
       <div class="label">You're signed in — one step left</div>
       <h2>Unlock the toolkit</h2>
-      <div class="gate-price"><b>$349</b><span>one-time + 13% HST · lifetime access</span></div>
+      <div class="gate-price"><b>$349 CAD</b><span>· one-time purchase · lifetime access</span></div>
       <ul class="incl">
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Listing &amp; Buying Wizards</li>
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Marketing Automation Blueprints</li>
@@ -350,21 +394,21 @@
    not-yet-clickable card. Add the url to flip it live.
    ================================================================ */
 const CATEGORIES = [
-  { key:'prelisting', name:'Pre-Listing', unit:'walkthrough', wizards:[
-      { name:'Matrix — Accessing All Its Data', blurb:'A guided walkthrough of Matrix and how to pull every piece of data you need.', videoOnly:true, video:'matrix-walkthrough-demo.mp4' },
+  { key:'prelisting', name:'Getting Started', unit:'walkthrough', wizards:[
       { name:'ITSO Systems Tour', blurb:'A tour of the ITSO systems and what each one is for.', videoOnly:true, video:'itso-tour-demo.mp4' },
+      { name:'Accessing Matrix Data', blurb:'A guided walkthrough of Matrix and how to pull every piece of data you need.', videoOnly:true, video:'matrix-walkthrough-demo.mp4' },
       { name:'Adding People to an Email List', blurb:'How to add new contacts to your email marketing list, step by step.', videoOnly:true, video:'email-list-demo.mp4' },
   ]},
   { key:'listing', name:'Listing', wizards:[
       { name:'Listing Intake Wizard', blurb:'Capture every detail of a new listing in minutes.', url:'wizards/listing-intake.html', video:'listing-intake-demo.mp4' },
-      { name:'Broker Loading your Listing', blurb:'Load your listing onto the board without missing a field.', url:'wizards/broker-load.html', video:'broker-load-demo.mp4' },
+      { name:'Realtor.ca', blurb:'Get your listing loaded correctly — every field, in the right order.', url:'wizards/broker-load.html', video:'broker-load-demo.mp4' },
       { name:'Loading Open House Info', blurb:'Capture open house details by phone or desktop.', url:'wizards/open-house.html', video:'open-house-demo.mp4' },
-      { name:'Vetting a Lease Application', blurb:'Screen a prospective tenant — application, income, credit, references — and summarize for your landlord.', url:'wizards/lease-vetting.html', video:'lease-vetting-demo.mp4' },
       { name:'Setting Up Your LockBox', blurb:'Program, place, and manage your lockbox the right way.', comingSoon:true, video:'lockbox-demo.mp4' },
   ]},
-  { key:'buying', name:'Buying', wizards:[
-      { name:'Making an Offer', blurb:'Build a clean, complete offer with nothing missed.', url:'wizards/making-an-offer.html', video:'making-an-offer-demo.mp4' },
-      { name:'Going Firm', blurb:'Take a conditional deal all the way to firm.', url:'wizards/going-firm.html', video:'going-firm-demo.mp4' },
+  { key:'buying', name:'Making an Offer', wizards:[
+      { name:'Making an Offer to Buy', blurb:'Build a clean, complete offer with nothing missed.', url:'wizards/making-an-offer.html', video:'making-an-offer-demo.mp4' },
+      { name:'Firming Up an Offer', blurb:'Take a conditional deal all the way to firm.', url:'wizards/going-firm.html', video:'going-firm-demo.mp4' },
+      { name:'Vetting a Lease Application', blurb:'Screen a prospective tenant — application, income, credit, references — and summarize for your landlord.', url:'wizards/lease-vetting.html', video:'lease-vetting-demo.mp4' },
       { name:'Preparing a Lease Offer', blurb:'Assemble the Agreement to Lease, deposit, and tenant package for a competitive lease offer.', url:'wizards/lease-offer-docs.html', video:'lease-offer-demo.mp4' },
   ]},
   { key:'marketing', name:'Marketing', wizards:[
@@ -410,7 +454,9 @@ const tabSignup=document.getElementById('tabSignup'), tabSignin=document.getElem
 const formSignup=document.getElementById('formSignup'), formSignin=document.getElementById('formSignin');
 function setTab(su){ tabSignup.classList.toggle('on',su); tabSignin.classList.toggle('on',!su); formSignup.style.display=su?'block':'none'; formSignin.style.display=su?'none':'block'; }
 tabSignup.onclick=()=>setTab(true); tabSignin.onclick=()=>setTab(false);
-document.getElementById('topSignin').addEventListener('click',()=>setTimeout(()=>setTab(false),0));
+document.getElementById('topLogin').addEventListener('click',()=>setTimeout(()=>setTab(false),0));
+document.getElementById('topSignup').addEventListener('click',()=>setTimeout(()=>setTab(true),0));
+document.getElementById('viewDemo').addEventListener('click',e=>{ e.preventDefault(); const d=document.getElementById('demo'); if(d) d.scrollIntoView({behavior:'smooth'}); });
 
 /* ================================================================
    4) AUTH + ENTITLEMENT (Supabase) with graceful demo fallback
@@ -560,47 +606,53 @@ CATEGORIES.forEach(cat=>{
   menu.querySelector('button').addEventListener('click',ev=>{ ev.stopPropagation(); const open=menu.classList.contains('open'); document.querySelectorAll('.nav .menu').forEach(m=>m.classList.remove('open')); if(!open) menu.classList.add('open'); });
   nav.appendChild(menu);
 
-  const sec=document.createElement('section'); sec.className='cat'; sec.id='cat-'+cat.key;
+  const sec=document.createElement('section'); sec.className='cat collapsed'; sec.id='cat-'+cat.key;
   const play='<div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>';
-  let lastGc=null;
-  const cards = cat.wizards.length
-    ? cat.wizards.map(w=>{
-        let gh='';
-        if(w.group && w.group!==lastGc){ gh=`<div class="wz-group">${w.group}</div>`; lastGc=w.group; }
-        const src = w.video ? `<source src="${w.video}" type="video/mp4">` : '';
-        const fileHint = w.video ? ` — drop <strong>${w.video}</strong> in` : '';
-        const action = w.videoOnly
-          ? ''
-          : w.comingSoon
-          ? `<span class="wz-open soon-tag">Coming soon</span>`
-          : w.linkPending
-            ? `<span class="wz-open soon-tag">Link coming soon</span>`
-            : `<a class="wz-open" href="${w.url}" target="_blank" rel="noopener">${w.cta||cat.cta||'Open wizard'} ${arrow}</a>`;
-        if(cat.listOnly){
-          return gh+`<div class="res">
-            <div class="res-body">
-              <div class="res-name">${w.name}</div>
-              <div class="res-desc">${w.blurb}</div>
-            </div>
-            ${action}
-          </div>`;
-        }
-        return gh+`<div class="wz">
-          <div class="wz-video">
-            <video controls playsinline preload="metadata">${src}</video>
-            <div class="wz-fallback">${play}<p>Explainer video${fileHint}</p></div>
-          </div>
-          <div class="wz-body">
-            <div class="wz-name">${w.name}</div>
-            <div class="wz-blurb">${w.blurb}</div>
-            ${action}
-          </div>
-        </div>`;
-      }).join('')
-    : `<div class="tool muted-card"><div><div class="tname">More tools are in the workshop</div><div class="tblurb">Tell Rebecca what you'd build first.</div></div></div>`;
+  function cardHTML(w){
+    const src = w.video ? `<source src="${w.video}" type="video/mp4">` : '';
+    const fileHint = w.video ? ` — drop <strong>${w.video}</strong> in` : '';
+    const action = w.videoOnly
+      ? ''
+      : w.comingSoon
+      ? `<span class="wz-open soon-tag">Coming soon</span>`
+      : w.linkPending
+        ? `<span class="wz-open soon-tag">Link coming soon</span>`
+        : `<a class="wz-open" href="${w.url}" target="_blank" rel="noopener">${w.cta||cat.cta||'Open wizard'} ${arrow}</a>`;
+    if(cat.listOnly){
+      return `<div class="res"><div class="res-body"><div class="res-name">${w.name}</div><div class="res-desc">${w.blurb}</div></div>${action}</div>`;
+    }
+    return `<div class="wz">
+      <div class="wz-video"><video controls playsinline preload="metadata">${src}</video><div class="wz-fallback">${play}<p>Explainer video${fileHint}</p></div></div>
+      <div class="wz-body"><div class="wz-name">${w.name}</div><div class="wz-blurb">${w.blurb}</div>${action}</div>
+    </div>`;
+  }
+  let body;
+  if(!cat.wizards.length){
+    body = `<div class="wz-list"><div class="tool muted-card"><div><div class="tname">More tools are in the workshop</div><div class="tblurb">Tell Rebecca what you'd build first.</div></div></div></div>`;
+  } else if(cat.wizards.some(w=>w.group)){
+    const order=[], byG={};
+    cat.wizards.forEach(w=>{ const k=w.group||'More'; if(!byG[k]){byG[k]=[];order.push(k);} byG[k].push(w); });
+    body = order.map(k=>`<div class="wz-subsec collapsed"><div class="wz-group">${k} <span class="chev">${caret}</span></div><div class="wz-sublist">${byG[k].map(cardHTML).join('')}</div></div>`).join('');
+  } else {
+    body = `<div class="wz-list">${cat.wizards.map(cardHTML).join('')}</div>`;
+  }
   const unit = cat.unit || 'wizard';
-  sec.innerHTML=`<div class="cat-head"><h3>${cat.name}</h3><i></i><span class="count">${cat.wizards.length} ${cat.wizards.length===1?unit:unit+'s'}</span></div><div class="wz-list">${cards}</div>`;
+  sec.innerHTML=`<div class="cat-head"><h3>${cat.name}</h3><i></i><span class="count">${cat.wizards.length} ${cat.wizards.length===1?unit:unit+'s'}</span><span class="chev">${caret}</span></div><div class="cat-body">${body}</div>`;
   catalog.appendChild(sec);
+});
+// accordion: click a category headline or a resource sub-headline to expand/collapse
+catalog.addEventListener('click',e=>{
+  const gh=e.target.closest('.wz-group');
+  if(gh){ gh.parentElement.classList.toggle('collapsed'); return; }
+  const head=e.target.closest('.cat-head');
+  if(head){ head.parentElement.classList.toggle('collapsed'); }
+});
+// when a nav link points at a section, open it and scroll there
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[href^="#cat-"]');
+  if(!a) return;
+  const target=document.querySelector(a.getAttribute('href'));
+  if(target){ target.classList.remove('collapsed'); setTimeout(()=>target.scrollIntoView({behavior:'smooth'}),0); }
 });
 document.addEventListener('click',()=>document.querySelectorAll('.nav .menu').forEach(m=>m.classList.remove('open')));
 
