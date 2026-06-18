@@ -49,7 +49,7 @@
   .pitch p.sub{font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);max-width:600px;margin:0 auto;line-height:1.5;font-weight:500;text-wrap:balance}
   .pitch p.lead{font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);max-width:720px;margin:16px auto 0;line-height:1.5;font-weight:500;text-wrap:balance}
   .pitch .hl{background:#FBE38E;font-weight:800;padding:.05em .24em;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-  .pitch ul.checklist{list-style:none;padding:0;margin:14px auto 0;width:fit-content;max-width:760px;text-align:left;font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);line-height:1.3;font-weight:500}
+  .pitch ul.checklist{list-style:none;padding:0;margin:7px auto 0;width:fit-content;max-width:760px;text-align:left;font-size:clamp(1.2rem,2.2vw,1.6rem);color:var(--ink);line-height:1.3;font-weight:500}
   .pitch ul.checklist li{position:relative;padding-left:1.7em;margin:.1em 0}
   .pitch ul.checklist li::before{content:"\2714";position:absolute;left:0;top:0;color:var(--green);font-weight:900}
 
@@ -152,6 +152,14 @@
 
   /* wizard = explainer video + wide, short frame */
   .wz-list{display:flex;flex-direction:column;gap:16px}
+  .wz-group{font-family:var(--display);font-weight:800;font-size:1.05rem;color:var(--ink);margin:14px 2px 0;padding-top:8px;border-top:1px solid var(--line)}
+  .wz-group:first-child{margin-top:0;padding-top:0;border-top:0}
+  .dropdown .ddgroup{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px}
+  .dropdown .ddgroup:first-child{padding-top:4px}
+  .res{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .res-name{font-weight:700;font-size:1.02rem}
+  .res-desc{color:var(--muted);font-size:.92rem;margin-top:3px;max-width:62ch}
+  .res .wz-open{flex:0 0 auto}
   .wz{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:box-shadow .2s,border-color .2s}
   .wz:hover{box-shadow:0 24px 42px -30px rgba(16,48,42,.45);border-color:#c8c0ac}
   .wz-video{position:relative;aspect-ratio:16/9;background:var(--ink-2);
@@ -251,7 +259,7 @@
         <button id="tabSignin" type="button">Sign in</button>
       </div>
       <form id="formSignup">
-        <div class="plan"><span class="price">$299</span><span>once · lifetime access</span></div>
+        <div class="plan"><span class="price">$349</span><span>once + HST · lifetime access</span></div>
         <div class="field"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
         <div class="field"><label for="su-pass">Create a password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
         <button class="btn" type="submit">Create account</button>
@@ -294,13 +302,13 @@
     <div class="gate-card">
       <div class="label">You're signed in — one step left</div>
       <h2>Unlock the toolkit</h2>
-      <div class="gate-price"><b>$299</b><span>one-time · lifetime access</span></div>
+      <div class="gate-price"><b>$349</b><span>one-time + 13% HST · lifetime access</span></div>
       <ul class="incl">
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Listing &amp; Buying Wizards</li>
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Marketing Automation Blueprints</li>
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> New wizards added as they're built — free</li>
       </ul>
-      <button class="btn" id="buyBtn" type="button">Get lifetime access — $299</button>
+      <button class="btn" id="buyBtn" type="button">Get lifetime access — $349</button>
       <p class="gate-sub">Secure checkout by Stripe. By purchasing you agree to the <a href="#" data-modal="disclaimer">disclaimer</a>.</p>
       <p class="gate-sub" id="gateDemoNote" style="display:none">Demo mode — add your Supabase &amp; Stripe keys to enable real checkout.</p>
       <button class="gate-signout" id="gateSignout" type="button">Sign out</button>
@@ -342,17 +350,36 @@
    not-yet-clickable card. Add the url to flip it live.
    ================================================================ */
 const CATEGORIES = [
+  { key:'prelisting', name:'Pre-Listing', unit:'walkthrough', wizards:[
+      { name:'Matrix — Accessing All Its Data', blurb:'A guided walkthrough of Matrix and how to pull every piece of data you need.', videoOnly:true, video:'matrix-walkthrough-demo.mp4' },
+      { name:'ITSO Systems Tour', blurb:'A tour of the ITSO systems and what each one is for.', videoOnly:true, video:'itso-tour-demo.mp4' },
+      { name:'Adding People to an Email List', blurb:'How to add new contacts to your email marketing list, step by step.', videoOnly:true, video:'email-list-demo.mp4' },
+  ]},
   { key:'listing', name:'Listing', wizards:[
       { name:'Listing Intake Wizard', blurb:'Capture every detail of a new listing in minutes.', url:'wizards/listing-intake.html', video:'listing-intake-demo.mp4' },
       { name:'Broker Loading your Listing', blurb:'Load your listing onto the board without missing a field.', url:'wizards/broker-load.html', video:'broker-load-demo.mp4' },
       { name:'Loading Open House Info', blurb:'Capture open house details by phone or desktop.', url:'wizards/open-house.html', video:'open-house-demo.mp4' },
+      { name:'Vetting a Lease Application', blurb:'Screen a prospective tenant — application, income, credit, references — and summarize for your landlord.', url:'wizards/lease-vetting.html', video:'lease-vetting-demo.mp4' },
+      { name:'Setting Up Your LockBox', blurb:'Program, place, and manage your lockbox the right way.', comingSoon:true, video:'lockbox-demo.mp4' },
   ]},
   { key:'buying', name:'Buying', wizards:[
-      { name:'Making an Offer', blurb:'Build a clean, complete offer with nothing missed.', comingSoon:true, video:'making-an-offer-demo.mp4' },
+      { name:'Making an Offer', blurb:'Build a clean, complete offer with nothing missed.', url:'wizards/making-an-offer.html', video:'making-an-offer-demo.mp4' },
       { name:'Going Firm', blurb:'Take a conditional deal all the way to firm.', url:'wizards/going-firm.html', video:'going-firm-demo.mp4' },
+      { name:'Preparing a Lease Offer', blurb:'Assemble the Agreement to Lease, deposit, and tenant package for a competitive lease offer.', url:'wizards/lease-offer-docs.html', video:'lease-offer-demo.mp4' },
   ]},
   { key:'marketing', name:'Marketing', wizards:[
       { name:'Marketing Automation Blueprints', blurb:'Automate your follow-up and stay top of mind.', comingSoon:true, video:'marketing-automation-demo.mp4' },
+  ]},
+  { key:'resources', name:'Recommended Resources', unit:'resource', cta:'Visit site', listOnly:true, wizards:[
+      { name:'Every OREA Form Explained', blurb:'A clear walkthrough of every OREA form and when to use it.', url:'wizards/orea-forms.html', cta:'Open reference', video:'orea-forms-demo.mp4', group:'Agent Resources' },
+      { name:'Follow Up Boss CRM', blurb:'The CRM to manage your leads and never miss a follow-up.', url:'https://www.followupboss.com/', video:'follow-up-boss-demo.mp4', group:'Agent Resources' },
+      { name:'Photographer & Videographer', blurb:'Professional listing photos and video that make homes shine.', url:'https://www.allisonmediaco.com/', video:'photographer-demo.mp4', group:'Agent Resources' },
+      { name:'Stager', blurb:'Staging that helps buyers picture themselves at home.', url:'https://www.stagesmart.ca/', video:'stager-demo.mp4', group:'Agent Resources' },
+      { name:'Marketing Materials Printer', blurb:'Feature sheets, postcards, and signage printed and shipped.', url:'https://www.agentprint.com/', video:'printer-demo.mp4', group:'Agent Resources' },
+      { name:'Sign Installation', blurb:'Reliable lawn-sign install and removal so you don\'t have to.', url:'https://signedup.ca/', video:'sign-installation-demo.mp4', group:'Agent Resources' },
+      { name:'Real Estate Lawyer', blurb:'Property Law Firm — closings, title review, and contract questions for your clients.', url:'https://propertylaw.ca/', video:'real-estate-lawyer-demo.mp4', group:'Client Resources' },
+      { name:'Mortgage Broker', blurb:'HW Advantage — financing options and pre-approvals for your buyers.', url:'https://www.hwadvantage.com/', video:'mortgage-broker-demo.mp4', group:'Client Resources' },
+      { name:'Land Transfer Tax Calculator', blurb:'Estimate Ontario (and Toronto) land transfer tax for your buyers.', url:'https://trreb.ca/buying-selling-intelligence/ltt-calculator-residential/', cta:'Open calculator', video:'ltt-calculator-demo.mp4', group:'Client Resources' },
   ]},
 ];
 
@@ -495,7 +522,7 @@ buyBtn.addEventListener('click', async ()=>{
     const out=await res.json();
     if(out.url){ window.location=out.url; }
     else { throw new Error(out.error||'Could not start checkout'); }
-  }catch(e){ buyBtn.disabled=false; buyBtn.textContent='Get lifetime access — $299'; alert('Checkout error: '+e.message); }
+  }catch(e){ buyBtn.disabled=false; buyBtn.textContent='Get lifetime access — $349'; alert('Checkout error: '+e.message); }
 });
 
 /* ---- handle return from Stripe (?paid=1): poll until webhook lands ---- */
@@ -514,25 +541,51 @@ const arrow='<svg viewBox="0 0 16 16" fill="none"><path d="M3 8h9M9 4l4 4-4 4" s
 const nav=document.getElementById('nav'), catalog=document.getElementById('catalog');
 CATEGORIES.forEach(cat=>{
   const menu=document.createElement('div'); menu.className='menu';
+  let lastG=null;
   const items = cat.wizards.length
-    ? cat.wizards.map(w=> w.comingSoon
-        ? `<div class="empty">${w.name} · coming soon</div>`
-        : `<a href="${w.url}" target="_blank" rel="noopener">${w.name}<small>${w.blurb}</small></a>`).join('')
+    ? cat.wizards.map(w=>{
+        let g='';
+        if(w.group && w.group!==lastG){ g=`<div class="ddgroup">${w.group}</div>`; lastG=w.group; }
+        const row = w.comingSoon
+          ? `<div class="empty">${w.name} · coming soon</div>`
+          : w.linkPending
+            ? `<div class="empty">${w.name} · link coming soon</div>`
+            : w.videoOnly
+              ? `<a href="#cat-${cat.key}">${w.name}<small>${w.blurb}</small></a>`
+              : `<a href="${w.url}" target="_blank" rel="noopener">${w.name}<small>${w.blurb}</small></a>`;
+        return g+row;
+      }).join('')
     : `<div class="empty">Coming soon.</div>`;
   menu.innerHTML=`<button type="button">${cat.name} ${caret}</button><div class="dropdown">${items}</div>`;
   menu.querySelector('button').addEventListener('click',ev=>{ ev.stopPropagation(); const open=menu.classList.contains('open'); document.querySelectorAll('.nav .menu').forEach(m=>m.classList.remove('open')); if(!open) menu.classList.add('open'); });
   nav.appendChild(menu);
 
-  const sec=document.createElement('section'); sec.className='cat';
+  const sec=document.createElement('section'); sec.className='cat'; sec.id='cat-'+cat.key;
   const play='<div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>';
+  let lastGc=null;
   const cards = cat.wizards.length
     ? cat.wizards.map(w=>{
+        let gh='';
+        if(w.group && w.group!==lastGc){ gh=`<div class="wz-group">${w.group}</div>`; lastGc=w.group; }
         const src = w.video ? `<source src="${w.video}" type="video/mp4">` : '';
         const fileHint = w.video ? ` — drop <strong>${w.video}</strong> in` : '';
-        const action = w.comingSoon
+        const action = w.videoOnly
+          ? ''
+          : w.comingSoon
           ? `<span class="wz-open soon-tag">Coming soon</span>`
-          : `<a class="wz-open" href="${w.url}" target="_blank" rel="noopener">Open wizard ${arrow}</a>`;
-        return `<div class="wz">
+          : w.linkPending
+            ? `<span class="wz-open soon-tag">Link coming soon</span>`
+            : `<a class="wz-open" href="${w.url}" target="_blank" rel="noopener">${w.cta||cat.cta||'Open wizard'} ${arrow}</a>`;
+        if(cat.listOnly){
+          return gh+`<div class="res">
+            <div class="res-body">
+              <div class="res-name">${w.name}</div>
+              <div class="res-desc">${w.blurb}</div>
+            </div>
+            ${action}
+          </div>`;
+        }
+        return gh+`<div class="wz">
           <div class="wz-video">
             <video controls playsinline preload="metadata">${src}</video>
             <div class="wz-fallback">${play}<p>Explainer video${fileHint}</p></div>
@@ -545,7 +598,8 @@ CATEGORIES.forEach(cat=>{
         </div>`;
       }).join('')
     : `<div class="tool muted-card"><div><div class="tname">More tools are in the workshop</div><div class="tblurb">Tell Rebecca what you'd build first.</div></div></div>`;
-  sec.innerHTML=`<div class="cat-head"><h3>${cat.name}</h3><i></i><span class="count">${cat.wizards.length} ${cat.wizards.length===1?'wizard':'wizards'}</span></div><div class="wz-list">${cards}</div>`;
+  const unit = cat.unit || 'wizard';
+  sec.innerHTML=`<div class="cat-head"><h3>${cat.name}</h3><i></i><span class="count">${cat.wizards.length} ${cat.wizards.length===1?unit:unit+'s'}</span></div><div class="wz-list">${cards}</div>`;
   catalog.appendChild(sec);
 });
 document.addEventListener('click',()=>document.querySelectorAll('.nav .menu').forEach(m=>m.classList.remove('open')));
@@ -580,7 +634,7 @@ const MODALS = {
     <div class="qa"><p class="q">What exactly is Realtor Tutor?</p><p class="a">One-on-one style video guidance plus step-by-step wizards that walk you through listing procedures, buyer deals and marketing automations — so you're confident you know what to do.</p></div>
     <div class="qa"><p class="q">Do I need experience?</p><p class="a">No. The wizards assume you're newer and explain the why, not just the what. A few years in? You'll use them to move faster and stop second-guessing.</p></div>
     <div class="qa"><p class="q">How is this different from joining a team?</p><p class="a">A team typically takes 30–50% of every commission, forever. This is one payment for similar guidance — and you keep your full amount of what you close.</p></div>
-    <div class="qa"><p class="q">Is it really one payment?</p><p class="a">Yes. $299 once, lifetime access. No subscription and no per-deal cut, with access to any new wizards that may be added in the future.</p></div>
+    <div class="qa"><p class="q">Is it really one payment?</p><p class="a">Yes. $349 once, plus 13% HST, lifetime access. No subscription and no per-deal cut, with access to any new wizards that may be added in the future.</p></div>
     <div class="qa"><p class="q">Can I actually reach a human?</p><p class="a">Yes. Members can contact me, Rebecca Zak, Realtor, directly at <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a>.</p></div>
     <div class="qa"><p class="q">Have a question before you join?</p><p class="a">Email me anytime at <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a> — I'm here to help.</p></div>` },
   privacy:{ title:'Privacy policy', eyebrow:'Plain language', body:`

@@ -1,5 +1,5 @@
 // netlify/functions/create-checkout.js
-// Creates a Stripe Checkout session for the $299 one-time, lifetime-access purchase.
+// Creates a Stripe Checkout session for the $349 one-time, lifetime-access purchase.
 // Verifies the Supabase access token server-side, then attaches the user id to the
 // session so the webhook can grant access to the right account.
 
@@ -13,9 +13,12 @@ const supabaseAdmin = createClient(
 );
 
 // --- price / branding (edit here) ---
-const PRICE_CENTS = 29900;      // $299.00
+const PRICE_CENTS = 34900;      // $349.00
 const CURRENCY    = 'cad';      // change to 'usd' if you prefer
 const PRODUCT_NAME = 'Realtor Tutor — Lifetime Access';
+// 13% HST is applied as a fixed Stripe Tax Rate. Create a 13% (exclusive) tax rate
+// in Stripe once, then set its id (txr_...) as STRIPE_TAX_RATE_ID in Netlify.
+const TAX_RATE_ID = process.env.STRIPE_TAX_RATE_ID;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -43,6 +46,7 @@ exports.handler = async (event) => {
       metadata: { supabase_user_id: user.id },
       line_items: [{
         quantity: 1,
+        tax_rates: TAX_RATE_ID ? [TAX_RATE_ID] : undefined,
         price_data: {
           currency: CURRENCY,
           unit_amount: PRICE_CENTS,
