@@ -1,0 +1,590 @@
+<!-- ============================================================
+     Offer Builder — Agreement of Purchase and Sale (Ontario)
+     Rebecca Zak · internal tool · matches /tools house style
+     Paste into a WordPress "Custom HTML" block.
+     Self-contained. Drafts persist in the visitor's own browser.
+     ============================================================ -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Making an Offer · Realtor Tutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.rt-top{position:sticky;top:0;z-index:30;background:#10302A;color:#fff;font-family:'Hanken Grotesk',system-ui,sans-serif}
+.rt-top-in{max-width:720px;margin:0 auto;height:60px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rt-back{display:inline-flex;align-items:center;gap:6px;color:#cfe0d8;text-decoration:none;font-weight:600;font-size:.92rem}
+.rt-back:hover{color:#fff}
+.rt-brand{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:1.02rem;display:flex;align-items:center;gap:.5ch;color:#fff}
+.rt-tick{width:9px;height:9px;background:#E0A227;border-radius:2px;transform:rotate(45deg);display:inline-block}
+.rt-spacer{width:74px}
+.rtgate{position:fixed;inset:0;z-index:50;background:#F4F1E8;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;color:#5B6A60}
+html,body{margin:0}
+</style>
+<div class="rtgate" id="rtgate"><div>Checking your access…</div></div>
+<div class="rt-top"><div class="rt-top-in">
+  <a class="rt-back" href="../index.html">&larr; Dashboard</a>
+  <span class="rt-brand"><span class="rt-tick"></span> Realtor Tutor</span>
+  <span class="rt-spacer"></span>
+</div></div>
+<div id="rz-offer-wizard">
+<style>
+#rz-offer-wizard{
+  --cobalt:#10302A; --gold:#E0A227; --gold-bright:#ECB94A; --gold-soft:#EBC56A;
+  --chalk:#10302A; --chalk-dim:#5B6A60; --chalk-faint:#7A857C;
+  --line-soft:rgba(16,48,42,.12); --line-gold:rgba(224,162,39,.5);
+  --ok:#2E7D5B; --radius:14px; --maxw:720px;
+  --display:'Bricolage Grotesque',system-ui,sans-serif; --body:'Hanken Grotesk',system-ui,sans-serif;
+  all:initial; display:block; box-sizing:border-box;
+  font-family:var(--body);
+  color:var(--chalk); -webkit-font-smoothing:antialiased; line-height:1.55;
+  background:#F4F1E8;
+  padding:clamp(20px,4vw,46px) clamp(14px,4vw,26px) 54px; min-height:100%;
+}
+#rz-offer-wizard *,#rz-offer-wizard *::before,#rz-offer-wizard *::after{box-sizing:border-box;}
+#rz-offer-wizard .rz-shell{max-width:var(--maxw);margin:0 auto;}
+
+/* ---------- Masthead ---------- */
+#rz-offer-wizard .rz-mast{display:flex;align-items:flex-start;gap:18px;margin-bottom:30px;}
+#rz-offer-wizard .rz-bex{
+  flex:0 0 auto;width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(120% 120% at 30% 25%, var(--gold-bright), var(--gold) 70%);
+  box-shadow:0 0 26px rgba(201,162,39,.45), inset 0 1px 1px rgba(255,255,255,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-style:italic;font-weight:600;
+  font-size:30px;color:var(--cobalt);line-height:1;padding-bottom:3px;
+}
+#rz-offer-wizard .rz-mast-txt{min-width:0;padding-top:1px;}
+#rz-offer-wizard .rz-title{
+  font-family:var(--display);font-weight:600;
+  font-size:clamp(30px,6vw,42px);line-height:1.02;letter-spacing:.005em;
+  color:var(--chalk);margin:0;
+}
+#rz-offer-wizard .rz-eyebrow{
+  font-family:var(--body);font-size:11px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--gold);font-weight:600;margin:8px 0 0;
+}
+#rz-offer-wizard .rz-sub{color:var(--chalk-dim);font-size:14.5px;max-width:52ch;margin:14px 0 0;line-height:1.6;}
+
+/* ---------- Progress ---------- */
+#rz-offer-wizard .rz-progress{margin:6px 0 22px;}
+#rz-offer-wizard .rz-ptrack{height:2px;background:var(--line-soft);overflow:hidden;}
+#rz-offer-wizard .rz-pfill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-soft));transition:width .45s cubic-bezier(.4,0,.2,1);}
+#rz-offer-wizard .rz-pmeta{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;}
+#rz-offer-wizard .rz-pstep{font-family:var(--body);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600;}
+#rz-offer-wizard .rz-pname{font-family:var(--display);font-style:italic;font-size:15px;color:var(--chalk-faint);}
+
+/* ---------- Card ---------- */
+#rz-offer-wizard .rz-card{
+  background:linear-gradient(180deg, rgba(20,32,74,.62), rgba(9,16,40,.62));
+  border:1px solid var(--line-soft); border-radius:var(--radius);
+  padding:clamp(20px,4vw,32px);
+  box-shadow:0 26px 64px -32px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05);
+}
+#rz-offer-wizard .rz-sechead{display:flex;align-items:center;gap:15px;margin-bottom:8px;}
+#rz-offer-wizard .rz-secbadge{
+  flex:0 0 auto;width:46px;height:46px;border-radius:50%;
+  border:1.5px solid var(--line-gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:600;font-size:19px;color:var(--gold);
+  letter-spacing:.02em;
+}
+#rz-offer-wizard .rz-sectitle{
+  font-family:var(--display);font-weight:600;font-size:clamp(23px,4.4vw,30px);
+  margin:0;color:var(--chalk);line-height:1.05;letter-spacing:.005em;
+}
+#rz-offer-wizard .rz-secblurb{color:var(--chalk-dim);font-size:14px;margin:0 0 24px;max-width:56ch;line-height:1.6;}
+
+/* ---------- Fields ---------- */
+#rz-offer-wizard .rz-field{margin-bottom:18px;}
+#rz-offer-wizard .rz-field.hidden{display:none;}
+#rz-offer-wizard .rz-label{display:block;font-family:var(--body);font-size:13px;font-weight:600;color:var(--chalk);margin-bottom:7px;letter-spacing:.005em;}
+#rz-offer-wizard .rz-req{color:var(--gold);margin-left:4px;font-weight:700;}
+#rz-offer-wizard .rz-hint{font-size:12.5px;color:var(--chalk-faint);margin:-1px 0 8px;line-height:1.5;}
+#rz-offer-wizard .rz-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){#rz-offer-wizard .rz-grid2{grid-template-columns:1fr;}}
+
+#rz-offer-wizard input[type=text],
+#rz-offer-wizard input[type=number],
+#rz-offer-wizard input[type=date],
+#rz-offer-wizard input[type=time],
+#rz-offer-wizard select,
+#rz-offer-wizard textarea{
+  width:100%;font-family:inherit;font-size:15px;color:var(--chalk);
+  background:rgba(255,255,255,.04); border:1px solid var(--line-soft);border-radius:10px;
+  padding:11px 13px;transition:border-color .18s, box-shadow .18s, background .18s;
+}
+#rz-offer-wizard textarea{min-height:84px;resize:vertical;line-height:1.5;}
+#rz-offer-wizard input::placeholder,#rz-offer-wizard textarea::placeholder{color:#647093;}
+#rz-offer-wizard input:focus,#rz-offer-wizard select:focus,#rz-offer-wizard textarea:focus{
+  outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.15);background:rgba(255,255,255,.065);
+}
+#rz-offer-wizard select{appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 19px,calc(100% - 13px) 19px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:38px;}
+#rz-offer-wizard .rz-money-wrap{position:relative;}
+#rz-offer-wizard .rz-money-wrap::before{content:"$";position:absolute;left:13px;top:11px;color:var(--gold);font-weight:600;font-size:15px;}
+#rz-offer-wizard .rz-money-wrap input{padding-left:26px;}
+
+/* choice chips */
+#rz-offer-wizard .rz-choices{display:flex;flex-wrap:wrap;gap:9px;}
+#rz-offer-wizard .rz-chip{
+  cursor:pointer;border:1px solid var(--line-soft);border-radius:999px;padding:9px 16px;font-size:13.5px;
+  color:var(--chalk-dim);background:rgba(255,255,255,.03);transition:all .16s;user-select:none;
+}
+#rz-offer-wizard .rz-chip:hover{border-color:var(--line-gold);color:var(--chalk);}
+#rz-offer-wizard .rz-chip.sel{background:var(--gold);border-color:var(--gold);color:var(--cobalt);font-weight:600;}
+
+/* condition toggles */
+#rz-offer-wizard .rz-toggle{
+  display:flex;align-items:flex-start;gap:13px;border:1px solid var(--line-soft);border-radius:12px;
+  padding:15px 16px;background:rgba(255,255,255,.025);transition:border-color .18s,background .18s;margin-bottom:13px;
+}
+#rz-offer-wizard .rz-toggle.on{border-color:var(--line-gold);background:rgba(201,162,39,.06);}
+#rz-offer-wizard .rz-tg-main{flex:1;min-width:0;}
+#rz-offer-wizard .rz-tg-name{font-family:var(--display);font-weight:600;font-size:18px;color:var(--chalk);line-height:1.1;}
+#rz-offer-wizard .rz-tg-desc{font-size:12.5px;color:var(--chalk-faint);margin-top:3px;}
+#rz-offer-wizard .rz-switch{
+  flex:0 0 auto;width:50px;height:28px;border-radius:999px;border:1px solid var(--line-soft);
+  background:rgba(255,255,255,.06);position:relative;cursor:pointer;transition:background .2s,border-color .2s;margin-top:2px;
+}
+#rz-offer-wizard .rz-switch::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--chalk-dim);transition:transform .2s,background .2s;}
+#rz-offer-wizard .rz-switch.on{background:var(--gold);border-color:var(--gold);}
+#rz-offer-wizard .rz-switch.on::after{transform:translateX(22px);background:var(--cobalt);}
+#rz-offer-wizard .rz-tg-detail{margin-top:13px;padding-top:14px;border-top:1px dashed var(--line-soft);}
+#rz-offer-wizard .rz-tg-detail.hidden{display:none;}
+
+/* ---------- Nav ---------- */
+#rz-offer-wizard .rz-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px;}
+#rz-offer-wizard .rz-btn{
+  font-family:var(--body);font-weight:600;font-size:13.5px;letter-spacing:.01em;
+  border:none;border-radius:10px;padding:13px 26px;cursor:pointer;transition:transform .12s,box-shadow .2s,background .2s,color .2s,border-color .2s;
+}
+#rz-offer-wizard .rz-btn:active{transform:translateY(1px);}
+#rz-offer-wizard .rz-btn-primary{background:linear-gradient(180deg,var(--gold-bright),#B8911E);color:var(--cobalt);box-shadow:0 10px 24px -10px rgba(201,162,39,.6);}
+#rz-offer-wizard .rz-btn-primary:hover{box-shadow:0 14px 30px -10px rgba(201,162,39,.78);}
+#rz-offer-wizard .rz-btn-ghost{background:transparent;color:var(--chalk-dim);border:1px solid var(--line-soft);}
+#rz-offer-wizard .rz-btn-ghost:hover{color:var(--chalk);border-color:var(--line-gold);}
+#rz-offer-wizard .rz-btn-ghost.invis{visibility:hidden;}
+
+/* ---------- Review output ---------- */
+#rz-offer-wizard .rz-out h3{
+  font-family:var(--body);font-weight:600;font-size:11px;color:var(--gold);
+  letter-spacing:.22em;text-transform:uppercase;margin:26px 0 12px;padding-bottom:9px;border-bottom:1px solid var(--line-soft);
+}
+#rz-offer-wizard .rz-out h3:first-child{margin-top:2px;}
+#rz-offer-wizard .rz-pair{display:grid;grid-template-columns:minmax(150px,38%) 1fr;gap:6px 18px;padding:8px 0;border-bottom:1px dashed var(--line-soft);font-size:14px;}
+@media(max-width:480px){#rz-offer-wizard .rz-pair{grid-template-columns:1fr;gap:2px;}}
+#rz-offer-wizard .rz-pair .k{color:var(--chalk-faint);}
+#rz-offer-wizard .rz-pair .v{color:var(--chalk);font-weight:500;}
+#rz-offer-wizard .rz-pair .v.empty{color:#566085;font-style:italic;font-weight:400;}
+
+#rz-offer-wizard .rz-clause{
+  background:rgba(255,255,255,.03);border:1px solid var(--line-soft);border-left:3px solid var(--gold);
+  border-radius:8px;padding:15px 17px;margin-bottom:13px;
+}
+#rz-offer-wizard .rz-clause .ct{font-family:var(--display);font-weight:600;font-size:18px;color:var(--gold-soft);margin-bottom:7px;letter-spacing:.01em;}
+#rz-offer-wizard .rz-clause .cbody{font-size:13.5px;color:var(--chalk-dim);line-height:1.6;white-space:pre-wrap;}
+#rz-offer-wizard mark{background:rgba(201,162,39,.22);color:var(--gold-soft);border-radius:3px;padding:0 3px;font-weight:600;}
+
+#rz-offer-wizard .rz-outbtns{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 4px;}
+#rz-offer-wizard .rz-outbtns .rz-btn{padding:11px 18px;font-size:12.5px;}
+
+#rz-offer-wizard .rz-note{
+  margin-top:20px;font-size:11.5px;line-height:1.6;color:var(--chalk-faint);
+  background:rgba(255,255,255,.025);border:1px solid var(--line-soft);border-radius:10px;padding:14px 16px;
+}
+#rz-offer-wizard .rz-note strong{color:var(--chalk-dim);font-weight:600;}
+
+/* footer note — matches the hub */
+#rz-offer-wizard .rz-foot{
+  display:flex;align-items:center;justify-content:center;gap:9px;margin-top:30px;
+  font-family:var(--display);font-style:italic;font-size:14px;color:var(--chalk-faint);
+}
+#rz-offer-wizard .rz-foot .dia{width:6px;height:6px;background:var(--gold);transform:rotate(45deg);flex:0 0 auto;}
+#rz-offer-wizard .rz-saved{font-family:var(--body);font-style:normal;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ok);opacity:0;transition:opacity .3s;}
+#rz-offer-wizard .rz-saved.show{opacity:.85;}
+
+/* toast */
+#rz-offer-wizard .rz-toast{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+  background:var(--gold);color:var(--cobalt);font-weight:600;font-size:13.5px;font-family:var(--body);
+  padding:11px 22px;border-radius:999px;box-shadow:0 14px 34px -10px rgba(0,0,0,.6);opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;z-index:60;
+}
+#rz-offer-wizard .rz-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media print{
+  #rz-offer-wizard{background:#fff !important;color:#111 !important;padding:0;}
+  #rz-offer-wizard .rz-progress,#rz-offer-wizard .rz-nav,#rz-offer-wizard .rz-outbtns,#rz-offer-wizard .rz-sub,#rz-offer-wizard .rz-bex{display:none !important;}
+  #rz-offer-wizard .rz-card{background:#fff !important;border:none;box-shadow:none;}
+  #rz-offer-wizard .rz-title,#rz-offer-wizard .rz-sectitle,#rz-offer-wizard .rz-pair .v{color:#111 !important;}
+  #rz-offer-wizard .rz-out h3,#rz-offer-wizard .rz-eyebrow,#rz-offer-wizard .rz-secbadge{color:#9a7d18 !important;border-color:#ccc !important;}
+  #rz-offer-wizard .rz-pair .k{color:#555 !important;}
+  #rz-offer-wizard .rz-clause{background:#faf8f2 !important;border-color:#e3dcc4 !important;}
+  #rz-offer-wizard .rz-clause .ct{color:#9a7d18 !important;}
+  #rz-offer-wizard .rz-clause .cbody,#rz-offer-wizard .rz-note{color:#333 !important;}
+  #rz-offer-wizard mark{background:#f2e6bf !important;color:#7a6212 !important;}
+}
+
+  /* ===== Realtor Tutor re-skin (light) — visuals only, logic untouched ===== */
+  #rz-offer-wizard .rz-card{background:#FBFAF4;box-shadow:0 30px 60px -48px rgba(16,48,42,.4);}
+  #rz-offer-wizard input,#rz-offer-wizard textarea,#rz-offer-wizard select,#rz-offer-wizard input:focus,#rz-offer-wizard textarea:focus{background:#fff;}
+  #rz-offer-wizard .rz-chip,#rz-offer-wizard .rz-opt{background:#fff;}
+  #rz-offer-wizard .rz-switch{background:#E4DECF;}
+  #rz-offer-wizard .rz-detail,#rz-offer-wizard .rz-clause{background:rgba(16,48,42,.02);}
+  #rz-offer-wizard .rz-formcard.secondary,#rz-offer-wizard .rz-note{background:rgba(16,48,42,.025);}
+  #rz-offer-wizard .rz-mast{margin-bottom:24px;}
+</style>
+
+<div class="rz-shell">
+
+  <div class="rz-mast">
+    <div class="rz-mast-txt">
+      <h1 class="rz-title">Making an Offer</h1>
+      <div class="rz-eyebrow">Agreement of Purchase &amp; Sale — step by step</div>
+      <p class="rz-sub">Build an Agreement of Purchase and Sale step by step — every required term, in order, then the questions that shape your conditions. Work it top to bottom; you'll get a clean prep sheet and draft clauses at the end.</p>
+    </div>
+  </div>
+
+  <div class="rz-progress">
+    <div class="rz-ptrack"><div class="rz-pfill" id="rzPfill"></div></div>
+    <div class="rz-pmeta">
+      <span class="rz-pstep" id="rzPstep">Step 1 of 9</span>
+      <span class="rz-pname" id="rzPname"></span>
+    </div>
+  </div>
+
+  <div class="rz-card" id="rzCard"></div>
+
+  <div class="rz-nav" id="rzNav">
+    <button class="rz-btn rz-btn-ghost" id="rzBack">Back</button>
+    <button class="rz-btn rz-btn-primary" id="rzNext">Next</button>
+  </div>
+
+  <div class="rz-foot">
+    <span class="dia"></span>
+    <span>Private · for Bex only · drafts stay in this browser</span>
+    <span class="rz-saved" id="rzSaved">Saved</span>
+  </div>
+</div>
+
+<div class="rz-toast" id="rzToast">Copied</div>
+</div>
+
+<script src="../gate.js"></script>
+<script>window.requireMemberAccess({home:'../index.html'}).then(function(ok){if(ok){var g=document.getElementById('rtgate');if(g)g.remove();}});</script>
+<script>
+(function(){
+  "use strict";
+  var root = document.getElementById('rz-offer-wizard');
+  var STORE='rz_offer_draft_v1';
+  var S = {}, idx = 0;
+
+  /* ---------- persistence ---------- */
+  function save(){
+    try{ localStorage.setItem(STORE, JSON.stringify({S:S, idx:idx})); flashSaved(); }catch(e){}
+  }
+  function load(){
+    try{ var raw=localStorage.getItem(STORE); if(raw){ var o=JSON.parse(raw); if(o&&o.S){S=o.S; idx=Math.min(o.idx||0, 8);} } }catch(e){}
+  }
+  var savedTimer;
+  function flashSaved(){ var el=document.getElementById('rzSaved'); if(!el)return; el.classList.add('show'); clearTimeout(savedTimer); savedTimer=setTimeout(function(){el.classList.remove('show');},1200); }
+
+  /* ---------- helpers ---------- */
+  function money(v){ if(v===''||v==null) return ''; var n=Number(String(v).replace(/[^0-9.]/g,'')); if(isNaN(n)) return ''; return n.toLocaleString('en-CA',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+  function numToWords(n){
+    n=Math.round(Number(n)||0); if(n===0) return 'Zero';
+    var ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+    var tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+    function three(num){var s='';if(num>99){s+=ones[Math.floor(num/100)]+' Hundred ';num%=100;}if(num>19){s+=tens[Math.floor(num/10)]+' ';num%=10;}if(num>0)s+=ones[num]+' ';return s;}
+    var scales=['','Thousand','Million','Billion'];var i=0,out='';
+    while(n>0){var ch=n%1000;if(ch)out=three(ch)+(scales[i]?scales[i]+' ':'')+out;n=Math.floor(n/1000);i++;}
+    return out.trim();
+  }
+  function ordinal(n){ if(n==null||String(n).trim()==='') return '____'; n=parseInt(n,10); if(isNaN(n)) return '____'; var s=['th','st','nd','rd'],v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+  function fmtDate(d){ if(!d) return ''; var p=d.split('-'); if(p.length!==3) return d; var mo=['January','February','March','April','May','June','July','August','September','October','November','December']; return mo[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
+  function fmtTime(t){ if(!t) return ''; var p=t.split(':'); if(p.length<2) return t; var h=parseInt(p[0],10),m=p[1];var ap=h>=12?'p.m.':'a.m.';var hh=h%12;if(hh===0)hh=12;return hh+':'+m+' '+ap; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function toast(msg){ var t=document.getElementById('rzToast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},1600); }
+
+  /* ============================================================ STEPS ============================================================ */
+  var STEPS = [
+    { key:'parties', title:'The Parties', blurb:'Exactly as names should appear on the agreement — full legal names, spelled the way they sign.',
+      fields:[
+        {id:'buyer1', type:'text', label:'Buyer — full legal name', req:true, ph:'e.g. Jordan Avery Smith'},
+        {id:'buyer2', type:'text', label:'Second buyer (if any)', ph:'Full legal name'},
+        {id:'seller1', type:'text', label:'Seller — full legal name', req:true, ph:'As shown on title, if known'},
+        {id:'seller2', type:'text', label:'Second seller (if any)', ph:'Full legal name'},
+      ]},
+    { key:'property', title:'The Property', blurb:'Where it is, and what kind — this drives which conditions apply later.',
+      fields:[
+        {id:'address', type:'text', label:'Municipal address', req:true, ph:'123 Main St, Dundas, ON  L9H 0A0'},
+        {id:'proptype', type:'chips', label:'Property type', req:true, options:['Freehold','Condominium','Vacant land','Other'], hint:'Condominium adds a status-certificate review; rural adds well & septic.'},
+        {id:'rural', type:'chips', label:'Rural / on private services?', options:['No — municipal services','Yes — well and/or septic'], hint:'Affects water-quality and septic clauses.'},
+        {id:'legal', type:'area', label:'Legal description', ph:"e.g. LOT 14, PLAN 62M-1234, City of Hamilton — from GeoWarehouse / listing", hint:'Optional now; your lawyer confirms this. Capture it if you have it.'},
+        {id:'lotsize', type:'text', label:'Frontage / depth or lot size', ph:'e.g. 40 ft × 110 ft  (or “as per MPAC”)'},
+      ]},
+    { key:'price', title:'The Price', blurb:'The headline number. The words-and-figures version is generated for you.',
+      fields:[
+        {id:'price', type:'money', label:'Purchase price', req:true, ph:'899,000'},
+        {id:'hst', type:'chips', label:'HST treatment', options:['Included in the price','In addition to the price','Not applicable'], hint:'Most resale homes are exempt; new builds and some others aren’t. Confirm with your lawyer.'},
+      ]},
+    { key:'deposit', title:'The Deposit', blurb:'Shows the seller you’re serious — credited toward the price on closing.',
+      fields:[
+        {id:'deposit', type:'money', label:'Deposit amount', req:true, ph:'30,000', hint:'Often roughly 5% of price in this market — but it’s your call.'},
+        {id:'depwhen', type:'chips', label:'Paid when?', options:['Herewith (with the offer)','Upon acceptance','Within banking days of acceptance']},
+        {id:'depdays', type:'number', label:'Banking days to deliver deposit', ph:'1', hint:'Only if “within banking days” — typically 1.'},
+        {id:'depholder', type:'text', label:'Held in trust by (deposit holder)', ph:'e.g. Listing brokerage, in trust', hint:'Usually the listing brokerage’s trust account.'},
+        {id:'depincrease', type:'chips', label:'Increase deposit when conditions are waived?', options:['No','Yes — add a top-up clause'], hint:'A common way to strengthen a conditional offer.'},
+        {id:'depincreaseamt', type:'money', label:'Additional deposit on waiver', ph:'20,000'},
+      ]},
+    { key:'dates', title:'Dates & Possession', blurb:'When the offer stays open, and when the keys change hands.',
+      fields:[
+        {id:'irrevparty', type:'chips', label:'Offer is irrevocable by', options:['The Buyer','The Seller'], req:true, hint:'On an offer you submit, usually the Buyer.'},
+        {id:'irrevdate', type:'date', label:'Irrevocable until — date', req:true, hint:'The deadline for the other side to accept.'},
+        {id:'irrevtime', type:'time', label:'Irrevocable until — time', req:true},
+        {id:'closing', type:'date', label:'Completion (closing) date', req:true, hint:'The day title transfers and you get possession.'},
+        {id:'possession', type:'chips', label:'Possession', options:['Vacant possession','Subject to existing tenancy','Other']},
+      ]},
+    { key:'inclusions', title:'Inclusions & Exclusions', blurb:'What stays, what goes, what’s rented. Be specific — it prevents closing-day disputes.',
+      fields:[
+        {id:'chattels', type:'area', label:'Chattels included', ph:'e.g. Refrigerator, stove, dishwasher, washer, dryer, all window coverings, garage door opener + 2 remotes', hint:'Movable items the seller leaves. Note makes where helpful.'},
+        {id:'fixtures', type:'area', label:'Fixtures excluded', ph:'e.g. Dining room light fixture, mounted TVs and brackets, garden shed', hint:'Attached items the seller is taking.'},
+        {id:'rentals', type:'area', label:'Rental items', ph:'e.g. Hot water tank (Reliance), HVAC, water softener — or “None known”', hint:'Items the buyer assumes payments on, or that must be bought out.'},
+        {id:'workingorder', type:'chips', label:'Require included items in working order on closing?', options:['Yes','No'], hint:'Adds a clause that chattels/systems function on completion.'},
+      ]},
+    { key:'conditions', title:'Conditions', blurb:'Your protections. Turn on the ones you want — each becomes a drafted clause with your timelines.',
+      conditions:[
+        {id:'c_finance', name:'Financing', desc:'Time to confirm your mortgage. Offer ends if you can’t.', detail:[{id:'fin_days', type:'number', label:'Days to satisfy', ph:'5'}]},
+        {id:'c_inspect', name:'Home inspection', desc:'Time to inspect and walk away if something’s wrong.', detail:[{id:'insp_days', type:'number', label:'Days to satisfy', ph:'5'}]},
+        {id:'c_status', name:'Status certificate review', desc:'Condo only — review the certificate & financials.', showIf:function(){return S.proptype==='Condominium';}, detail:[{id:'stat_days', type:'number', label:'Days after receiving certificate', ph:'5'}]},
+        {id:'c_sale', name:'Sale of buyer’s property', desc:'Conditional on selling your current home.', detail:[
+          {id:'sale_days', type:'number', label:'Days to firm up sale', ph:'30'},
+          {id:'sale_escape', type:'chips', label:'Include a seller “escape clause”?', options:['Yes','No']},
+          {id:'sale_escape_hrs', type:'number', label:'Escape notice period (hours)', ph:'48'},
+        ]},
+        {id:'c_insure', name:'Insurance', desc:'Confirm you can obtain home insurance.', detail:[{id:'ins_days', type:'number', label:'Days to satisfy', ph:'5'}]},
+        {id:'c_lawyer', name:'Lawyer review', desc:'A few days for your lawyer to review the agreement.', detail:[{id:'law_days', type:'number', label:'Days to satisfy', ph:'3'}]},
+        {id:'c_well', name:'Water & septic', desc:'Rural only — water quality/quantity and septic inspection.', showIf:function(){return S.rural==='Yes — well and/or septic';}, detail:[{id:'well_days', type:'number', label:'Days to satisfy', ph:'10'}]},
+        {id:'c_other', name:'Other / custom condition', desc:'Anything else you want to make the offer conditional on.', detail:[
+          {id:'other_text', type:'area', label:'Describe the condition', ph:'e.g. Seller to provide a current survey; review of permits; etc.'},
+          {id:'other_days', type:'number', label:'Days to satisfy', ph:'5'},
+        ]},
+      ]},
+    { key:'other', title:'Other Terms', blurb:'A few remaining standard items, then we build your summary.',
+      fields:[
+        {id:'titledate', type:'date', label:'Title search / requisition date', hint:'Deadline for your lawyer to raise title issues. Often a couple of weeks before closing — your lawyer advises.'},
+        {id:'notice_email', type:'text', label:'Email for delivery of documents', ph:'rebecca@rebeccazak.com', hint:'Where signed documents and notices are sent.'},
+        {id:'presentuse', type:'text', label:'Present use of the property', ph:'e.g. Residential'},
+        {id:'extra', type:'area', label:'Anything else to flag for the agreement', ph:'Notes for yourself or your lawyer — special arrangements, seller promises, etc.'},
+      ]},
+    { key:'review', title:'Your Offer Prep Sheet', blurb:'', isReview:true },
+  ];
+
+  function fieldHidden(f){
+    if(f.id==='depdays') return S.depwhen!=='Within banking days of acceptance';
+    if(f.id==='depincreaseamt') return S.depincrease!=='Yes — add a top-up clause';
+    if(f.id==='rural') return !(S.proptype==='Freehold'||S.proptype==='Vacant land'||S.proptype==='Other'||!S.proptype);
+    return false;
+  }
+
+  function renderField(f){
+    if(fieldHidden(f)) return '<div class="rz-field hidden"></div>';
+    var v = S[f.id]==null?'':S[f.id];
+    var lab = '<label class="rz-label" for="rz_'+f.id+'">'+esc(f.label)+(f.req?'<span class="rz-req">*</span>':'')+'</label>';
+    var hint = f.hint?'<div class="rz-hint">'+esc(f.hint)+'</div>':'';
+    var inner='';
+    if(f.type==='text'||f.type==='number'||f.type==='date'||f.type==='time'){
+      var t = f.type==='number'?'number':(f.type==='date'?'date':(f.type==='time'?'time':'text'));
+      inner='<input type="'+t+'" id="rz_'+f.id+'" data-id="'+f.id+'" value="'+esc(v)+'" placeholder="'+esc(f.ph||'')+'"'+(f.type==='number'?' min="0"':'')+'>';
+    } else if(f.type==='money'){
+      inner='<div class="rz-money-wrap"><input type="text" inputmode="decimal" id="rz_'+f.id+'" data-id="'+f.id+'" data-money="1" value="'+esc(v)+'" placeholder="'+esc(f.ph||'')+'"></div>';
+    } else if(f.type==='area'){
+      inner='<textarea id="rz_'+f.id+'" data-id="'+f.id+'" placeholder="'+esc(f.ph||'')+'">'+esc(v)+'</textarea>';
+    } else if(f.type==='chips'){
+      inner='<div class="rz-choices" data-chips="'+f.id+'">'+f.options.map(function(o){return '<span class="rz-chip'+(v===o?' sel':'')+'" data-id="'+f.id+'" data-val="'+esc(o)+'">'+esc(o)+'</span>';}).join('')+'</div>';
+    }
+    return '<div class="rz-field" id="field_'+f.id+'">'+lab+hint+inner+'</div>';
+  }
+
+  function renderCondition(c){
+    if(c.showIf && !c.showIf()) return '';
+    var on = !!S[c.id];
+    var detail='';
+    if(c.detail){
+      detail='<div class="rz-tg-detail'+(on?'':' hidden')+'" data-detail="'+c.id+'">'+
+        (c.id==='c_sale'?'<div class="rz-grid2">':'')+
+        c.detail.map(function(f){ if(f.id==='sale_escape_hrs' && S.sale_escape!=='Yes') return '<div class="rz-field hidden"></div>'; return renderField(f); }).join('')+
+        (c.id==='c_sale'?'</div>':'')+'</div>';
+    }
+    return '<div class="rz-toggle'+(on?' on':'')+'" data-cond="'+c.id+'">'+
+      '<div class="rz-tg-main"><div class="rz-tg-name">'+esc(c.name)+'</div><div class="rz-tg-desc">'+esc(c.desc)+'</div>'+detail+'</div>'+
+      '<div class="rz-switch'+(on?' on':'')+'" role="switch" aria-checked="'+on+'" tabindex="0" data-switch="'+c.id+'"></div></div>';
+  }
+
+  function render(){
+    var step = STEPS[idx];
+    var card = document.getElementById('rzCard');
+    var badge = ('0'+(idx+1)).slice(-2);
+    var html = '<div class="rz-sechead"><span class="rz-secbadge">'+badge+'</span><h2 class="rz-sectitle">'+esc(step.title)+'</h2></div>';
+    if(step.blurb) html+='<p class="rz-secblurb">'+esc(step.blurb)+'</p>';
+    if(step.isReview){ html += buildReview(); }
+    else if(step.conditions){ html += step.conditions.map(renderCondition).join(''); }
+    else { html += step.fields.map(renderField).join(''); }
+    card.innerHTML = html;
+    bind(step);
+    updateProgress();
+    var next=document.getElementById('rzNext');
+    next.textContent = step.isReview ? 'Done' : (STEPS[idx+1] && STEPS[idx+1].isReview ? 'Build prep sheet' : 'Next');
+    document.getElementById('rzBack').classList.toggle('invis', idx===0);
+    document.getElementById('rzNav').style.display = step.isReview ? 'none' : 'flex';
+    card.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function updateProgress(){
+    var pct = Math.round((idx)/(STEPS.length-1)*100);
+    document.getElementById('rzPfill').style.width = pct+'%';
+    document.getElementById('rzPstep').textContent = 'Step '+(idx+1)+' of '+STEPS.length;
+    document.getElementById('rzPname').textContent = STEPS[idx].title;
+  }
+
+  function bind(step){
+    var card=document.getElementById('rzCard');
+    card.querySelectorAll('input[data-id],textarea[data-id],select[data-id]').forEach(function(el){
+      el.addEventListener('input', function(){ S[el.getAttribute('data-id')]=el.value; save(); });
+      if(el.getAttribute('data-money')){
+        el.addEventListener('blur', function(){ if(el.value.trim()!==''){ el.value=money(el.value); S[el.getAttribute('data-id')]=el.value; save(); } });
+        el.addEventListener('focus', function(){ el.value=String(el.value).replace(/,/g,''); });
+      }
+    });
+    card.querySelectorAll('.rz-chip').forEach(function(ch){
+      ch.addEventListener('click', function(){ var id=ch.getAttribute('data-id'),val=ch.getAttribute('data-val'); S[id]=(S[id]===val)?'':val; save(); render(); });
+    });
+    card.querySelectorAll('[data-switch]').forEach(function(sw){
+      function toggle(){ var id=sw.getAttribute('data-switch'); S[id]=!S[id]; save(); render(); }
+      sw.addEventListener('click', toggle);
+      sw.addEventListener('keydown', function(e){ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();} });
+    });
+  }
+
+  function validate(){
+    var step=STEPS[idx]; if(!step.fields) return true;
+    for(var i=0;i<step.fields.length;i++){
+      var f=step.fields[i];
+      if(f.req && !fieldHidden(f) && (!S[f.id]||String(S[f.id]).trim()==='')){
+        var el=document.getElementById('rz_'+f.id) || document.querySelector('[data-chips="'+f.id+'"]');
+        if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); }
+        toast('Please complete: '+f.label); return false;
+      }
+    }
+    return true;
+  }
+
+  /* ============================================================ REVIEW ============================================================ */
+  function row(k,v){ var empty=(v==null||String(v).trim()===''); return '<div class="rz-pair"><span class="k">'+esc(k)+'</span><span class="v'+(empty?' empty':'')+'">'+(empty?'—':esc(v))+'</span></div>'; }
+  function buyersStr(){ return [S.buyer1,S.buyer2].filter(Boolean).join(' and '); }
+  function sellersStr(){ return [S.seller1,S.seller2].filter(Boolean).join(' and '); }
+  function depWhenStr(){ if(S.depwhen==='Within banking days of acceptance') return 'Within '+(S.depdays||'___')+' banking day(s) of acceptance'; return S.depwhen||''; }
+
+  function buildClauses(){
+    var out=[];
+    var deadline=function(days){ return 'no later than 6:00 p.m. on the '+ordinal(days)+' day following acceptance of this Agreement'; };
+    var benefit='This condition is included for the sole benefit of the Buyer and may be waived at the Buyer’s option by notice in writing to the Seller within the time period stated above. If such notice is not given within that time, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction.';
+
+    if(S.c_finance) out.push(['Financing','This Agreement is conditional upon the Buyer arranging, at the Buyer’s own expense, satisfactory mortgage financing in the Buyer’s sole and absolute discretion. Unless the Buyer gives notice in writing to the Seller '+deadline(S.fin_days)+' that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction. '+benefit]);
+    if(S.c_inspect) out.push(['Home inspection','This Agreement is conditional upon the Buyer obtaining, at the Buyer’s own expense, a home inspection report satisfactory to the Buyer in the Buyer’s sole and absolute discretion. Unless the Buyer gives notice in writing to the Seller '+deadline(S.insp_days)+' that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction. The Seller agrees to provide reasonable access for the inspection. '+benefit]);
+    if(S.c_status && S.proptype==='Condominium') out.push(['Status certificate review','This Agreement is conditional upon the Buyer’s lawyer reviewing the status certificate and attached documentation and finding them satisfactory to the Buyer in the Buyer’s sole and absolute discretion. The Seller shall, at the Seller’s expense, request and deliver the status certificate promptly. The Buyer shall have '+(S.stat_days||'___')+' day(s) after receipt to review. Unless the Buyer gives notice in writing to the Seller within that period that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction.']);
+    if(S.c_sale){
+      var sale='This Agreement is conditional upon the sale of the Buyer’s existing property at __________________ on or before 6:00 p.m. on the '+ordinal(S.sale_days)+' day following acceptance of this Agreement. Unless the Buyer gives notice in writing to the Seller within that time that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction.';
+      if(S.sale_escape==='Yes') sale+='\n\nEscape clause: The Seller may continue to offer the property for sale. Should the Seller receive another acceptable offer, the Seller may notify the Buyer in writing, and the Buyer shall have '+(S.sale_escape_hrs||'48')+' hours from such notice to waive this condition in writing; failing which this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction.';
+      out.push(['Sale of Buyer’s property', sale]);
+    }
+    if(S.c_insure) out.push(['Insurance','This Agreement is conditional upon the Buyer arranging property insurance satisfactory to the Buyer in the Buyer’s sole and absolute discretion. Unless the Buyer gives notice in writing to the Seller '+deadline(S.ins_days)+' that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction. '+benefit]);
+    if(S.c_lawyer) out.push(['Lawyer review','This Agreement is conditional upon review of this Agreement by the Buyer’s solicitor and the Buyer being satisfied, in the Buyer’s sole and absolute discretion, with its terms. Unless the Buyer gives notice in writing to the Seller '+deadline(S.law_days)+' that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction.']);
+    if(S.c_well && S.rural==='Yes — well and/or septic') out.push(['Water & septic','This Agreement is conditional upon the Buyer obtaining, at the Buyer’s own expense, satisfactory results regarding the quantity and potability of the water supply and the condition of the septic system, all satisfactory to the Buyer in the Buyer’s sole and absolute discretion. Unless the Buyer gives notice in writing to the Seller '+deadline(S.well_days)+' that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction. The Seller agrees to provide reasonable access for testing.']);
+    if(S.c_other && (S.other_text||'').trim()) out.push(['Custom condition','This Agreement is conditional upon the following, satisfactory to the Buyer in the Buyer’s sole and absolute discretion: '+S.other_text.trim()+'. Unless the Buyer gives notice in writing to the Seller '+deadline(S.other_days)+' that this condition is fulfilled, this Agreement shall be null and void and the deposit returned to the Buyer in full without deduction.']);
+    if(S.workingorder==='Yes') out.push(['Chattels & systems in working order','The Seller represents and warrants that the chattels and fixtures included in this Agreement, and the plumbing, heating, electrical, air-conditioning and other mechanical systems serving the property, shall be in good working order on the completion date. This warranty shall survive and not merge on completion, but applies only to the state of the property on completion.']);
+    if(S.depincrease==='Yes — add a top-up clause') out.push(['Additional deposit on waiver','The Buyer agrees to deliver an additional deposit of $'+(S.depincreaseamt||'________')+' to the deposit holder, to be held in trust and credited toward the purchase price on completion, within ____ banking day(s) of the Buyer waiving or fulfilling all conditions in this Agreement.']);
+    return out;
+  }
+
+  function buildReview(){
+    var h='<div class="rz-out">';
+    h+='<h3>The Parties</h3>'+row('Buyer(s)', buyersStr())+row('Seller(s)', sellersStr());
+    h+='<h3>The Property</h3>'+row('Address', S.address)+row('Type', S.proptype);
+    if(S.rural) h+=row('Services', S.rural);
+    h+=row('Legal description', S.legal)+row('Lot size', S.lotsize);
+    h+='<h3>Price &amp; Deposit</h3>';
+    var pr=S.price?money(S.price):''; h+=row('Purchase price', pr?('$'+pr):'');
+    if(S.price){ var n=Number(String(S.price).replace(/[^0-9.]/g,'')); if(!isNaN(n)) h+=row('In words', numToWords(n)+' Canadian Dollars ($'+pr+')'); }
+    h+=row('HST', S.hst)+row('Deposit', S.deposit?('$'+money(S.deposit)):'')+row('Deposit paid', depWhenStr())+row('Held in trust by', S.depholder);
+    if(S.depincrease==='Yes — add a top-up clause') h+=row('Top-up on waiver', S.depincreaseamt?('$'+money(S.depincreaseamt)):'');
+    h+='<h3>Dates &amp; Possession</h3>'+row('Irrevocable by', S.irrevparty)+row('Irrevocable until',(fmtDate(S.irrevdate)+(S.irrevtime?(' at '+fmtTime(S.irrevtime)):'')).trim())+row('Completion date', fmtDate(S.closing))+row('Possession', S.possession);
+    h+='<h3>Inclusions &amp; Exclusions</h3>'+row('Chattels included', S.chattels)+row('Fixtures excluded', S.fixtures)+row('Rental items', S.rentals);
+    h+='<h3>Other Terms</h3>'+row('Title / requisition date', fmtDate(S.titledate))+row('Notices by email to', S.notice_email)+row('Present use', S.presentuse);
+    if((S.extra||'').trim()) h+=row('Notes', S.extra);
+    var clauses=buildClauses();
+    h+='<h3>Draft Schedule A Clauses</h3>';
+    if(clauses.length===0){ h+='<p class="rz-secblurb" style="margin-bottom:4px;">No conditions selected — this would be a firm (unconditional) offer. Go Back to add conditions, or proceed firm.</p>'; }
+    else { h+=clauses.map(function(c){ var body=esc(c[1]).replace(/_{2,}/g,'<mark>____</mark>'); return '<div class="rz-clause"><div class="ct">'+esc(c[0])+'</div><div class="cbody">'+body+'</div></div>'; }).join(''); }
+    h+='<div class="rz-outbtns">'+
+        '<button class="rz-btn rz-btn-primary" id="rzCopyAll">Copy full prep sheet</button>'+
+        '<button class="rz-btn rz-btn-ghost" id="rzCopyClauses">Copy clauses only</button>'+
+        '<button class="rz-btn rz-btn-ghost" id="rzPrint">Print / Save PDF</button>'+
+        '<button class="rz-btn rz-btn-ghost" id="rzRestart">Start over</button></div>';
+    h+='<div class="rz-note"><strong>How to use this.</strong> A preparation aid that organizes your terms and gives draft clause language as a starting point — not the Agreement itself, and not legal advice. Final wording goes into the brokerage’s standard OREA forms, and conditions and timelines should be reviewed by you and confirmed by a real estate lawyer before signing. Highlighted blanks (<mark>____</mark>) need a number or detail. Days run from acceptance unless your lawyer advises otherwise.</div>';
+    h+='</div>';
+    return h;
+  }
+
+  function plainSummary(clausesOnly){
+    var L=[];
+    if(!clausesOnly){
+      L.push('OFFER PREPARATION SHEET — Agreement of Purchase and Sale (Ontario)');
+      L.push('Rebecca Zak · internal tool · rebeccazak.com/tools');
+      L.push('');
+      L.push('THE PARTIES'); L.push('  Buyer(s):  '+(buyersStr()||'—')); L.push('  Seller(s): '+(sellersStr()||'—')); L.push('');
+      L.push('THE PROPERTY'); L.push('  Address:  '+(S.address||'—')); L.push('  Type:     '+(S.proptype||'—')+(S.rural?('  ('+S.rural+')'):''));
+      if(S.legal) L.push('  Legal:    '+S.legal); if(S.lotsize) L.push('  Lot:      '+S.lotsize); L.push('');
+      L.push('PRICE & DEPOSIT'); var pr=S.price?money(S.price):''; L.push('  Price:    '+(pr?('$'+pr):'—'));
+      if(S.price){var n=Number(String(S.price).replace(/[^0-9.]/g,''));if(!isNaN(n))L.push('  In words: '+numToWords(n)+' Canadian Dollars ($'+pr+')');}
+      if(S.hst) L.push('  HST:      '+S.hst);
+      L.push('  Deposit:  '+(S.deposit?('$'+money(S.deposit)):'—')+'  ·  '+depWhenStr());
+      if(S.depholder) L.push('  Held by:  '+S.depholder);
+      if(S.depincrease==='Yes — add a top-up clause') L.push('  Top-up on waiver: '+(S.depincreaseamt?('$'+money(S.depincreaseamt)):'—')); L.push('');
+      L.push('DATES & POSSESSION'); L.push('  Irrevocable by '+(S.irrevparty||'—')+' until '+(fmtDate(S.irrevdate)||'—')+(S.irrevtime?(' at '+fmtTime(S.irrevtime)):''));
+      L.push('  Completion:  '+(fmtDate(S.closing)||'—')); if(S.possession) L.push('  Possession:  '+S.possession); L.push('');
+      L.push('INCLUSIONS & EXCLUSIONS'); L.push('  Chattels included: '+(S.chattels||'—')); L.push('  Fixtures excluded: '+(S.fixtures||'—')); L.push('  Rental items:      '+(S.rentals||'—')); L.push('');
+      L.push('OTHER TERMS');
+      if(S.titledate) L.push('  Title/requisition date: '+fmtDate(S.titledate));
+      if(S.notice_email) L.push('  Notices by email to:    '+S.notice_email);
+      if(S.presentuse) L.push('  Present use:            '+S.presentuse);
+      if((S.extra||'').trim()) L.push('  Notes: '+S.extra.trim()); L.push('');
+    }
+    var clauses=buildClauses();
+    L.push('SCHEDULE A — DRAFT CLAUSES  (starting points; finalize in OREA forms / with a lawyer)');
+    if(clauses.length===0){ L.push('  (none — firm offer)'); }
+    else clauses.forEach(function(c,i){ L.push(''); L.push('  '+(i+1)+'. '+c[0].toUpperCase()); L.push('     '+c[1].replace(/\n/g,'\n     ')); });
+    if(!clausesOnly){ L.push(''); L.push('Not legal advice. Confirm conditions, timelines and final wording with a real estate lawyer before signing.'); }
+    return L.join('\n');
+  }
+
+  function copyText(txt){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast('Copied to clipboard');},function(){fallbackCopy(txt);}); } else fallbackCopy(txt); }
+  function fallbackCopy(txt){ var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';root.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Copied to clipboard');}catch(e){toast('Press Ctrl/Cmd-C to copy');}root.removeChild(ta); }
+
+  root.addEventListener('click', function(e){
+    var t=e.target;
+    if(t.id==='rzCopyAll') copyText(plainSummary(false));
+    else if(t.id==='rzCopyClauses') copyText(plainSummary(true));
+    else if(t.id==='rzPrint') window.print();
+    else if(t.id==='rzRestart'){ if(confirm('Clear all answers and start a new offer?')){ S={}; idx=0; try{localStorage.removeItem(STORE);}catch(e){} render(); } }
+  });
+
+  document.getElementById('rzNext').addEventListener('click', function(){ if(STEPS[idx].isReview) return; if(!validate()) return; if(idx<STEPS.length-1){ idx++; save(); render(); } });
+  document.getElementById('rzBack').addEventListener('click', function(){ if(idx>0){ idx--; save(); render(); } });
+
+  load();
+  render();
+})();
+</script>

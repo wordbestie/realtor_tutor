@@ -1,0 +1,573 @@
+<!-- ============================================================
+     Going Firm — Conditional-period navigator (Ontario)
+     Rebecca Zak · internal tool · matches /tools house style
+     Routes the period between acceptance and firm to the right
+     OREA form (waiver, fulfilment, amendment, release, termination).
+     Paste into a WordPress "Custom HTML" block. Self-contained.
+     ============================================================ -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Going Firm · Realtor Tutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.rt-top{position:sticky;top:0;z-index:30;background:#10302A;color:#fff;font-family:'Hanken Grotesk',system-ui,sans-serif}
+.rt-top-in{max-width:720px;margin:0 auto;height:60px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rt-back{display:inline-flex;align-items:center;gap:6px;color:#cfe0d8;text-decoration:none;font-weight:600;font-size:.92rem}
+.rt-back:hover{color:#fff}
+.rt-brand{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:1.02rem;display:flex;align-items:center;gap:.5ch;color:#fff}
+.rt-tick{width:9px;height:9px;background:#E0A227;border-radius:2px;transform:rotate(45deg);display:inline-block}
+.rt-spacer{width:74px}
+.rtgate{position:fixed;inset:0;z-index:50;background:#F4F1E8;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:700;color:#5B6A60}
+html,body{margin:0}
+</style>
+<div class="rtgate" id="rtgate"><div>Checking your access…</div></div>
+<div class="rt-top"><div class="rt-top-in">
+  <a class="rt-back" href="../index.html">&larr; Dashboard</a>
+  <span class="rt-brand"><span class="rt-tick"></span> Realtor Tutor</span>
+  <span class="rt-spacer"></span>
+</div></div>
+<div id="rz-firm-wizard">
+<style>
+#rz-firm-wizard{
+  --cobalt:#10302A; --gold:#E0A227; --gold-bright:#ECB94A; --gold-soft:#EBC56A;
+  --chalk:#10302A; --chalk-dim:#5B6A60; --chalk-faint:#7A857C;
+  --line-soft:rgba(16,48,42,.12); --line-gold:rgba(224,162,39,.5);
+  --ok:#2E7D5B; --radius:14px; --maxw:720px;
+  --display:'Bricolage Grotesque',system-ui,sans-serif; --body:'Hanken Grotesk',system-ui,sans-serif;
+  all:initial; display:block; box-sizing:border-box;
+  font-family:var(--body);
+  color:var(--chalk); -webkit-font-smoothing:antialiased; line-height:1.55;
+  background:#F4F1E8;
+  padding:clamp(20px,4vw,46px) clamp(14px,4vw,26px) 54px; min-height:100%;
+}
+#rz-firm-wizard *,#rz-firm-wizard *::before,#rz-firm-wizard *::after{box-sizing:border-box;}
+#rz-firm-wizard .rz-shell{max-width:var(--maxw);margin:0 auto;}
+
+/* masthead */
+#rz-firm-wizard .rz-mast{display:flex;align-items:flex-start;gap:18px;margin-bottom:30px;}
+#rz-firm-wizard .rz-bex{
+  flex:0 0 auto;width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(120% 120% at 30% 25%, var(--gold-bright), var(--gold) 70%);
+  box-shadow:0 0 26px rgba(201,162,39,.45), inset 0 1px 1px rgba(255,255,255,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-style:italic;font-weight:600;font-size:30px;color:var(--cobalt);line-height:1;padding-bottom:3px;
+}
+#rz-firm-wizard .rz-mast-txt{min-width:0;padding-top:1px;}
+#rz-firm-wizard .rz-title{font-family:var(--display);font-weight:600;font-size:clamp(30px,6vw,42px);line-height:1.02;letter-spacing:.005em;color:var(--chalk);margin:0;}
+#rz-firm-wizard .rz-eyebrow{font-family:var(--body);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:8px 0 0;}
+#rz-firm-wizard .rz-sub{color:var(--chalk-dim);font-size:14.5px;max-width:52ch;margin:14px 0 0;line-height:1.6;}
+
+/* progress */
+#rz-firm-wizard .rz-progress{margin:6px 0 22px;}
+#rz-firm-wizard .rz-ptrack{height:2px;background:var(--line-soft);overflow:hidden;}
+#rz-firm-wizard .rz-pfill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-soft));transition:width .45s cubic-bezier(.4,0,.2,1);}
+#rz-firm-wizard .rz-pmeta{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;}
+#rz-firm-wizard .rz-pstep{font-family:var(--body);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600;}
+#rz-firm-wizard .rz-pname{font-family:var(--display);font-style:italic;font-size:15px;color:var(--chalk-faint);}
+
+/* card */
+#rz-firm-wizard .rz-card{
+  background:linear-gradient(180deg, rgba(20,32,74,.62), rgba(9,16,40,.62));
+  border:1px solid var(--line-soft); border-radius:var(--radius);
+  padding:clamp(20px,4vw,32px);
+  box-shadow:0 26px 64px -32px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05);
+}
+#rz-firm-wizard .rz-sechead{display:flex;align-items:center;gap:15px;margin-bottom:8px;}
+#rz-firm-wizard .rz-secbadge{
+  flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:1.5px solid var(--line-gold);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:600;font-size:19px;color:var(--gold);letter-spacing:.02em;
+}
+#rz-firm-wizard .rz-sectitle{font-family:var(--display);font-weight:600;font-size:clamp(23px,4.4vw,30px);margin:0;color:var(--chalk);line-height:1.05;letter-spacing:.005em;}
+#rz-firm-wizard .rz-secblurb{color:var(--chalk-dim);font-size:14px;margin:0 0 24px;max-width:56ch;line-height:1.6;}
+
+/* fields */
+#rz-firm-wizard .rz-field{margin-bottom:18px;}
+#rz-firm-wizard .rz-field.hidden{display:none;}
+#rz-firm-wizard .rz-label{display:block;font-family:var(--body);font-size:13px;font-weight:600;color:var(--chalk);margin-bottom:7px;letter-spacing:.005em;}
+#rz-firm-wizard .rz-hint{font-size:12.5px;color:var(--chalk-faint);margin:-1px 0 8px;line-height:1.5;}
+#rz-firm-wizard .rz-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){#rz-firm-wizard .rz-grid2{grid-template-columns:1fr;}}
+#rz-firm-wizard input[type=text],#rz-firm-wizard input[type=number],#rz-firm-wizard input[type=date],#rz-firm-wizard input[type=time],#rz-firm-wizard textarea{
+  width:100%;font-family:inherit;font-size:15px;color:var(--chalk);background:rgba(255,255,255,.04);border:1px solid var(--line-soft);border-radius:10px;padding:11px 13px;transition:border-color .18s, box-shadow .18s, background .18s;
+}
+#rz-firm-wizard textarea{min-height:74px;resize:vertical;line-height:1.5;}
+#rz-firm-wizard input::placeholder,#rz-firm-wizard textarea::placeholder{color:#647093;}
+#rz-firm-wizard input:focus,#rz-firm-wizard textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.15);background:rgba(255,255,255,.065);}
+
+/* chips */
+#rz-firm-wizard .rz-choices{display:flex;flex-wrap:wrap;gap:9px;}
+#rz-firm-wizard .rz-chip{cursor:pointer;border:1px solid var(--line-soft);border-radius:999px;padding:9px 16px;font-size:13.5px;color:var(--chalk-dim);background:rgba(255,255,255,.03);transition:all .16s;user-select:none;}
+#rz-firm-wizard .rz-chip:hover{border-color:var(--line-gold);color:var(--chalk);}
+#rz-firm-wizard .rz-chip.sel{background:var(--gold);border-color:var(--gold);color:var(--cobalt);font-weight:600;}
+
+/* option rows (single-select scenarios) */
+#rz-firm-wizard .rz-opt{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line-soft);border-radius:12px;padding:15px 16px;background:rgba(255,255,255,.025);cursor:pointer;transition:border-color .16s,background .16s;margin-bottom:11px;}
+#rz-firm-wizard .rz-opt:hover{border-color:var(--line-gold);}
+#rz-firm-wizard .rz-opt.sel{border-color:var(--gold);background:rgba(201,162,39,.08);}
+#rz-firm-wizard .rz-radio{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line-gold);margin-top:2px;position:relative;}
+#rz-firm-wizard .rz-opt.sel .rz-radio{border-color:var(--gold);}
+#rz-firm-wizard .rz-opt.sel .rz-radio::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--gold);}
+#rz-firm-wizard .rz-opt-name{font-family:var(--display);font-weight:600;font-size:18px;color:var(--chalk);line-height:1.12;}
+#rz-firm-wizard .rz-opt-desc{font-size:12.5px;color:var(--chalk-faint);margin-top:3px;}
+#rz-firm-wizard .rz-detail{border:1px dashed var(--line-soft);border-radius:12px;padding:16px 16px 2px;margin:2px 0 4px;background:rgba(255,255,255,.02);}
+#rz-firm-wizard .rz-detail .rz-dhead{font-family:var(--body);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:14px;}
+
+/* nav */
+#rz-firm-wizard .rz-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px;}
+#rz-firm-wizard .rz-btn{font-family:var(--body);font-weight:600;font-size:13.5px;letter-spacing:.01em;border:none;border-radius:10px;padding:13px 26px;cursor:pointer;transition:transform .12s,box-shadow .2s,background .2s,color .2s,border-color .2s;}
+#rz-firm-wizard .rz-btn:active{transform:translateY(1px);}
+#rz-firm-wizard .rz-btn-primary{background:linear-gradient(180deg,var(--gold-bright),#B8911E);color:var(--cobalt);box-shadow:0 10px 24px -10px rgba(201,162,39,.6);}
+#rz-firm-wizard .rz-btn-primary:hover{box-shadow:0 14px 30px -10px rgba(201,162,39,.78);}
+#rz-firm-wizard .rz-btn-ghost{background:transparent;color:var(--chalk-dim);border:1px solid var(--line-soft);}
+#rz-firm-wizard .rz-btn-ghost:hover{color:var(--chalk);border-color:var(--line-gold);}
+#rz-firm-wizard .rz-btn-ghost.invis{visibility:hidden;}
+
+/* result */
+#rz-firm-wizard .rz-formcard{display:flex;align-items:center;gap:14px;border:1px solid var(--line-gold);border-left:3px solid var(--gold);border-radius:12px;padding:15px 17px;background:rgba(201,162,39,.07);margin-bottom:12px;}
+#rz-firm-wizard .rz-formcard.secondary{background:rgba(255,255,255,.03);border-color:var(--line-soft);border-left-color:var(--gold-soft);}
+#rz-firm-wizard .rz-formcard .pill{font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--cobalt);background:var(--gold);padding:7px 11px;border-radius:6px;white-space:nowrap;}
+#rz-firm-wizard .rz-formcard.secondary .pill{background:transparent;color:var(--gold);border:1px solid var(--line-gold);}
+#rz-firm-wizard .rz-formcard .fname{font-family:var(--display);font-weight:600;font-size:20px;color:var(--chalk);line-height:1.12;}
+#rz-firm-wizard .rz-lbl{font-family:var(--body);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:20px 0 6px;font-weight:600;}
+#rz-firm-wizard .rz-res p{font-size:14px;color:var(--chalk-dim);line-height:1.62;margin:0;}
+#rz-firm-wizard .rz-res p .em{color:var(--chalk);font-weight:600;}
+#rz-firm-wizard .rz-warn{border:1px solid rgba(201,162,39,.5);background:rgba(201,162,39,.1);border-radius:10px;padding:14px 16px;font-size:13.5px;color:var(--gold-soft);margin:8px 0 2px;line-height:1.55;}
+#rz-firm-wizard .rz-check{list-style:none;padding:0;margin:8px 0 0;}
+#rz-firm-wizard .rz-check li{position:relative;padding-left:22px;font-size:13.5px;color:var(--chalk-dim);margin-bottom:9px;line-height:1.5;}
+#rz-firm-wizard .rz-check li::before{content:"";position:absolute;left:3px;top:7px;width:7px;height:7px;background:var(--gold);transform:rotate(45deg);}
+#rz-firm-wizard .rz-deal{font-family:var(--display);font-style:italic;font-size:16px;color:var(--chalk-faint);margin:0 0 18px;}
+
+#rz-firm-wizard .rz-outbtns{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 4px;}
+#rz-firm-wizard .rz-outbtns .rz-btn{padding:11px 18px;font-size:12.5px;}
+#rz-firm-wizard .rz-note{margin-top:20px;font-size:11.5px;line-height:1.6;color:var(--chalk-faint);background:rgba(255,255,255,.025);border:1px solid var(--line-soft);border-radius:10px;padding:14px 16px;}
+#rz-firm-wizard .rz-note strong{color:var(--chalk-dim);font-weight:600;}
+
+/* footer */
+#rz-firm-wizard .rz-foot{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:30px;font-family:var(--display);font-style:italic;font-size:14px;color:var(--chalk-faint);}
+#rz-firm-wizard .rz-foot .dia{width:6px;height:6px;background:var(--gold);transform:rotate(45deg);flex:0 0 auto;}
+#rz-firm-wizard .rz-saved{font-family:var(--body);font-style:normal;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ok);opacity:0;transition:opacity .3s;}
+#rz-firm-wizard .rz-saved.show{opacity:.85;}
+
+/* toast */
+#rz-firm-wizard .rz-toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--gold);color:var(--cobalt);font-weight:600;font-size:13.5px;font-family:var(--body);padding:11px 22px;border-radius:999px;box-shadow:0 14px 34px -10px rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:60;}
+#rz-firm-wizard .rz-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media print{
+  #rz-firm-wizard{background:#fff !important;color:#111 !important;padding:0;}
+  #rz-firm-wizard .rz-progress,#rz-firm-wizard .rz-nav,#rz-firm-wizard .rz-outbtns,#rz-firm-wizard .rz-sub,#rz-firm-wizard .rz-bex{display:none !important;}
+  #rz-firm-wizard .rz-card{background:#fff !important;border:none;box-shadow:none;}
+  #rz-firm-wizard .rz-title,#rz-firm-wizard .rz-sectitle,#rz-firm-wizard .rz-formcard .fname{color:#111 !important;}
+  #rz-firm-wizard .rz-lbl,#rz-firm-wizard .rz-eyebrow,#rz-firm-wizard .rz-secbadge{color:#9a7d18 !important;}
+  #rz-firm-wizard .rz-res p,#rz-firm-wizard .rz-check li,#rz-firm-wizard .rz-note{color:#333 !important;}
+  #rz-firm-wizard .rz-formcard{background:#faf8f2 !important;border-color:#e3dcc4 !important;}
+  #rz-firm-wizard .rz-formcard .pill{background:#9a7d18 !important;color:#fff !important;}
+  #rz-firm-wizard .rz-warn{background:#faf3df !important;color:#7a6212 !important;border-color:#e3dcc4 !important;}
+}
+
+  /* ===== Realtor Tutor re-skin (light) — visuals only, logic untouched ===== */
+  #rz-firm-wizard .rz-card{background:#FBFAF4;box-shadow:0 30px 60px -48px rgba(16,48,42,.4);}
+  #rz-firm-wizard input,#rz-firm-wizard textarea,#rz-firm-wizard input:focus,#rz-firm-wizard textarea:focus{background:#fff;}
+  #rz-firm-wizard .rz-chip,#rz-firm-wizard .rz-opt{background:#fff;}
+  #rz-firm-wizard .rz-detail{background:rgba(16,48,42,.02);}
+  #rz-firm-wizard .rz-formcard.secondary,#rz-firm-wizard .rz-note{background:rgba(16,48,42,.025);}
+  #rz-firm-wizard .rz-mast{margin-bottom:24px;}
+</style>
+
+<div class="rz-shell">
+  <div class="rz-mast">
+    <div class="rz-mast-txt">
+      <h1 class="rz-title">Going Firm</h1>
+      <div class="rz-eyebrow">Conditional period → the right form</div>
+      <p class="rz-sub">From acceptance to firm — answer a few questions about where the deal sits and this points you to the right OREA form: waiver, fulfilment, amendment, release, or termination. It explains why, who signs, and what comes next.</p>
+    </div>
+  </div>
+
+  <div class="rz-progress">
+    <div class="rz-ptrack"><div class="rz-pfill" id="rzPfill"></div></div>
+    <div class="rz-pmeta">
+      <span class="rz-pstep" id="rzPstep">Step 1 of 3</span>
+      <span class="rz-pname" id="rzPname"></span>
+    </div>
+  </div>
+
+  <div class="rz-card" id="rzCard"></div>
+
+  <div class="rz-nav" id="rzNav">
+    <button class="rz-btn rz-btn-ghost" id="rzBack">Back</button>
+    <button class="rz-btn rz-btn-primary" id="rzNext">Next</button>
+  </div>
+
+  <div class="rz-foot">
+    <span class="dia"></span>
+    <span>Private · for Bex only · drafts stay in this browser</span>
+    <span class="rz-saved" id="rzSaved">Saved</span>
+  </div>
+</div>
+
+<div class="rz-toast" id="rzToast">Copied</div>
+</div>
+
+<script src="../gate.js"></script>
+<script>window.requireMemberAccess({home:'../index.html'}).then(function(ok){if(ok){var g=document.getElementById('rtgate');if(g)g.remove();}});</script>
+<script>
+(function(){
+  "use strict";
+  var root=document.getElementById('rz-firm-wizard');
+  var STORE='rz_firm_draft_v1';
+  var S={}, idx=0;
+
+  function save(){ try{ localStorage.setItem(STORE, JSON.stringify({S:S,idx:idx})); flashSaved(); }catch(e){} }
+  function load(){ try{ var raw=localStorage.getItem(STORE); if(raw){ var o=JSON.parse(raw); if(o&&o.S){ S=o.S; idx=Math.min(o.idx||0,2);} } }catch(e){} }
+  var st; function flashSaved(){ var el=document.getElementById('rzSaved'); if(!el)return; el.classList.add('show'); clearTimeout(st); st=setTimeout(function(){el.classList.remove('show');},1200); }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function fmtDate(d){ if(!d) return ''; var p=d.split('-'); if(p.length!==3) return d; var mo=['January','February','March','April','May','June','July','August','September','October','November','December']; return mo[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
+  function fmtTime(t){ if(!t) return ''; var p=t.split(':'); if(p.length<2) return t; var h=parseInt(p[0],10),m=p[1];var ap=h>=12?'p.m.':'a.m.';var hh=h%12;if(hh===0)hh=12;return hh+':'+m+' '+ap; }
+  function toast(msg){ var t=document.getElementById('rzToast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},1600); }
+
+  /* ---------- step 1 fields ---------- */
+  var DEAL_FIELDS=[
+    {id:'address', type:'text', label:'Property address', req:true, ph:'123 Main St, Dundas, ON'},
+    {id:'side', type:'chips', label:'Which side are you on?', req:true, options:['Buyer side','Listing / seller side']},
+    {id:'accepted', type:'date', label:'Date the offer was accepted', hint:'Anchors your condition deadlines.'},
+  ];
+
+  /* ---------- scenarios (step 2) ---------- */
+  var SCEN=[
+    {id:'fulfilled', name:'A condition has been satisfied', desc:'It’s fully met — confirm it and move toward firm.'},
+    {id:'proceed',   name:'Proceeding, but a condition isn’t fully met', desc:'You want to give the condition up and continue anyway.'},
+    {id:'change',    name:'Change a term', desc:'Price, closing date, inclusions, deposit, etc.'},
+    {id:'time',      name:'Need more time on a condition', desc:'Extend a condition’s deadline.'},
+    {id:'end',       name:'A condition won’t be met — ending the deal', desc:'Walk away and release the deposit.'},
+    {id:'escape',    name:'Seller received another offer (escape clause)', desc:'A sale-of-property condition with a notice/escape clause.'},
+    {id:'firm',      name:'All conditions handled — are we firm?', desc:'Confirm the deal is binding and what’s next.'},
+  ];
+
+  var CONDS=['Financing','Home inspection','Status certificate','Insurance','Sale of buyer’s property','Lawyer review','Water & septic','Other'];
+
+  function followups(id){
+    switch(id){
+      case 'fulfilled': return [
+        {id:'which', type:'chips', label:'Which condition was met?', options:CONDS},
+        {id:'dl_date', type:'date', label:'Condition deadline — date', hint:'Optional. Your notice must be delivered before this.'},
+        {id:'dl_time', type:'time', label:'Condition deadline — time'},
+      ];
+      case 'proceed': return [
+        {id:'which', type:'chips', label:'Which condition are you giving up?', options:CONDS},
+        {id:'waivable', type:'chips', label:'Can this condition be waived?', options:['Yes — it’s for one party’s benefit','Not sure','No — it can only be fulfilled'], hint:'Most buyer conditions (financing, inspection) are waivable. Some — like a true condition precedent that depends on a third party — can only be fulfilled.'},
+        {id:'dl_date', type:'date', label:'Condition deadline — date', hint:'Optional.'},
+        {id:'dl_time', type:'time', label:'Condition deadline — time'},
+      ];
+      case 'change': return [
+        {id:'whatchg', type:'mchips', label:'What’s changing? (pick any)', options:['Price','Closing date','Inclusions / exclusions','Deposit','Condition dates','Other terms']},
+        {id:'chgnote', type:'area', label:'Brief note on the change', ph:'e.g. Reduce price to $880,000 after inspection; close one week later.'},
+      ];
+      case 'time': return [
+        {id:'which', type:'chips', label:'Which condition needs more time?', options:CONDS},
+        {id:'newdl', type:'date', label:'New deadline you’re proposing'},
+      ];
+      case 'end': return [
+        {id:'who', type:'chips', label:'Who is terminating?', options:['Buyer is terminating','Seller is terminating']},
+        {id:'failcond', type:'chips', label:'Which condition wasn’t met? (optional)', options:CONDS},
+      ];
+      case 'escape': return [
+        {id:'esc_side', type:'chips', label:'Your role here', options:['I’m on the listing / seller side','I’m on the buyer side']},
+        {id:'esc_hrs', type:'number', label:'Notice period in the clause (hours)', ph:'48'},
+      ];
+      case 'firm': return [];
+    }
+    return [];
+  }
+
+  var STEPS=[
+    {title:'The deal', blurb:'A little context so the guidance is specific to this transaction.', isDeal:true},
+    {title:'What’s happening', blurb:'Pick the situation that fits right now — follow-up questions appear below.', isSituation:true},
+    {title:'The right form', blurb:'', isResult:true},
+  ];
+
+  /* ---------- render fields ---------- */
+  function renderField(f){
+    var v=S[f.id]==null?'':S[f.id];
+    var lab='<label class="rz-label">'+esc(f.label)+(f.req?'<span style="color:var(--gold);margin-left:4px;font-weight:700;">*</span>':'')+'</label>';
+    var hint=f.hint?'<div class="rz-hint">'+esc(f.hint)+'</div>':'';
+    var inner='';
+    if(f.type==='text'||f.type==='number'||f.type==='date'||f.type==='time'){
+      var t=f.type==='number'?'number':(f.type==='date'?'date':(f.type==='time'?'time':'text'));
+      inner='<input type="'+t+'" id="rz_'+f.id+'" data-id="'+f.id+'" value="'+esc(v)+'" placeholder="'+esc(f.ph||'')+'"'+(f.type==='number'?' min="0"':'')+'>';
+    } else if(f.type==='area'){
+      inner='<textarea id="rz_'+f.id+'" data-id="'+f.id+'" placeholder="'+esc(f.ph||'')+'">'+esc(v)+'</textarea>';
+    } else if(f.type==='chips'){
+      inner='<div class="rz-choices">'+f.options.map(function(o){return '<span class="rz-chip'+(v===o?' sel':'')+'" data-chip="'+f.id+'" data-val="'+esc(o)+'">'+esc(o)+'</span>';}).join('')+'</div>';
+    } else if(f.type==='mchips'){
+      var arr=Array.isArray(S[f.id])?S[f.id]:[];
+      inner='<div class="rz-choices">'+f.options.map(function(o){return '<span class="rz-chip'+(arr.indexOf(o)>=0?' sel':'')+'" data-mchip="'+f.id+'" data-val="'+esc(o)+'">'+esc(o)+'</span>';}).join('')+'</div>';
+    }
+    return '<div class="rz-field">'+lab+hint+inner+'</div>';
+  }
+
+  function render(){
+    var step=STEPS[idx];
+    var card=document.getElementById('rzCard');
+    var badge=('0'+(idx+1)).slice(-2);
+    var html='<div class="rz-sechead"><span class="rz-secbadge">'+badge+'</span><h2 class="rz-sectitle">'+esc(step.title)+'</h2></div>';
+    if(step.blurb) html+='<p class="rz-secblurb">'+esc(step.blurb)+'</p>';
+
+    if(step.isDeal){
+      html+=DEAL_FIELDS.map(renderField).join('');
+    } else if(step.isSituation){
+      html+=SCEN.map(function(s){
+        var sel=S.scenario===s.id;
+        var row='<div class="rz-opt'+(sel?' sel':'')+'" data-scen="'+s.id+'"><span class="rz-radio"></span><div><div class="rz-opt-name">'+esc(s.name)+'</div><div class="rz-opt-desc">'+esc(s.desc)+'</div></div></div>';
+        if(sel){
+          var fu=followups(s.id);
+          if(fu.length){ row+='<div class="rz-detail"><div class="rz-dhead">A few details</div>'+fu.map(renderField).join('')+'</div>'; }
+        }
+        return row;
+      }).join('');
+    } else if(step.isResult){
+      html+=buildResult();
+    }
+    card.innerHTML=html;
+    bind(step);
+    updateProgress();
+    var next=document.getElementById('rzNext');
+    next.textContent = step.isResult ? 'Done' : (STEPS[idx+1] && STEPS[idx+1].isResult ? 'Show the form' : 'Next');
+    document.getElementById('rzBack').classList.toggle('invis', idx===0);
+    document.getElementById('rzNav').style.display = step.isResult ? 'none' : 'flex';
+    card.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function updateProgress(){
+    var pct=Math.round((idx)/(STEPS.length-1)*100);
+    document.getElementById('rzPfill').style.width=pct+'%';
+    document.getElementById('rzPstep').textContent='Step '+(idx+1)+' of '+STEPS.length;
+    document.getElementById('rzPname').textContent=STEPS[idx].title;
+  }
+
+  function bind(step){
+    var card=document.getElementById('rzCard');
+    card.querySelectorAll('input[data-id],textarea[data-id]').forEach(function(el){
+      el.addEventListener('input',function(){ S[el.getAttribute('data-id')]=el.value; save(); });
+    });
+    card.querySelectorAll('[data-chip]').forEach(function(ch){
+      ch.addEventListener('click',function(){ var id=ch.getAttribute('data-chip'),val=ch.getAttribute('data-val'); S[id]=(S[id]===val)?'':val; save(); render(); });
+    });
+    card.querySelectorAll('[data-mchip]').forEach(function(ch){
+      ch.addEventListener('click',function(){ var id=ch.getAttribute('data-mchip'),val=ch.getAttribute('data-val'); var arr=Array.isArray(S[id])?S[id].slice():[]; var i=arr.indexOf(val); if(i>=0)arr.splice(i,1); else arr.push(val); S[id]=arr; save(); render(); });
+    });
+    card.querySelectorAll('[data-scen]').forEach(function(op){
+      op.addEventListener('click',function(e){ if(e.target.closest('.rz-detail')) return; var id=op.getAttribute('data-scen'); S.scenario=(S.scenario===id)?'':id; save(); render(); });
+    });
+  }
+
+  function validate(){
+    var step=STEPS[idx];
+    if(step.isDeal){
+      if(!S.address||!String(S.address).trim()){ toast('Please add the property address'); return false; }
+      if(!S.side){ toast('Please pick which side you’re on'); return false; }
+    }
+    if(step.isSituation){
+      if(!S.scenario){ toast('Pick what’s happening right now'); return false; }
+    }
+    return true;
+  }
+
+  /* ============================================================ RESULT ============================================================ */
+  function deadlineLine(){
+    if(S.dl_date){ return 'Deliver in writing before <span class="em">'+esc(fmtDate(S.dl_date))+(S.dl_time?(' at '+esc(fmtTime(S.dl_time))):'')+'</span> — the condition deadline in the agreement.'; }
+    return 'Deliver in writing <span class="em">before the condition deadline</span> stated in the agreement. A minute late and the condition can lapse.';
+  }
+  var DELIVER='Deliver the signed form the way the agreement’s notice clause allows (email is fine if the agreement permits email delivery), and keep proof of delivery.';
+  var SUBMIT='Submit the executed form to the brokerage within 24 hours.';
+
+  function F(n,t){ return {n:n,t:t}; }
+
+  function compute(){
+    var sc=S.scenario;
+    var which=S.which||'the condition';
+
+    if(sc==='fulfilled'){
+      return {
+        forms:[F('Form 124','Notice of Fulfillment of Condition(s)')],
+        why:'The condition ('+esc(which)+') has been completely met. A notice of fulfilment confirms it’s satisfied — the cleaner, more accurate choice than a waiver when the condition genuinely happened.',
+        who:'The party the condition is for (usually the Buyer) signs and delivers it; the other party acknowledges receipt.',
+        before:deadlineLine(),
+        then:'Once every condition is either fulfilled or waived, the deal is firm.',
+        note:'If the condition isn’t actually fully met but you want to proceed anyway, use a Waiver (Form 123) instead.',
+        checklist:[SUBMIT, 'Check whether any other conditions are still open before treating the deal as firm.', 'If the agreement has a deposit top-up on waiver/fulfilment, make sure that deposit is delivered.']
+      };
+    }
+
+    if(sc==='proceed'){
+      if(S.waivable==='No — it can only be fulfilled'){
+        return {
+          forms:[F('Form 124','Notice of Fulfillment of Condition(s)')],
+          warn:'This condition can only be fulfilled, not waived. You can’t give it up with a waiver — it has to actually be met.',
+          why:'A true condition precedent (one that depends on something outside the parties’ control) can only be satisfied. If it’s now met, give a Notice of Fulfilment.',
+          who:'The party the condition is for signs and delivers it.',
+          before:deadlineLine(),
+          then:'If it can’t be met in time, your realistic options are to agree more time by Amendment (Form 120), or let it fail — see “ending the deal”.',
+          checklist:[SUBMIT,'If it can’t be met, switch to the “need more time” or “ending the deal” path.']
+        };
+      }
+      return {
+        forms:[F('Form 123','Waiver')],
+        why:'You’re choosing to give up '+esc(which)+' and complete the transaction even though it isn’t fully met. A waiver is the party’s intentional relinquishment of that condition.',
+        who:'The party the condition is for (usually the Buyer) signs and delivers it.',
+        before:deadlineLine(),
+        then:'Once all conditions are waived or fulfilled, the deal is firm.',
+        note:'A waiver only works if the condition is for that party’s sole benefit. If it’s actually been fully met, a Notice of Fulfillment (Form 124) is the more accurate form.'+(S.waivable==='Not sure'?' You weren’t sure it’s waivable — confirm the exact clause wording before sending.':''),
+        checklist:[SUBMIT,'If the agreement has a deposit top-up on waiver, deliver that deposit now.','Confirm no other conditions remain open.']
+      };
+    }
+
+    if(sc==='change'){
+      var chg=Array.isArray(S.whatchg)&&S.whatchg.length?S.whatchg.join(', '):'a term';
+      return {
+        forms:[F('Form 120','Amendment to Agreement of Purchase and Sale')],
+        why:'Any change to an agreed term ('+esc(chg)+') is made by amendment. '+(S.chgnote?('Note: '+esc(S.chgnote)):''),
+        who:'All parties to the agreement must sign — an amendment is mutual. Nothing changes until everyone has signed.',
+        before:'No fixed deadline, but if the change affects a condition with a clock running, get it signed before that deadline.',
+        then:'The amended terms replace the originals once fully signed.',
+        checklist:[SUBMIT,'Make sure every buyer and seller on the agreement signs.','Send the signed amendment to both lawyers.']
+      };
+    }
+
+    if(sc==='time'){
+      return {
+        forms:[F('Form 120','Amendment to Agreement of Purchase and Sale')],
+        why:'Extending a condition deadline changes an agreed term, so it needs a mutual amendment — one side can’t extend it alone.'+(S.newdl?(' New deadline proposed: <span class="em">'+esc(fmtDate(S.newdl))+'</span>.'):''),
+        who:'All parties must sign.',
+        before:'Get it signed <span class="em">before the current deadline passes</span>. If the original deadline lapses first, the condition can fail and the deal may end.',
+        then:'The condition now runs to the new date.',
+        checklist:[SUBMIT,'Confirm all signatures land before the current deadline.','Reset your calendar to the new date.']
+      };
+    }
+
+    if(sc==='end'){
+      var buyerSide = S.who!=='Seller is terminating';
+      var term = buyerSide ? F('Form 125','Termination of Agreement by Buyer') : F('Form 126','Termination of Agreement by Seller');
+      return {
+        forms:[term, F('Form 122','Mutual Release of Agreement of Purchase and Sale')],
+        why:'When a condition isn’t met, the '+(buyerSide?'buyer':'seller')+' gives notice of termination. A mutual release then formally ends the agreement and authorizes the deposit holder to return the deposit.'+(S.failcond?(' Condition not met: '+esc(S.failcond)+'.'):''),
+        who:'The termination is signed by the terminating party; the mutual release is signed by <span class="em">both</span> parties.',
+        before:'Deliver the termination before the condition deadline if you’re relying on the condition failing.',
+        then:'Once the mutual release is signed, the deposit holder can return the deposit.',
+        note:'The deposit can’t be released from trust without a signed direction — don’t assume it returns automatically just because the deal died.',
+        checklist:[SUBMIT,'Get the mutual release signed by every party so the deposit can be released.','Notify both lawyers the deal is terminated.']
+      };
+    }
+
+    if(sc==='escape'){
+      var hrs=S.esc_hrs||'48';
+      if(S.esc_side==='I’m on the buyer side'){
+        return {
+          forms:[F('Form 123','Waiver'), F('Form 124','Notice of Fulfillment of Condition(s)')],
+          why:'You’ve received a Notice to Remove Condition(s) (Form 121) because the seller has another offer in hand. You now have <span class="em">'+esc(hrs)+' hours</span> to either waive your condition (Form 123) or give notice it’s fulfilled (Form 124) — whichever fits.',
+          who:'You (the buyer) sign whichever you use.',
+          before:'You must respond within <span class="em">'+esc(hrs)+' hours</span> of receiving the notice. If you don’t, your agreement ends.',
+          then:'If you don’t remove the condition in time, your agreement collapses and your deposit is returned via a Mutual Release (Form 122), and the seller proceeds with the other offer.',
+          checklist:[SUBMIT,'Decide fast — the clock starts when the notice was delivered.','If you can’t remove it, expect a Mutual Release (Form 122) to return your deposit.']
+        };
+      }
+      return {
+        forms:[F('Form 121','Notice to Remove Condition(s)')],
+        why:'You have another acceptable offer, so you notify the conditional buyer to remove their sale-of-property condition within the time in the escape clause.',
+        who:'The seller signs and delivers it to the buyer (through the buyer’s brokerage).',
+        before:'Deliver it the moment you’re ready to invoke the clause — the buyer’s <span class="em">'+esc(hrs)+'-hour</span> window starts on delivery.',
+        then:'The buyer then has '+esc(hrs)+' hours to waive (Form 123) or fulfil (Form 124). If they don’t, their agreement ends and you can sign the other offer. If their agreement collapses, a Mutual Release (Form 122) returns their deposit.',
+        note:'Don’t firm up the second offer until the first buyer’s window has expired without them removing the condition.',
+        checklist:[SUBMIT,'Track the exact delivery time — it starts the buyer’s clock.','Keep the second offer ready but don’t accept it firm until the first agreement is dealt with.']
+      };
+    }
+
+    if(sc==='firm'){
+      return {
+        forms:[],
+        firmHead:'The deal is firm (binding) once every condition has been waived (Form 123) or fulfilled (Form 124).',
+        why:'There’s no single form for “going firm” — it’s the result of clearing each condition. Use this as your closing-out checklist.',
+        checklist:[
+          'Each condition cleared with a Waiver (123) or Notice of Fulfilment (124), delivered before its deadline.',
+          'Every executed form submitted to the brokerage within 24 hours.',
+          'Deposit delivered in full — plus any top-up owed on waiver of conditions.',
+          'Requisition/title date and the closing date calendared.',
+          'Both lawyers sent the firm agreement and all waivers/fulfilments/amendments.',
+          'Any documents the seller owes (status certificate, SPIS, etc.) delivered.'
+        ]
+      };
+    }
+
+    return null;
+  }
+
+  function buildResult(){
+    var r=compute();
+    if(!r) return '<p class="rz-secblurb">Go back and pick what’s happening, and I’ll point you to the right form.</p>';
+    var h='<div class="rz-res">';
+    var deal=(S.address?esc(S.address):'')+(S.side?('  ·  '+esc(S.side)):'')+(S.accepted?('  ·  accepted '+esc(fmtDate(S.accepted))):'');
+    if(deal.trim()) h+='<p class="rz-deal">'+deal+'</p>';
+
+    if(r.firmHead){ h+='<div class="rz-formcard"><span class="pill">Status</span><span class="fname">'+esc(r.firmHead)+'</span></div>'; }
+    if(r.warn){ h+='<div class="rz-warn">'+r.warn+'</div>'; }
+    if(r.forms && r.forms.length){
+      h+=r.forms.map(function(f,i){ return '<div class="rz-formcard'+(i>0?' secondary':'')+'"><span class="pill">'+esc(f.n)+'</span><span class="fname">'+esc(f.t)+'</span></div>'; }).join('');
+    }
+    if(r.why){ h+='<div class="rz-lbl">Why this</div><p>'+r.why+'</p>'; }
+    if(r.who){ h+='<div class="rz-lbl">Who signs</div><p>'+r.who+'</p>'; }
+    if(r.before){ h+='<div class="rz-lbl">Before the deadline</div><p>'+r.before+'</p>'; }
+    if(r.forms && r.forms.length && !r.firmHead){ h+='<div class="rz-lbl">How to deliver</div><p>'+DELIVER+'</p>'; }
+    if(r.then){ h+='<div class="rz-lbl">Then</div><p>'+r.then+'</p>'; }
+    if(r.note){ h+='<div class="rz-warn">'+r.note+'</div>'; }
+    if(r.checklist && r.checklist.length){ h+='<div class="rz-lbl">Don’t forget</div><ul class="rz-check">'+r.checklist.map(function(c){return '<li>'+esc(c)+'</li>';}).join('')+'</ul>'; }
+
+    h+='<div class="rz-outbtns">'+
+        '<button class="rz-btn rz-btn-primary" id="rzCopy">Copy this guidance</button>'+
+        '<button class="rz-btn rz-btn-ghost" id="rzPrint">Print / Save PDF</button>'+
+        '<button class="rz-btn rz-btn-ghost" id="rzRestart">Start over</button></div>';
+    h+='<div class="rz-note"><strong>Decision support, not legal advice.</strong> This points you to the OREA form that usually fits — final form choice and wording depend on the exact clause and your brokerage’s practice, and conditions/timelines should be confirmed with your broker or a real estate lawyer. Deadlines run from the dates in the agreement; deliver every notice in writing, on time, the way the agreement allows.</div>';
+    h+='</div>';
+    return h;
+  }
+
+  function stripTags(s){ return String(s).replace(/<[^>]*>/g,''); }
+  function plain(){
+    var r=compute(); if(!r) return '';
+    var L=[];
+    L.push('GOING FIRM — conditional-period guidance');
+    var deal=(S.address||'')+(S.side?('  ·  '+S.side):'')+(S.accepted?('  ·  accepted '+fmtDate(S.accepted)):'');
+    if(deal.trim()) L.push(deal.trim());
+    L.push('');
+    if(r.firmHead){ L.push('STATUS: '+r.firmHead); L.push(''); }
+    if(r.warn){ L.push('⚠ '+stripTags(r.warn)); L.push(''); }
+    if(r.forms&&r.forms.length){ L.push('USE: '+r.forms.map(function(f){return f.n+' — '+f.t;}).join('   +   ')); L.push(''); }
+    if(r.why){ L.push('WHY THIS'); L.push('  '+stripTags(r.why)); L.push(''); }
+    if(r.who){ L.push('WHO SIGNS'); L.push('  '+stripTags(r.who)); L.push(''); }
+    if(r.before){ L.push('BEFORE THE DEADLINE'); L.push('  '+stripTags(r.before)); L.push(''); }
+    if(r.forms&&r.forms.length&&!r.firmHead){ L.push('HOW TO DELIVER'); L.push('  '+DELIVER); L.push(''); }
+    if(r.then){ L.push('THEN'); L.push('  '+stripTags(r.then)); L.push(''); }
+    if(r.note){ L.push('NOTE: '+stripTags(r.note)); L.push(''); }
+    if(r.checklist&&r.checklist.length){ L.push('DON’T FORGET'); r.checklist.forEach(function(c){L.push('  • '+c);}); L.push(''); }
+    L.push('Decision support, not legal advice. Confirm the form, wording and timelines with your broker or a real estate lawyer.');
+    return L.join('\n');
+  }
+
+  function copyText(txt){ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast('Copied to clipboard');},function(){fallbackCopy(txt);}); } else fallbackCopy(txt); }
+  function fallbackCopy(txt){ var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';root.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Copied to clipboard');}catch(e){toast('Press Ctrl/Cmd-C to copy');}root.removeChild(ta); }
+
+  root.addEventListener('click',function(e){
+    var t=e.target;
+    if(t.id==='rzCopy') copyText(plain());
+    else if(t.id==='rzPrint') window.print();
+    else if(t.id==='rzRestart'){ if(confirm('Clear answers and start over?')){ S={}; idx=0; try{localStorage.removeItem(STORE);}catch(e){} render(); } }
+  });
+
+  document.getElementById('rzNext').addEventListener('click',function(){ if(STEPS[idx].isResult) return; if(!validate()) return; if(idx<STEPS.length-1){ idx++; save(); render(); } });
+  document.getElementById('rzBack').addEventListener('click',function(){ if(idx>0){ idx--; save(); render(); } });
+
+  load();
+  render();
+})();
+</script>
