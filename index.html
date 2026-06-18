@@ -462,9 +462,22 @@ document.getElementById('viewDemo').addEventListener('click',e=>{ e.preventDefau
    4) AUTH + ENTITLEMENT (Supabase) with graceful demo fallback
    ================================================================ */
 let supabase=null, demoPaid=false;
+async function loadCreateClient(){
+  if(window.__rtCreateClient) return window.__rtCreateClient;
+  const urls=[
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm',
+    'https://esm.sh/@supabase/supabase-js@2.45.0'
+  ];
+  let err;
+  for(const u of urls){
+    try{ const m=await import(u); if(m&&m.createClient){ window.__rtCreateClient=m.createClient; return m.createClient; } }
+    catch(e){ err=e; }
+  }
+  throw err||new Error('Could not load the sign-in library. Check your connection and try again.');
+}
 async function getSupabase(){
   if(supabase) return supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  const createClient = await loadCreateClient();
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true,
             lock: (name, acquireTimeout, fn) => fn() }   // bypass navigator.locks (prevents silent hangs)
