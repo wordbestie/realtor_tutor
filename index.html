@@ -489,8 +489,8 @@ let supabase=null, demoPaid=false;
 async function loadCreateClient(){
   if(window.__rtCreateClient) return window.__rtCreateClient;
   const urls=[
-    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm',
-    'https://esm.sh/@supabase/supabase-js@2.45.0'
+    'https://esm.sh/@supabase/supabase-js@2.45.0',
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm'
   ];
   let err;
   for(const u of urls){
