@@ -205,8 +205,8 @@
   .foot-social a:hover{color:var(--green)}
   .foot-social svg{width:20px;height:20px}
   .foot-links{display:flex;flex-wrap:wrap;gap:6px 8px;width:100%;border-top:1px solid var(--line);padding-top:18px}
-  .foot-links button{background:none;border:0;font-family:var(--body);color:var(--muted);font-weight:600;font-size:.88rem;cursor:pointer;padding:4px 10px;border-radius:8px;transition:.15s}
-  .foot-links button:hover{background:#ECE7D9;color:var(--ink)}
+  .foot-links button,.foot-links a{background:none;border:0;font-family:var(--body);color:var(--muted);font-weight:600;font-size:.88rem;cursor:pointer;padding:4px 10px;border-radius:8px;transition:.15s;text-decoration:none;display:inline-block}
+  .foot-links button:hover,.foot-links a:hover{background:#ECE7D9;color:var(--ink)}
   .foot-legal{width:100%;color:var(--muted);font-size:.82rem;padding-top:4px}
 
   /* ---------------- MODAL ---------------- */
@@ -465,6 +465,7 @@ const SOCIAL = {
   facebook: 'https://www.facebook.com/',     // set your page URL
   facebookName: 'Realtor Tutor',
   contactEmail: 'rebecca@realtortutor.com',
+  feedbackUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSe4dd0gT3OV4Yl9UDe73ZxVrcJEJninW-qjuHWyWyufC5eWUA/viewform',     // paste your Google Form / Tally link here. While blank, "Give feedback" opens an email instead.
 };
 
 /* ================================================================
@@ -707,6 +708,7 @@ const footerHTML=`
       <a href="${SOCIAL.facebook}" target="_blank" rel="noopener">${fb} ${SOCIAL.facebookName}</a>
     </div>
     <div class="foot-links">
+      <a href="${SOCIAL.feedbackUrl ? SOCIAL.feedbackUrl : 'mailto:'+SOCIAL.contactEmail+'?subject=Realtor%20Tutor%20feedback'}"${SOCIAL.feedbackUrl ? ' target="_blank" rel="noopener"' : ''}>Give feedback</a>
       <button data-modal="faq">FAQ</button>
       <button data-modal="privacy">Privacy policy</button>
       <button data-modal="disclaimer">Disclaimer</button>
