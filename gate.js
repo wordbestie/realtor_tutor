@@ -5,8 +5,8 @@
    Both index.html and every wizard read from this one file.
    These two values are safe to expose publicly.
    ================================================================ */
-window.RT_SUPABASE_URL      = 'https://jcqotsaxpemrblhqoils.supabase.co';
-window.RT_SUPABASE_ANON_KEY = 'sb_publishable_5e9ks4XWisKN50099EXNdA_WalYwdMe';
+window.RT_SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+window.RT_SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
 // While the keys are placeholders, the whole site runs in DEMO MODE
 // (everything is clickable, nothing is actually checked). Real keys
@@ -27,9 +27,9 @@ window.requireMemberAccess = async function (opts) {
   try {
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
     const sb = createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY, {
-  auth: { persistSession:true, autoRefreshToken:true,
-          lock: (name, acquireTimeout, fn) => fn() }
-});
+      auth: { persistSession:true, autoRefreshToken:true,
+              lock: (name, acquireTimeout, fn) => fn() }   // bypass navigator.locks (prevents silent hangs)
+    });
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { location.replace(home); return false; }
     const { data } = await sb
