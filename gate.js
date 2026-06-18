@@ -26,9 +26,9 @@ window.requireMemberAccess = async function (opts) {
   if (window.RT_DEMO_MODE) return true;
   try {
     let createClient;
-    const cdns = [
-      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm',
-      'https://esm.sh/@supabase/supabase-js@2.45.0'
+     const cdns = [
+      'https://esm.sh/@supabase/supabase-js@2.45.0',
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm'
     ];
     for (const u of cdns) {
       try { const m = await import(u); if (m && m.createClient) { createClient = m.createClient; break; } }
