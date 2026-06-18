@@ -94,6 +94,22 @@
   .demo-fallback .play svg{width:30px;height:30px;color:var(--ink);margin-left:4px}
   .demo-fallback p{margin:0;font-weight:600;font-size:.92rem}
 
+  /* ----- combined demo + auth row, binder-divider tabs ----- */
+  .duo{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:26px;align-items:stretch;padding:44px 0 76px}
+  .panel{display:flex;flex-direction:column;min-width:0}
+  .binder-tabs{display:flex;gap:6px;padding-left:20px}
+  .btab{font-family:var(--display);font-weight:800;font-size:.98rem;line-height:1;letter-spacing:-.01em;padding:11px 20px 13px;border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:#E7E1D2;color:var(--muted);cursor:pointer;position:relative;margin-bottom:-1px;top:4px;transition:background .18s,color .18s,top .18s}
+  .btab.on,.btab-static{background:var(--card);color:var(--ink);top:0;z-index:3;box-shadow:0 -9px 20px -12px rgba(16,48,42,.45)}
+  .btab-static{cursor:default}
+  .btab:not(.on):not(.btab-static):hover{background:#EFE9DB;color:var(--ink)}
+  .panel-auth .authbody{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 22px;box-shadow:0 30px 60px -40px rgba(16,48,42,.4);display:flex;flex-direction:column;justify-content:center;min-height:340px}
+  .panel-demo .demo-stage{flex:1;aspect-ratio:16/9;max-height:none;min-height:260px;border:1px solid var(--line);border-radius:14px}
+  @media(max-width:860px){
+    .duo{grid-template-columns:1fr;gap:30px;padding:30px 0 56px}
+    .panel-demo .demo-stage{flex:0 0 auto}
+    .panel-auth .authbody{min-height:0}
+  }
+
   /* ---------------- PAYWALL ---------------- */
   .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:60px 24px}
   .gate-card{background:var(--card);border:1px solid var(--line);border-radius:24px;max-width:520px;width:100%;padding:40px 36px;text-align:center;box-shadow:0 40px 80px -50px rgba(16,48,42,.5)}
@@ -295,43 +311,43 @@
     </div>
   </div>
 
-  <div class="auth wrap" id="auth">
-    <div class="card">
-      <div class="tabs">
-        <button id="tabSignup" class="on" type="button">Sign up</button>
-        <button id="tabSignin" type="button">Login</button>
+  <!-- Demo video + sign-up side by side, binder-tab style. id="demo" keeps the View Demo link working. -->
+  <section class="duo wrap" id="demo">
+    <div class="panel panel-demo">
+      <div class="binder-tabs"><span class="btab btab-static">See what's inside</span></div>
+      <div class="demo-stage">
+        <video class="demo-video" controls playsinline preload="metadata" poster="demo-poster.jpg">
+          <source src="demo.mp4" type="video/mp4">
+        </video>
+        <div class="demo-fallback">
+          <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+          <p>Demo video — drop <strong>demo.mp4</strong> in next to this page.</p>
+        </div>
       </div>
-      <form id="formSignup">
-        <div class="plan"><span class="price">$349 CAD</span><span>· one-time purchase · lifetime access</span></div>
-        <div class="field"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
-        <div class="field"><label for="su-pass">Create a password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
-        <button class="btn" type="submit">Sign up</button>
-        <p class="fineprint">One payment. No subscription, no per-deal cut.</p>
-        <p class="fineprint">By joining you agree to the <a href="#" data-modal="disclaimer">disclaimer</a>.</p>
-        <div class="err" id="su-err"></div>
-      </form>
-      <form id="formSignin" style="display:none">
-        <div class="field" style="margin-top:8px"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
-        <div class="field"><label for="si-pass">Password</label><input id="si-pass" type="password" autocomplete="current-password" placeholder="Your password"></div>
-        <button class="btn" type="submit">Login</button>
-        <p class="fineprint">Members only — this is where the tools live.</p>
-        <div class="err" id="si-err"></div>
-      </form>
     </div>
-  </div>
 
-  <!-- Edge-to-edge demo. Drop your file in as demo.mp4 (optional demo-poster.jpg). -->
-  <section class="demo" id="demo">
-    <div class="demo-head wrap">
-      <h2>See what's inside</h2>
-    </div>
-    <div class="demo-stage">
-      <video class="demo-video" controls playsinline preload="metadata" poster="demo-poster.jpg">
-        <source src="demo.mp4" type="video/mp4">
-      </video>
-      <div class="demo-fallback">
-        <div class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-        <p>Demo video — drop <strong>demo.mp4</strong> in next to this page.</p>
+    <div class="panel panel-auth" id="auth">
+      <div class="binder-tabs">
+        <button id="tabSignup" class="btab on" type="button">Sign up</button>
+        <button id="tabSignin" class="btab" type="button">Login</button>
+      </div>
+      <div class="authbody">
+        <form id="formSignup">
+          <div class="plan"><span class="price">$347 CAD</span><span>· one-time purchase · lifetime access</span></div>
+          <div class="field"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+          <div class="field"><label for="su-pass">Create a password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
+          <button class="btn" type="submit">Sign up</button>
+          <p class="fineprint">One payment. No subscription, no per-deal cut.</p>
+          <p class="fineprint">By joining you agree to the <a href="#" data-modal="disclaimer">disclaimer</a>.</p>
+          <div class="err" id="su-err"></div>
+        </form>
+        <form id="formSignin" style="display:none">
+          <div class="field" style="margin-top:8px"><label for="si-email">Email</label><input id="si-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+          <div class="field"><label for="si-pass">Password</label><input id="si-pass" type="password" autocomplete="current-password" placeholder="Your password"></div>
+          <button class="btn" type="submit">Login</button>
+          <p class="fineprint">Members only — this is where the tools live.</p>
+          <div class="err" id="si-err"></div>
+        </form>
       </div>
     </div>
   </section>
@@ -346,13 +362,13 @@
     <div class="gate-card">
       <div class="label">You're signed in — one step left</div>
       <h2>Unlock the toolkit</h2>
-      <div class="gate-price"><b>$349 CAD</b><span>· one-time purchase · lifetime access</span></div>
+      <div class="gate-price"><b>$347 CAD</b><span>· one-time purchase · lifetime access</span></div>
       <ul class="incl">
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Listing &amp; Buying Wizards</li>
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Marketing Automation Blueprints</li>
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> New wizards added as they're built — free</li>
       </ul>
-      <button class="btn" id="buyBtn" type="button">Get lifetime access — $349</button>
+      <button class="btn" id="buyBtn" type="button">Get lifetime access — $347</button>
       <p class="gate-sub">Secure checkout by Stripe. By purchasing you agree to the <a href="#" data-modal="disclaimer">disclaimer</a>.</p>
       <p class="gate-sub" id="gateDemoNote" style="display:none">Demo mode — add your Supabase &amp; Stripe keys to enable real checkout.</p>
       <button class="gate-signout" id="gateSignout" type="button">Sign out</button>
@@ -421,8 +437,9 @@ const CATEGORIES = [
       { name:'Stager', blurb:'Staging that helps buyers picture themselves at home.', url:'https://www.stagesmart.ca/', video:'stager-demo.mp4', group:'Agent Resources' },
       { name:'Marketing Materials Printer', blurb:'Feature sheets, postcards, and signage printed and shipped.', url:'https://www.agentprint.com/', video:'printer-demo.mp4', group:'Agent Resources' },
       { name:'Sign Installation', blurb:'Reliable lawn-sign install and removal so you don\'t have to.', url:'https://signedup.ca/', video:'sign-installation-demo.mp4', group:'Agent Resources' },
-      { name:'Real Estate Lawyer', blurb:'Property Law Firm — closings, title review, and contract questions for your clients.', url:'https://propertylaw.ca/', video:'real-estate-lawyer-demo.mp4', group:'Client Resources' },
+      { name:'Home Inspector', blurb:'Inspection Services Group — thorough home inspections that protect your buyers.', url:'https://inspectionservicesgroup.com/', video:'home-inspection-demo.mp4', group:'Client Resources' },
       { name:'Mortgage Broker', blurb:'HW Advantage — financing options and pre-approvals for your buyers.', url:'https://www.hwadvantage.com/', video:'mortgage-broker-demo.mp4', group:'Client Resources' },
+      { name:'Real Estate Lawyer', blurb:'Property Law Firm — closings, title review, and contract questions for your clients.', url:'https://propertylaw.ca/', video:'real-estate-lawyer-demo.mp4', group:'Client Resources' },
       { name:'Land Transfer Tax Calculator', blurb:'Estimate Ontario (and Toronto) land transfer tax for your buyers.', url:'https://trreb.ca/buying-selling-intelligence/ltt-calculator-residential/', cta:'Open calculator', video:'ltt-calculator-demo.mp4', group:'Client Resources' },
   ]},
 ];
@@ -581,7 +598,7 @@ buyBtn.addEventListener('click', async ()=>{
     const out=await res.json();
     if(out.url){ window.location=out.url; }
     else { throw new Error(out.error||'Could not start checkout'); }
-  }catch(e){ buyBtn.disabled=false; buyBtn.textContent='Get lifetime access — $349'; alert('Checkout error: '+e.message); }
+  }catch(e){ buyBtn.disabled=false; buyBtn.textContent='Get lifetime access — $347'; alert('Checkout error: '+e.message); }
 });
 
 /* ---- handle return from Stripe (?paid=1): poll until webhook lands ---- */
@@ -699,7 +716,7 @@ const MODALS = {
     <div class="qa"><p class="q">What exactly is Realtor Tutor?</p><p class="a">One-on-one style video guidance plus step-by-step wizards that walk you through listing procedures, buyer deals and marketing automations — so you're confident you know what to do.</p></div>
     <div class="qa"><p class="q">Do I need experience?</p><p class="a">No. The wizards assume you're newer and explain the why, not just the what. A few years in? You'll use them to move faster and stop second-guessing.</p></div>
     <div class="qa"><p class="q">How is this different from joining a team?</p><p class="a">A team typically takes 30–50% of every commission, forever. This is one payment for similar guidance — and you keep your full amount of what you close.</p></div>
-    <div class="qa"><p class="q">Is it really one payment?</p><p class="a">Yes. $349 once, plus 13% HST, lifetime access. No subscription and no per-deal cut, with access to any new wizards that may be added in the future.</p></div>
+    <div class="qa"><p class="q">Is it really one payment?</p><p class="a">Yes. $347 once, plus 13% HST, lifetime access. No subscription and no per-deal cut, with access to any new wizards that may be added in the future.</p></div>
     <div class="qa"><p class="q">Can I actually reach a human?</p><p class="a">Yes. Members can contact me, Rebecca Zak, Realtor, directly at <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a>.</p></div>
     <div class="qa"><p class="q">Have a question before you join?</p><p class="a">Email me anytime at <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a> — I'm here to help.</p></div>` },
   privacy:{ title:'Privacy policy', eyebrow:'Plain language', body:`
