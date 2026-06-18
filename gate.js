@@ -5,8 +5,8 @@
    Both index.html and every wizard read from this one file.
    These two values are safe to expose publicly.
    ================================================================ */
-window.RT_SUPABASE_URL      = 'https://jcqotsaxpemrblhqoils.supabase.co';
-window.RT_SUPABASE_ANON_KEY = 'sb_publishable_5e9ks4XWisKN50099EXNdA_WalYwdMe';
+window.RT_SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+window.RT_SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
 // While the keys are placeholders, the whole site runs in DEMO MODE
 // (everything is clickable, nothing is actually checked). Real keys
@@ -25,7 +25,16 @@ window.requireMemberAccess = async function (opts) {
   const home = (opts && opts.home) ? opts.home : '../index.html';
   if (window.RT_DEMO_MODE) return true;
   try {
-       let createClient;     const cdns = [       'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm',       'https://esm.sh/@supabase/supabase-js@2.45.0'     ];     for (const u of cdns) {       try { const m = await import(u); if (m && m.createClient) { createClient = m.createClient; break; } }       catch (e) { /* try next CDN */ }     }     if (!createClient) { location.replace(home); return false; }
+    let createClient;
+    const cdns = [
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm',
+      'https://esm.sh/@supabase/supabase-js@2.45.0'
+    ];
+    for (const u of cdns) {
+      try { const m = await import(u); if (m && m.createClient) { createClient = m.createClient; break; } }
+      catch (e) { /* try next CDN */ }
+    }
+    if (!createClient) { location.replace(home); return false; }
     const sb = createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY, {
       auth: { persistSession:true, autoRefreshToken:true,
               lock: (name, acquireTimeout, fn) => fn() }   // bypass navigator.locks (prevents silent hangs)
