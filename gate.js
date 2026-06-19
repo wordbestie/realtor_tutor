@@ -36,7 +36,7 @@ window.requireMemberAccess = async function (opts) {
     }
     if (!createClient) { location.replace(home); return false; }
     const sb = createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY, {
-      auth: { persistSession:true, autoRefreshToken:true,
+      auth: { persistSession:true, autoRefreshToken:false,
               lock: (name, acquireTimeout, fn) => fn() }   // bypass navigator.locks (prevents silent hangs)
     });
     const { data: { session } } = await sb.auth.getSession();
