@@ -11,9 +11,6 @@
 [functions."stripe-webhook"]
   # (esbuild bundles node_modules automatically; nothing extra needed)
 
-# Single-page app: send everything that isn't a real file or function to index.html
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+# NOTE: No catch-all redirect. This site is plain .html files (index + wizards),
+# so every page is a real file. A missing file should return a real 404 — not
+# silently serve the homepage — so deployment mistakes are obvious.
