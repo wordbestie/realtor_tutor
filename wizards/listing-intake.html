@@ -538,7 +538,7 @@ async function saveProgress(exit){
 
 async function goPhase2(){
   try{ await saveProgress(false); }catch(e){}
-  window.location.href='broker-load-wizard-phase2-web.html?listing='+encodeURIComponent(listingKey);
+  window.location.href='broker-load.html?listing='+encodeURIComponent(listingKey);
 }
 
 /* ---------- review / output ---------- */
@@ -633,7 +633,7 @@ function renderReview(){
       <li>Once executed, submit the deal to <b>Real</b> for compliance &amp; retention (TRESA: 6 yrs; FINTRAC: 5 yrs).</li>
     </ol>
 
-    <button class="btn-primary" style="width:100%;margin-top:10px;padding:15px 22px" onclick="goPhase2()">Continue to Phase 2 — Broker Load →</button>
+    <button class="btn-primary" style="width:100%;margin-top:10px;padding:15px 22px" onclick="goPhase2()">Continue to Broker Load →</button>
     <div class="hint" style="text-align:center;margin:8px 0 0">Opens the broker-load walkthrough with this listing ready to go.</div>
 
     <div class="nav">

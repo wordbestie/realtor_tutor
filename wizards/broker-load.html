@@ -196,7 +196,7 @@ const store={
 };
 
 /* ---------- state ---------- */
-let d={};               // listing data (from Phase 1 or manual mini-set)
+let d={};               // listing data (from Listing Intake or manual mini-set)
 let listingKey=null;    // 'listing:...' if linked
 let progressKey=null;   // 'brokerload:...'
 let stage='start';      // start | manualq | flow
@@ -315,22 +315,22 @@ async function renderStart(){
   items.sort((a,b)=>(b.o._updated||0)-(a.o._updated||0));
   let saved='';
   if(items.length){
-    saved=`<div class="section-label">Load a listing from Phase 1</div><div class="saved-list">`+
+    saved=`<div class="section-label">Load a listing from your Listing Intake</div><div class="saved-list">`+
       items.map(it=>`<div class="saved-item">
         <div><div class="si-addr">${esc(it.o.address||'Untitled listing')}</div>
           <div class="si-meta">${esc(it.o.city||'')}${it.o.price?' · '+money(it.o.price):''} · ${it.o.ptype==='condo'?'Condo':'Freehold'}${it.o.occ==='tenant'?' · tenant':''}</div></div>
         <button class="mini btn-primary" onclick="link('${it.k}')">Walk me through →</button>
       </div>`).join('')+`</div>`;
   } else {
-    saved=`<div class="step-note" style="margin-top:8px">No saved Phase 1 listings found in this tool's storage. Start manually and I'll still prompt you through every step in order.</div>`;
+    saved=`<div class="step-note" style="margin-top:8px">No saved listings found from the Listing Intake wizard yet. Start manually and I'll still prompt you through every step in order.</div>`;
   }
   $("#screen").innerHTML=`
     <div class="step-meta"><span class="count">Begin</span></div>
     <h2 class="step-title">Broker load a listing</h2>
-    <p class="step-note">Pick a listing you onboarded in Phase 1 and I'll prompt you through the Matrix entry — every action and the exact values to type, in order. Condo and tenant steps appear only when they apply.</p>
+    <p class="step-note">Pick a listing you onboarded in the Listing Intake wizard and I'll prompt you through the Matrix entry — every action and the exact values to type, in order. Condo and tenant steps appear only when they apply.</p>
     ${saved}
     <div class="section-label">Or</div>
-    <div class="start-actions"><button class="btn-ghost" onclick="startManual()">Start manually (no Phase 1 data)</button></div>
+    <div class="start-actions"><button class="btn-ghost" onclick="startManual()">Start manually (no Listing Intake data)</button></div>
     <div class="disclaimer">Guidance reflects the Cornerstone/ITSO Matrix workflow and current OREA forms. Field labels live behind your member login — follow the yellow required fields on screen. Not a substitute for MLS rules or brokerage policy.</div>`;
 }
 
