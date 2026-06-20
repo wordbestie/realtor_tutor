@@ -787,7 +787,17 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
     const v=stage.querySelector('video'), f=stage.querySelector('.wz-fallback');
     if(v&&f){ v.addEventListener('loadeddata',()=>f.style.display='none'); v.addEventListener('error',()=>{v.style.display='none';f.style.display='flex';},true); }
   });
-  if(!DEMO_MODE){ const sb=await getSupabase(); sb.auth.onAuthStateChange(()=>route()); await handleReturn(); }
+  if(!DEMO_MODE){
+    const sb=await getSupabase();
+    // Only react to real sign-in / sign-out. Ignore TOKEN_REFRESHED, USER_UPDATED,
+    // INITIAL_SESSION, etc. — re-routing on those can boot a valid member out on a
+    // momentary session-read blip (the routine token refresh is NOT a logout).
+    sb.auth.onAuthStateChange((event)=>{
+      if(event==='SIGNED_OUT'){ show('landing'); }
+      else if(event==='SIGNED_IN'){ route(); }
+    });
+    await handleReturn();
+  }
   await route();
 })();
 </script>
