@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Automation · Realtor Tutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10302A; --ink-2:#0B221D; --paper:#F4F1E8; --card:#FBFAF4; --card-2:#FFFFFF;
+    --gold:#E0A227; --gold-soft:#B5821C; --green:#2E7D5B; --muted:#5B6A60;
+    --line:#DED7C6; --danger:#C0473A;
+    --display:'Bricolage Grotesque',system-ui,sans-serif; --body:'Hanken Grotesk',system-ui,sans-serif; --radius:16px;
+  }
+  *{box-sizing:border-box} html,body{margin:0;padding:0}
+  body{font-family:var(--body);color:var(--ink);background:
+    radial-gradient(1100px 700px at 80% -10%, rgba(224,162,39,.10), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgba(224,162,39,.06), transparent 55%), var(--paper);
+    min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:30px 20px 70px}
+
+  .rt-top{position:sticky;top:0;z-index:30;background:var(--ink);color:#fff}
+  .rt-top-in{max-width:720px;margin:0 auto;height:60px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .rt-back{display:inline-flex;align-items:center;gap:6px;color:#cfe0d8;text-decoration:none;font-weight:600;font-size:.92rem}
+  .rt-back:hover{color:#fff}
+  .rt-brand{font-family:var(--display);font-weight:800;font-size:1.02rem;display:flex;align-items:center;gap:.5ch;color:#fff}
+  .rt-tick{width:9px;height:9px;background:var(--gold);border-radius:2px;transform:rotate(45deg);display:inline-block}
+  .rt-spacer{width:74px}
+  .rtgate{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;align-items:center;justify-content:center}
+  .rtgate-box{font-family:var(--display);font-weight:700;color:var(--muted)}
+
+  .kicker{font-family:var(--display);font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:9px}
+  h1{font-family:var(--display);font-weight:800;font-size:1.9rem;line-height:1.1;margin:0 0 10px}
+  .sub{color:var(--muted);font-size:1.02rem;max-width:58ch;margin:0 0 22px}
+
+  .screen{display:none} .screen.is-on{display:block}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin:0 0 16px}
+  label.fld{display:block;font-family:var(--display);font-weight:700;font-size:.95rem;margin:0 0 7px}
+  .hint{color:var(--muted);font-size:.85rem;margin:0 0 12px}
+  textarea,input[type=text],input[type=url]{width:100%;font-family:var(--body);font-size:1rem;color:var(--ink);background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;resize:vertical}
+  textarea:focus,input:focus{outline:none;border-color:var(--gold)}
+  textarea{min-height:120px}
+
+  .drop{border:2px dashed var(--line);border-radius:14px;background:var(--card-2);padding:26px;text-align:center;cursor:pointer;transition:.15s;color:var(--muted)}
+  .drop:hover{border-color:var(--gold);color:var(--ink)}
+  .drop input{display:none}
+  .preview{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin-top:12px}
+  .preview img{width:100%;display:block;max-height:420px;object-fit:cover}
+  .preview .rm{position:absolute;top:10px;right:10px;background:rgba(11,34,29,.85);color:#fff;border:none;border-radius:30px;padding:6px 13px;font-weight:600;font-size:.82rem;cursor:pointer}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--display);font-weight:800;font-size:1rem;color:var(--ink);background:var(--gold);border:none;border-radius:30px;padding:13px 26px;cursor:pointer;transition:.15s}
+  .btn:hover{background:var(--gold-soft);color:#fff}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.block{width:100%}
+  .btn-ghost{background:none;border:1.5px solid var(--line);color:var(--ink);font-family:var(--display);font-weight:700;border-radius:30px;padding:11px 20px;cursor:pointer}
+  .btn-ghost:hover{border-color:var(--gold)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
+
+  .chip{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);background:var(--card-2);border-radius:30px;padding:8px 15px;font-weight:600;font-size:.9rem;cursor:pointer;user-select:none}
+  .chip.on{border-color:var(--green);background:rgba(46,125,91,.1);color:var(--ink)}
+  .chip .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .chip.on .dot{background:var(--green)}
+
+  .err{color:var(--danger);font-size:.9rem;margin-top:10px;font-weight:600;display:none}
+  .err.show{display:block}
+  .spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(16,48,42,.25);border-top-color:var(--ink);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .stepnum{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--gold);color:var(--gold-soft);font-family:var(--display);font-weight:800;font-size:13px;margin-bottom:10px}
+  .step h3{font-family:var(--display);font-weight:800;font-size:1.1rem;margin:0 0 7px}
+  .step p{margin:0 0 9px} .step a.inline{color:var(--green);font-weight:600;text-decoration:none;border-bottom:1px solid rgba(46,125,91,.4)}
+  .note{border-left:3px solid var(--gold);padding:10px 13px;margin:10px 0 0;background:rgba(224,162,39,.08);border-radius:0 9px 9px 0;font-size:13.5px}
+  .note .k{font-family:var(--display);font-weight:800;font-size:10px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--gold-soft)}
+  .btnlink{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;font-size:.92rem;color:var(--ink);background:var(--gold);border:none;border-radius:30px;padding:10px 18px;text-decoration:none;margin:4px 6px 2px 0}
+  .btnlink:hover{background:var(--gold-soft);color:#fff}
+  .btnlink.todo{background:#ECE7D9;color:var(--muted)}
+
+  .connbar{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.84rem;color:var(--muted);margin:-6px 0 18px}
+  .connbar b{color:var(--green)}
+  .connbar a{color:var(--muted);text-decoration:underline;cursor:pointer}
+
+  .caption-out{white-space:pre-wrap;background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:1rem;min-height:120px}
+
+  .upsell{margin-top:30px;background:linear-gradient(160deg,var(--ink),var(--ink-2));color:#fff;border-radius:20px;padding:28px 24px;text-align:center;box-shadow:0 30px 60px -36px rgba(16,48,42,.8)}
+  .upsell .tag{font-family:var(--display);font-weight:800;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+  .upsell h2{font-family:var(--display);font-weight:800;font-size:1.45rem;line-height:1.12;margin:0 0 11px;color:#fff}
+  .upsell p{color:#cfe0d8;max-width:52ch;margin:0 auto 15px}
+  .upsell .grid{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:0 0 18px}
+  .upsell .gchip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:30px;padding:6px 13px;font-size:.83rem;font-weight:600;color:#eef5f1}
+  .upsell .cta{display:inline-block;background:var(--gold);color:var(--ink);font-family:var(--display);font-weight:800;font-size:1rem;border:none;border-radius:32px;padding:13px 28px;text-decoration:none}
+  .upsell .cta:hover{background:#f0c869}
+  .upsell .fine{color:#9fb3a9;font-size:.78rem;margin:13px 0 0}
+  .done-ic{width:54px;height:54px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;margin:0 auto 14px}
+  .center{text-align:center}
+  .foot{margin-top:24px;color:var(--muted);font-size:.84rem;text-align:center}
+  .foot a{color:var(--green)}
+</style>
+</head>
+<body>
+
+<div class="rtgate" id="rtgate"><div class="rtgate-box">Checking your access…</div></div>
+
+<header class="rt-top">
+  <div class="rt-top-in">
+    <a class="rt-back" href="../index.html">&larr; Dashboard</a>
+    <span class="rt-brand"><span class="rt-tick"></span> Realtor&nbsp;Tutor</span>
+    <span class="rt-spacer"></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="kicker">Content Automation</div>
+  <h1 id="hTitle">Post to your socials in three taps.</h1>
+  <p class="sub" id="hSub">Add a photo and a quick brief — I'll write the caption, you review it, and it publishes to your own Instagram, Facebook and LinkedIn. One-time setup, then it's this easy every time.</p>
+
+  <!-- ===================== SETUP (first run) ===================== -->
+  <section class="screen" id="scrSetup">
+    <div class="card step">
+      <span class="stepnum">1</span>
+      <h3>Create a free Make account</h3>
+      <p>Make securely connects to your social accounts and does the publishing. The free plan is plenty.</p>
+      <a class="btnlink" href="https://www.make.com/en/register" target="_blank" rel="noopener">Create my free Make account →</a>
+    </div>
+    <div class="card step">
+      <span class="stepnum">2</span>
+      <h3>Add the Publisher to your account</h3>
+      <p>One click copies my ready-made publishing automation into your Make. During setup, Make will ask you to log into your Instagram, Facebook and LinkedIn — that connects them as <b>you</b>.</p>
+      <a class="btnlink todo" id="bpPub" href="#" target="_blank" rel="noopener">Add the Publisher →</a>
+      <div class="note"><span class="k">One-time note</span>Instagram must be a free <b>Business or Creator</b> account linked to a Facebook Page — that's Meta's rule for any auto-posting tool. The walkthrough video shows exactly how.</div>
+    </div>
+    <div class="card step">
+      <span class="stepnum">3</span>
+      <h3>Paste your webhook link</h3>
+      <p>When you turn the Publisher on, Make shows a <b>webhook URL</b>. Copy it and paste it here once — this is what lets RT hand your post to your automation.</p>
+      <input type="url" id="hookInput" placeholder="https://hook…make.com/…">
+      <div class="row"><button class="btn" id="saveHook">Save &amp; continue →</button></div>
+      <div class="err" id="setupErr"></div>
+    </div>
+  </section>
+
+  <!-- ===================== CREATE ===================== -->
+  <section class="screen" id="scrCreate">
+    <div class="connbar"><span>Publishing to <b id="connList">your connected socials</b></span><a id="changeConn">change setup</a></div>
+    <div class="card">
+      <label class="fld">1 · Your image</label>
+      <p class="hint">A listing photo, a sold sign, a headshot — whatever this post is about.</p>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/*">
+        <div id="dropText">📷 Tap to add a photo</div>
+      </label>
+      <div class="preview" id="preview" style="display:none"><img id="previewImg" alt=""><button class="rm" id="rmImg">Remove</button></div>
+    </div>
+    <div class="card">
+      <label class="fld">2 · Your brief</label>
+      <p class="hint">A sentence or two on what to say. I'll turn it into a polished caption.</p>
+      <textarea id="brief" placeholder="e.g. Just listed — 3 bed bungalow in east Hamilton, big backyard, open house Saturday 2–4."></textarea>
+    </div>
+    <button class="btn block" id="genBtn">Write my caption →</button>
+    <div class="err" id="createErr"></div>
+  </section>
+
+  <!-- ===================== REVIEW ===================== -->
+  <section class="screen" id="scrReview">
+    <div class="card">
+      <label class="fld">Review your post</label>
+      <p class="hint">Edit the words however you like, pick where it goes, then publish.</p>
+      <div class="preview" id="reviewImgWrap" style="margin-bottom:14px"><img id="reviewImg" alt=""></div>
+      <textarea id="caption" class="caption-out" aria-label="Caption"></textarea>
+      <div class="row"><button class="btn-ghost" id="regenBtn">↻ Rewrite caption</button></div>
+    </div>
+    <div class="card">
+      <label class="fld">Publish to</label>
+      <div class="row" id="platforms"></div>
+    </div>
+    <button class="btn block" id="pubBtn">Publish now →</button>
+    <div class="err" id="reviewErr"></div>
+    <div class="row" style="margin-top:10px"><button class="btn-ghost" id="backCreate">← Start over</button></div>
+  </section>
+
+  <!-- ===================== DONE + UPSELL ===================== -->
+  <section class="screen" id="scrDone">
+    <div class="card center">
+      <div class="done-ic">✓</div>
+      <h3 style="font-family:var(--display);font-weight:800;font-size:1.3rem;margin:0 0 6px">Published!</h3>
+      <p style="color:var(--muted);margin:0 0 16px">Your post is on its way to your socials. Check your accounts in a minute.</p>
+      <button class="btn" id="againBtn">Make another →</button>
+    </div>
+
+    <section class="upsell">
+      <div class="tag">You just did that in three taps</div>
+      <h2>Now imagine never doing it again.</h2>
+      <p>That was one post, by hand. The full Content Automation Package runs your entire calendar — every format, every platform — completely hands-off.</p>
+      <div class="grid">
+        <span class="gchip">📸 Image posts</span><span class="gchip">🎬 Shorts &amp; Reels</span>
+        <span class="gchip">📝 Long-form &amp; blog</span><span class="gchip">📅 Auto-scheduled</span>
+      </div>
+      <a class="cta" id="upsellCta" href="#">Unlock the full system — $397 →</a>
+      <p class="fine">One-time. Plugs straight into the Make account you just set up.</p>
+    </section>
+  </section>
+
+  <p class="foot">Built &amp; supported by Rebecca Zak, REALTOR®. Stuck? <a href="mailto:rebecca@realtortutor.com">rebecca@realtortutor.com</a></p>
+</main>
+
+<script>
+/* ===================================================================
+   REBECCA — fill these in:
+   =================================================================== */
+var SETUP = {
+  publisherBlueprint: '',          // Make share/template link for the webhook Publisher
+  upsellUrl: '',                   // Stripe checkout for the $397 full package
+  platforms: [                     // platforms to offer (match what your Publisher posts to)
+    {id:'instagram', label:'Instagram'},
+    {id:'facebook',  label:'Facebook'},
+    {id:'linkedin',  label:'LinkedIn'}
+  ]
+};
+var CAPTION_FN = '/.netlify/functions/generate-caption';
+var PUBLISH_FN = '/.netlify/functions/publish-post';
+var HOOK_KEY   = 'rt_auto_webhook';
+
+/* ---- tiny helpers ---- */
+function $(id){return document.getElementById(id);}
+function show(id){['scrSetup','scrCreate','scrReview','scrDone'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
+function err(id,msg){var e=$(id);if(msg){e.textContent=msg;e.classList.add('show');}else{e.classList.remove('show');}}
+
+var state = { base64:null, mediaType:'image/jpeg', dataUrl:null, caption:'' };
+
+/* ---- image: read + downscale to keep payloads small ---- */
+function handleFile(file){
+  if(!file || !/^image\//.test(file.type)){ err('createErr','That doesn\'t look like an image.'); return; }
+  err('createErr','');
+  var img=new Image(), rd=new FileReader();
+  rd.onload=function(){ img.onload=function(){
+    var max=1080, w=img.width, h=img.height;
+    if(w>h && w>max){ h=Math.round(h*max/w); w=max; } else if(h>=w && h>max){ w=Math.round(w*max/h); h=max; }
+    var c=document.createElement('canvas'); c.width=w; c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    var url=c.toDataURL('image/jpeg',0.85);
+    state.dataUrl=url; state.mediaType='image/jpeg'; state.base64=url.split(',')[1];
+    $('previewImg').src=url; $('preview').style.display='block'; $('drop').style.display='none';
+  }; img.src=rd.result; };
+  rd.readAsDataURL(file);
+}
+function clearImg(){ state.base64=null; state.dataUrl=null; $('file').value=''; $('preview').style.display='none'; $('drop').style.display='block'; }
+
+/* ---- caption ---- */
+function generate(btn,errId){
+  var brief=$('brief').value.trim();
+  if(!state.base64){ err(errId,'Add a photo first.'); return; }
+  if(!brief){ err(errId,'Add a quick brief first.'); return; }
+  err(errId,'');
+  var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Writing…';
+  fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64}})})
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+    .then(function(res){
+      btn.disabled=false; btn.innerHTML=orig;
+      if(!res.ok){ err(errId,(res.d&&res.d.error)||'Could not write the caption. Try again.'); return; }
+      state.caption=res.d.caption||''; $('caption').value=state.caption;
+      $('reviewImg').src=state.dataUrl; show('scrReview');
+    })
+    .catch(function(){ btn.disabled=false; btn.innerHTML=orig; err(errId,'Connection problem. Try again.'); });
+}
+
+/* ---- platforms ---- */
+function renderPlatforms(){
+  var box=$('platforms'); box.innerHTML='';
+  SETUP.platforms.forEach(function(p){
+    var el=document.createElement('div'); el.className='chip on'; el.dataset.id=p.id;
+    el.innerHTML='<span class="dot"></span>'+p.label;
+    el.onclick=function(){ el.classList.toggle('on'); };
+    box.appendChild(el);
+  });
+}
+function selectedPlatforms(){
+  var out={}; document.querySelectorAll('#platforms .chip').forEach(function(c){ out[c.dataset.id]=c.classList.contains('on'); });
+  return out;
+}
+
+/* ---- publish ---- */
+function publish(btn){
+  var hook=localStorage.getItem(HOOK_KEY);
+  if(!hook){ show('scrSetup'); return; }
+  var caption=$('caption').value.trim();
+  var plats=selectedPlatforms();
+  if(!Object.keys(plats).some(function(k){return plats[k];})){ err('reviewErr','Pick at least one place to post.'); return; }
+  if(!caption){ err('reviewErr','Your caption is empty.'); return; }
+  err('reviewErr','');
+  var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Publishing…';
+  fetch(PUBLISH_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+    webhookUrl:hook, caption:caption, platforms:plats, image:state.base64, imageType:state.mediaType
+  })})
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+    .then(function(res){
+      btn.disabled=false; btn.innerHTML=orig;
+      if(!res.ok){ err('reviewErr',(res.d&&res.d.error)||'Publishing failed. Try again.'); return; }
+      show('scrDone');
+    })
+    .catch(function(){ btn.disabled=false; btn.innerHTML=orig; err('reviewErr','Connection problem. Try again.'); });
+}
+
+/* ---- setup / routing ---- */
+function saveHook(){
+  var v=$('hookInput').value.trim();
+  if(!/^https:\/\/hook[a-z0-9.\-]*\.make\.com\//i.test(v)){ err('setupErr','That doesn\'t look like a Make webhook link (it should start with https://hook…make.com/).'); return; }
+  err('setupErr',''); localStorage.setItem(HOOK_KEY,v); startCreate();
+}
+function startCreate(){ renderPlatforms(); show('scrCreate'); }
+function boot(){
+  // wire setup links/config
+  if(SETUP.publisherBlueprint){ var b=$('bpPub'); b.href=SETUP.publisherBlueprint; b.classList.remove('todo'); }
+  var cta=$('upsellCta');
+  cta.href = SETUP.upsellUrl ? SETUP.upsellUrl : 'mailto:rebecca@realtortutor.com?subject=Full%20Content%20Automation%20Package%20-%20%24397';
+  // events
+  $('file').addEventListener('change',function(e){ handleFile(e.target.files[0]); });
+  $('rmImg').onclick=clearImg;
+  $('genBtn').onclick=function(){ generate(this,'createErr'); };
+  $('regenBtn').onclick=function(){ var b=this; var o=b.innerHTML; b.disabled=true; b.innerHTML='<span class="spin"></span> Rewriting…';
+    fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:$('brief').value.trim(),image:{media_type:state.mediaType,data:state.base64}})})
+    .then(function(r){return r.json();}).then(function(d){ b.disabled=false; b.innerHTML=o; if(d.caption){$('caption').value=d.caption;} })
+    .catch(function(){ b.disabled=false; b.innerHTML=o; }); };
+  $('pubBtn').onclick=function(){ publish(this); };
+  $('backCreate').onclick=function(){ show('scrCreate'); };
+  $('againBtn').onclick=function(){ $('brief').value=''; clearImg(); $('caption').value=''; show('scrCreate'); };
+  $('saveHook').onclick=saveHook;
+  $('changeConn').onclick=function(){ show('scrSetup'); };
+  // route: connected? -> create, else setup
+  if(localStorage.getItem(HOOK_KEY)){ startCreate(); } else { show('scrSetup'); }
+}
+boot();
+</script>
+
+<script src="../gate.js"></script>
+<script>window.requireMemberAccess({home:'../index.html'}).then(function(ok){if(ok){var g=document.getElementById('rtgate');if(g)g.remove();}});</script>
+</body>
+</html>
