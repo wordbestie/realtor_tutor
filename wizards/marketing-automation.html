@@ -93,6 +93,13 @@
   .upsell .cta{display:inline-block;background:var(--gold);color:var(--ink);font-family:var(--display);font-weight:800;font-size:1rem;border:none;border-radius:32px;padding:13px 28px;text-decoration:none}
   .upsell .cta:hover{background:#f0c869}
   .upsell .fine{color:#9fb3a9;font-size:.78rem;margin:13px 0 0}
+  .commercial{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#0B221D;border:1px solid rgba(255,255,255,.12);margin:0 0 16px}
+  .commercial video{width:100%;height:100%;object-fit:cover;display:block}
+  .commercial .unmute{position:absolute;bottom:10px;right:10px;background:rgba(11,34,29,.82);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:30px;padding:7px 13px;font-weight:600;font-size:.82rem;cursor:pointer}
+  .commercial .commercial-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center}
+  .commercial-fallback h2{margin:0 0 10px}
+  .commercial-fallback p{margin:0 0 14px}
+  .commercial-fallback .grid{margin:0}
   .done-ic{width:54px;height:54px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;margin:0 auto 14px}
   .center{text-align:center}
   .foot{margin-top:24px;color:var(--muted);font-size:.84rem;text-align:center}
@@ -191,11 +198,19 @@
 
     <section class="upsell">
       <div class="tag">You just did that in three taps</div>
-      <h2>Now imagine never doing it again.</h2>
-      <p>That was one post, by hand. The full Content Automation Package runs your entire calendar — every format, every platform — completely hands-off.</p>
-      <div class="grid">
-        <span class="gchip">📸 Image posts</span><span class="gchip">🎬 Shorts &amp; Reels</span>
-        <span class="gchip">📝 Long-form &amp; blog</span><span class="gchip">📅 Auto-scheduled</span>
+      <div class="commercial">
+        <video id="upsellVideo" autoplay muted loop playsinline preload="metadata">
+          <source src="../automation-commercial.mp4" type="video/mp4">
+        </video>
+        <button class="unmute" id="unmute" type="button" style="display:none">🔊 Tap for sound</button>
+        <div class="commercial-fallback" id="commFall">
+          <h2>Now imagine never doing it again.</h2>
+          <p>That was one post, by hand. The full Content Automation Package runs your entire calendar — every format, every platform — completely hands-off.</p>
+          <div class="grid">
+            <span class="gchip">📸 Image posts</span><span class="gchip">🎬 Shorts &amp; Reels</span>
+            <span class="gchip">📝 Long-form &amp; blog</span><span class="gchip">📅 Auto-scheduled</span>
+          </div>
+        </div>
       </div>
       <a class="cta" id="upsellCta" href="#">Unlock the full system — $397 →</a>
       <p class="fine">One-time. Plugs straight into the Make account you just set up.</p>
@@ -211,7 +226,8 @@
    =================================================================== */
 var SETUP = {
   publisherBlueprint: '',          // Make share/template link for the webhook Publisher
-  upsellUrl: '',                   // Stripe checkout for the $397 full package
+  upsellUrl: '',                   // OPTIONAL override: external link for the unlock button.
+                                   // Leave BLANK to use the built-in $397 Stripe checkout.
   platforms: [                     // platforms to offer (match what your Publisher posts to)
     {id:'instagram', label:'Instagram'},
     {id:'facebook',  label:'Facebook'},
@@ -220,6 +236,7 @@ var SETUP = {
 };
 var CAPTION_FN = '/.netlify/functions/generate-caption';
 var PUBLISH_FN = '/.netlify/functions/publish-post';
+var AUTOMATION_CHECKOUT_FN = '/.netlify/functions/create-automation-checkout';
 var HOOK_KEY   = 'rt_auto_webhook';
 
 /* ---- tiny helpers ---- */
@@ -309,11 +326,43 @@ function saveHook(){
   err('setupErr',''); localStorage.setItem(HOOK_KEY,v); startCreate();
 }
 function startCreate(){ renderPlatforms(); show('scrCreate'); }
+
+/* ---- $397 unlock: take the member's session token to the Stripe checkout ---- */
+async function startUnlock(e){
+  if(SETUP.upsellUrl) return;            // manual override → just follow the link
+  if(window.RT_DEMO_MODE) return;        // demo preview → fall back to the mailto href
+  if(e) e.preventDefault();
+  var cta=$('upsellCta'), orig=cta.innerHTML;
+  cta.style.pointerEvents='none'; cta.innerHTML='Loading checkout…';
+  try{
+    var mod=await import('https://esm.sh/@supabase/supabase-js@2.45.0');
+    var sb=mod.createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY,
+      {auth:{persistSession:true,autoRefreshToken:false,lock:function(n,t,fn){return fn();}}});
+    var r=await sb.auth.getSession();
+    var token=(r&&r.data&&r.data.session)?r.data.session.access_token:null;
+    if(!token){ location.replace('../index.html'); return; }
+    var res=await fetch(AUTOMATION_CHECKOUT_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_token:token})});
+    var out=await res.json();
+    if(out.url){ window.location=out.url; return; }
+    throw new Error(out.error||'checkout');
+  }catch(err){
+    cta.style.pointerEvents=''; cta.innerHTML=orig;
+    alert('Could not start checkout — please try again, or email rebecca@realtortutor.com.');
+  }
+}
+
 function boot(){
   // wire setup links/config
   if(SETUP.publisherBlueprint){ var b=$('bpPub'); b.href=SETUP.publisherBlueprint; b.classList.remove('todo'); }
   var cta=$('upsellCta');
-  cta.href = SETUP.upsellUrl ? SETUP.upsellUrl : 'mailto:rebecca@realtortutor.com?subject=Full%20Content%20Automation%20Package%20-%20%24397';
+  if(SETUP.upsellUrl){ cta.href=SETUP.upsellUrl; }
+  else { cta.href='mailto:rebecca@realtortutor.com?subject=Full%20Content%20Automation%20Package%20-%20%24397'; cta.addEventListener('click',startUnlock); }
+  // upsell commercial video: hide the text fallback once it plays; offer sound
+  var uv=$('upsellVideo'), cf=$('commFall'), um=$('unmute');
+  if(uv){
+    uv.addEventListener('loadeddata',function(){ if(cf)cf.style.display='none'; if(um)um.style.display='inline-block'; });
+    if(um){ um.onclick=function(){ uv.muted=!uv.muted; um.textContent = uv.muted ? '🔊 Tap for sound' : '🔇 Mute'; if(!uv.muted){ uv.play(); } }; }
+  }
   // events
   $('file').addEventListener('change',function(e){ handleFile(e.target.files[0]); });
   $('rmImg').onclick=clearImg;
