@@ -410,6 +410,14 @@
       </div>
       <button class="welcome-x" id="welcomeX" type="button" aria-label="Dismiss">&times;</button>
     </div>
+    <div class="welcome" id="autoBanner" role="status" style="display:none">
+      <div class="welcome-ic">✓</div>
+      <div class="welcome-body">
+        <strong>Content Automation unlocked!</strong>
+        <span>You've got the full system. A receipt is on its way, and setup details for the full content engine will follow by email. Open Content Automation to get started.</span>
+      </div>
+      <button class="welcome-x" id="autoX" type="button" aria-label="Dismiss">&times;</button>
+    </div>
     <div class="greet">
       <h2>Let's get to work &amp; make that money. 💪💰</h2>
       <p>Each wizard &amp; video below walks you through the task step by step.<br>If you need help, email <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a>.</p>
@@ -491,9 +499,8 @@ const SOCIAL = {
 const views = { landing:document.getElementById('landing'), paywall:document.getElementById('paywall'), app:document.getElementById('app') };
 function show(name){ Object.entries(views).forEach(([k,el])=>el.classList.toggle('is-active',k===name)); window.scrollTo(0,0); if(name==='app') maybeWelcome(); }
 function maybeWelcome(){
-  if(sessionStorage.getItem('rt_welcome')!=='1') return;
-  sessionStorage.removeItem('rt_welcome');
-  const b=document.getElementById('welcomeBanner'); if(b) b.style.display='flex';
+  if(sessionStorage.getItem('rt_welcome')==='1'){ sessionStorage.removeItem('rt_welcome'); const b=document.getElementById('welcomeBanner'); if(b) b.style.display='flex'; }
+  if(sessionStorage.getItem('rt_auto_welcome')==='1'){ sessionStorage.removeItem('rt_auto_welcome'); const a=document.getElementById('autoBanner'); if(a) a.style.display='flex'; }
 }
 
 /* ---- auth tabs ---- */
@@ -613,6 +620,7 @@ async function signOut(){ if(!DEMO_MODE){ const sb=await getSupabase(); await sb
 document.getElementById('signout').onclick=signOut;
 document.getElementById('gateSignout').onclick=signOut;
 document.getElementById('welcomeX').onclick=()=>{ document.getElementById('welcomeBanner').style.display='none'; };
+document.getElementById('autoX').onclick=()=>{ document.getElementById('autoBanner').style.display='none'; };
 
 /* ---- buy: Stripe Checkout via Netlify function ---- */
 const buyBtn=document.getElementById('buyBtn');
@@ -632,13 +640,22 @@ buyBtn.addEventListener('click', async ()=>{
   }catch(e){ buyBtn.disabled=false; buyBtn.textContent='Get lifetime access — $347'; alert('Checkout error: '+e.message); }
 });
 
-/* ---- handle return from Stripe (?paid=1): poll until webhook lands ---- */
+/* ---- handle return from Stripe: poll until webhook lands ---- */
 async function handleReturn(){
   const p=new URLSearchParams(location.search);
-  if(p.get('paid')!=='1' || DEMO_MODE) return;
-  sessionStorage.setItem('rt_welcome','1');
-  const user=await currentUser(); if(!user) return;
-  for(let i=0;i<6;i++){ if(await hasAccess(user.id)){ history.replaceState({},'','/'); show('app'); return; } await new Promise(r=>setTimeout(r,1500)); }
+  if(DEMO_MODE) return;
+  if(p.get('paid')==='1'){
+    sessionStorage.setItem('rt_welcome','1');
+    const user=await currentUser(); if(!user) return;
+    for(let i=0;i<6;i++){ if(await hasAccess(user.id)){ history.replaceState({},'','/'); show('app'); return; } await new Promise(r=>setTimeout(r,1500)); }
+    return;
+  }
+  if(p.get('automation')==='1'){
+    sessionStorage.setItem('rt_auto_welcome','1');
+    const user=await currentUser(); if(!user) return;   // already a member; just confirm + show app
+    history.replaceState({},'','/'); show('app');
+    return;
+  }
 }
 
 /* ================================================================
