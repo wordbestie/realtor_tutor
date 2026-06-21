@@ -418,6 +418,14 @@
       </div>
       <button class="welcome-x" id="autoX" type="button" aria-label="Dismiss">&times;</button>
     </div>
+    <div class="welcome" id="subBanner" role="status" style="display:none">
+      <div class="welcome-ic">✓</div>
+      <div class="welcome-body">
+        <strong>Your subscription is active!</strong>
+        <span>You're all set. A receipt is on its way. Open Content Automation to start creating — and you can manage or cancel anytime from the Plan menu.</span>
+      </div>
+      <button class="welcome-x" id="subX" type="button" aria-label="Dismiss">&times;</button>
+    </div>
     <div class="greet">
       <h2>Let's get to work &amp; make that money. 💪💰</h2>
       <p>Each wizard &amp; video below walks you through the task step by step.<br>If you need help, email <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a>.</p>
@@ -501,6 +509,7 @@ function show(name){ Object.entries(views).forEach(([k,el])=>el.classList.toggle
 function maybeWelcome(){
   if(sessionStorage.getItem('rt_welcome')==='1'){ sessionStorage.removeItem('rt_welcome'); const b=document.getElementById('welcomeBanner'); if(b) b.style.display='flex'; }
   if(sessionStorage.getItem('rt_auto_welcome')==='1'){ sessionStorage.removeItem('rt_auto_welcome'); const a=document.getElementById('autoBanner'); if(a) a.style.display='flex'; }
+  if(sessionStorage.getItem('rt_sub_welcome')==='1'){ sessionStorage.removeItem('rt_sub_welcome'); const a=document.getElementById('subBanner'); if(a) a.style.display='flex'; }
 }
 
 /* ---- auth tabs ---- */
@@ -621,6 +630,7 @@ document.getElementById('signout').onclick=signOut;
 document.getElementById('gateSignout').onclick=signOut;
 document.getElementById('welcomeX').onclick=()=>{ document.getElementById('welcomeBanner').style.display='none'; };
 document.getElementById('autoX').onclick=()=>{ document.getElementById('autoBanner').style.display='none'; };
+document.getElementById('subX').onclick=()=>{ document.getElementById('subBanner').style.display='none'; };
 
 /* ---- buy: Stripe Checkout via Netlify function ---- */
 const buyBtn=document.getElementById('buyBtn');
@@ -653,6 +663,17 @@ async function handleReturn(){
   if(p.get('automation')==='1'){
     sessionStorage.setItem('rt_auto_welcome','1');
     const user=await currentUser(); if(!user) return;   // already a member; just confirm + show app
+    history.replaceState({},'','/'); show('app');
+    return;
+  }
+  if(p.get('subscribed')==='1'){
+    sessionStorage.setItem('rt_sub_welcome','1');
+    const user=await currentUser(); if(!user) return;
+    history.replaceState({},'','/'); show('app');
+    return;
+  }
+  if(p.get('from')==='portal'){
+    const user=await currentUser(); if(!user) return;   // back from billing portal — just land them in the app
     history.replaceState({},'','/'); show('app');
     return;
   }
