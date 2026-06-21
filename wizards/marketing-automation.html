@@ -64,6 +64,12 @@
   .chip .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
   .chip.on .dot{background:var(--green)}
 
+  .ghost{display:inline-flex;align-items:center;gap:7px;background:none;border:1.5px dashed var(--line);border-radius:30px;padding:8px 15px;font-family:var(--display);font-weight:700;font-size:.9rem;color:var(--ink);cursor:pointer;margin-bottom:12px}
+  .ghost:hover{border-color:var(--gold);border-style:solid}
+  .ideas{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+  .idea{text-align:left;border:1.5px solid var(--line);background:var(--card-2);border-radius:12px;padding:11px 14px;font-size:.92rem;line-height:1.35;color:var(--ink);cursor:pointer;transition:.12s}
+  .idea:hover{border-color:var(--gold);background:#fff}
+
   .err{color:var(--danger);font-size:.9rem;margin-top:10px;font-weight:600;display:none}
   .err.show{display:block}
   .spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(16,48,42,.25);border-top-color:var(--ink);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
@@ -195,7 +201,9 @@
     </div>
     <div class="card">
       <label class="fld">2 · Your brief</label>
-      <p class="hint">Provide a sentence or two on what to say so Realtor Tutor can turn it into a polished caption.</p>
+      <p class="hint">A sentence or two on what to say — or tap “Suggest ideas” and pick one to start.</p>
+      <button class="ghost" id="ideaBtn" type="button">💡 Suggest ideas</button>
+      <div class="ideas" id="ideaBox" style="display:none"></div>
       <textarea id="brief" placeholder="e.g. Just listed — 3 bed bungalow in east Hamilton, big backyard, open house Saturday 2–4."></textarea>
     </div>
     <button class="btn block" id="genBtn">Write my caption →</button>
@@ -300,6 +308,7 @@ var SETUP = {
   }
 };
 var CAPTION_FN = '/.netlify/functions/generate-caption';
+var IDEAS_FN   = '/.netlify/functions/suggest-ideas';
 var PUBLISH_FN = '/.netlify/functions/publish-post';
 var AUTOMATION_CHECKOUT_FN = '/.netlify/functions/create-automation-checkout';
 var HOOK_KEY   = 'rt_auto_webhook';
@@ -418,6 +427,31 @@ function saveVoice(){
 }
 function openVoice(){ fillVoiceForm(); show('scrVoice'); }
 
+/* ---- suggested ideas (no blank box) ---- */
+function renderIdeas(list){
+  var box=$('ideaBox'); box.innerHTML='';
+  if(!list || !list.length){ box.style.display='none'; return; }
+  list.forEach(function(txt){
+    var el=document.createElement('button'); el.type='button'; el.className='idea'; el.textContent=txt;
+    el.onclick=function(){ $('brief').value=txt; box.style.display='none'; $('brief').focus(); };
+    box.appendChild(el);
+  });
+  box.style.display='flex';
+}
+function fetchIdeas(){
+  var btn=$('ideaBtn'); var old=btn.innerHTML;
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Thinking of ideas…';
+  err('createErr','');
+  fetch(IDEAS_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({voice:loadVoice()})})
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+    .then(function(res){
+      if(!res.ok || !res.d.ideas || !res.d.ideas.length){ throw new Error((res.d&&res.d.error)||'No ideas came back.'); }
+      renderIdeas(res.d.ideas);
+    })
+    .catch(function(e){ err('createErr', e.message||'Could not fetch ideas. Please try again.'); })
+    .finally(function(){ btn.disabled=false; btn.innerHTML=old; });
+}
+
 /* ---- shared supabase client (live mode only) ---- */
 var _sb=null;
 async function rtClient(){
@@ -504,6 +538,7 @@ function boot(){
   $('saveHook').onclick=saveHook;
   $('changeConn').onclick=function(){ show('scrSetup'); };
   $('saveVoice').onclick=saveVoice;
+  $('ideaBtn').onclick=fetchIdeas;
   $('editVoice').onclick=openVoice;
   $('fsBack').onclick=function(){ show('scrCreate'); };
   // route: connected? -> create, else setup
