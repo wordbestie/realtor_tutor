@@ -54,3 +54,25 @@ window.requireMemberAccess = async function (opts) {
     return false;
   }
 };
+window.requireLogin = async function (opts) {
+  const home = (opts && opts.home) ? opts.home : '../content.html';
+  if (window.RT_DEMO_MODE) return true;
+  try {
+    let createClient;
+    const cdns = [
+      'https://esm.sh/@supabase/supabase-js@2.45.0',
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm'
+    ];
+    for (const u of cdns) {
+      try { const m = await import(u); if (m && m.createClient) { createClient = m.createClient; break; } }
+      catch (e) {}
+    }
+    if (!createClient) { location.replace(home); return false; }
+    const sb = createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY, {
+      auth: { persistSession:true, autoRefreshToken:false, lock: (n,a,fn)=>fn() }
+    });
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { location.replace(home); return false; }
+    return true;
+  } catch (e) { location.replace(home); return false; }
+};
