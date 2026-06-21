@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Realtor Content Engine — AI posts in your voice, on autopilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10302A; --paper:#F4F1E8; --card:#FBFAF4; --card-2:#FFFFFF;
+    --gold:#E0A227; --gold-soft:#B5821C; --green:#2E7D5B; --line:#DED7C6; --muted:#5B6A60;
+    --display:'Bricolage Grotesque',system-ui,sans-serif; --body:'Hanken Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--body);color:var(--ink);background:
+    radial-gradient(900px 600px at -10% 110%, rgba(224,162,39,.07), transparent 55%), var(--paper);min-height:100vh}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 22px 64px}
+  header{display:flex;align-items:center;gap:.5ch;padding:6px 0 0}
+  .tick{width:14px;height:14px;border-radius:50%;background:var(--gold)}
+  .brand{font-family:var(--display);font-weight:800;font-size:1.05rem}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;margin-top:48px}
+  @media(max-width:780px){ .grid{grid-template-columns:1fr;gap:28px;margin-top:28px} }
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,5vw,3.2rem);line-height:1.05;letter-spacing:-.02em;margin:0 0 16px}
+  h1 .hl{color:var(--gold-soft)}
+  .lead{font-size:1.15rem;color:var(--ink);line-height:1.5;margin:0 0 22px;max-width:30ch}
+  .points{list-style:none;padding:0;margin:0 0 8px}
+  .points li{display:flex;gap:10px;align-items:flex-start;margin:0 0 10px;color:var(--ink)}
+  .points .b{color:var(--green);font-weight:800}
+  .free{display:inline-block;margin-top:6px;font-weight:700;color:var(--green);font-size:.95rem}
+  /* auth card */
+  .card{background:var(--card-2);border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 10px 34px rgba(16,48,42,.08)}
+  .tabs{display:flex;gap:6px;background:var(--paper);border-radius:30px;padding:5px;margin:0 0 18px}
+  .tabs button{flex:1;border:none;background:none;font-family:var(--display);font-weight:700;font-size:.95rem;color:var(--muted);padding:9px;border-radius:24px;cursor:pointer}
+  .tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  label.fld{display:block;font-weight:600;font-size:.85rem;margin:0 0 6px;color:var(--ink)}
+  input{width:100%;font-family:var(--body);font-size:1rem;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 14px}
+  input:focus{outline:none;border-color:var(--gold)}
+  .btn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--display);font-weight:800;font-size:1rem;color:var(--ink);background:var(--gold);border:none;border-radius:30px;padding:13px;cursor:pointer}
+  .btn:disabled{opacity:.6;cursor:default}
+  .msg{font-size:.9rem;margin:12px 2px 0;min-height:1.2em;color:#B23B2E;font-weight:600}
+  .msg.note{color:var(--green)}
+  .fine{font-size:.82rem;color:var(--muted);margin:16px 2px 0;line-height:1.5}
+  .pricing{margin-top:10px;font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="tick"></span><span class="brand">Realtor&nbsp;Content&nbsp;Engine</span></header>
+
+  <div class="grid">
+    <div>
+      <h1>Your social posts, <span class="hl">written in your voice</span> — and published for you.</h1>
+      <p class="lead">Tell it who you are once. After that, it writes captions that sound like you and posts them to your socials. You just review and tap publish.</p>
+      <ul class="points">
+        <li><span class="b">✓</span> Learns your voice from a 2-minute interview</li>
+        <li><span class="b">✓</span> Suggests post ideas so you're never staring at a blank box</li>
+        <li><span class="b">✓</span> Publishes to Instagram, Facebook &amp; LinkedIn</li>
+      </ul>
+      <span class="free">Start free — 3 posts a month, no card required.</span>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button id="tabSignup" class="on" type="button">Start free</button>
+        <button id="tabSignin" type="button">Log in</button>
+      </div>
+
+      <form id="form">
+        <label class="fld" for="email">Email</label>
+        <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+        <label class="fld" for="pass">Password</label>
+        <input id="pass" type="password" autocomplete="current-password" placeholder="At least 8 characters">
+        <button class="btn" id="submit" type="submit">Create my free account →</button>
+      </form>
+      <div class="msg" id="msg"></div>
+      <p class="pricing">Free to start. Upgrade anytime — Solo $67/mo, Pro $197/mo. Cancel whenever.</p>
+      <p class="fine">Already a Realtor Tutor member? Use the same email and password — it's one account.</p>
+    </div>
+  </div>
+</div>
+
+<script src="gate.js"></script>
+<script>
+  var WIZARD = 'wizards/marketing-automation.html';
+  var DEMO = !!window.RT_DEMO_MODE;
+  var SB_URL = window.RT_SUPABASE_URL, SB_KEY = window.RT_SUPABASE_ANON_KEY;
+  var supabase = null, isSignup = true;
+
+  function $(id){ return document.getElementById(id); }
+  function setMsg(t, ok){ var m=$('msg'); m.textContent=t||''; m.className='msg'+(ok?' note':''); }
+
+  async function loadCreateClient(){
+    var urls=['https://esm.sh/@supabase/supabase-js@2.45.0','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/+esm'];
+    for(var i=0;i<urls.length;i++){ try{ var m=await import(urls[i]); if(m&&m.createClient) return m.createClient; }catch(e){} }
+    throw new Error('Could not load the sign-in library. Check your connection and try again.');
+  }
+  async function getSupabase(){
+    if(supabase) return supabase;
+    var createClient = await loadCreateClient();
+    supabase = createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
+    return supabase;
+  }
+  function goToWizard(){ location.replace(WIZARD); }
+
+  function setTab(signup){
+    isSignup = signup;
+    $('tabSignup').classList.toggle('on', signup);
+    $('tabSignin').classList.toggle('on', !signup);
+    $('submit').textContent = signup ? 'Create my free account →' : 'Log in →';
+    $('pass').setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
+    setMsg('');
+  }
+  $('tabSignup').onclick=function(){ setTab(true); };
+  $('tabSignin').onclick=function(){ setTab(false); };
+
+  $('form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var email=$('email').value.trim(), pass=$('pass').value;
+    if(!email.includes('@')){ setMsg('Enter a valid email.'); return; }
+    if(isSignup && pass.length<8){ setMsg('Password needs at least 8 characters.'); return; }
+    if(!pass){ setMsg('Enter your password.'); return; }
+    setMsg('');
+    if(DEMO){ goToWizard(); return; }   // preview mode: skip auth
+    var btn=$('submit'), label=btn.textContent; btn.disabled=true; btn.textContent='Working…';
+    try{
+      var sb = await getSupabase();
+      if(isSignup){
+        var up = await sb.auth.signUp({ email:email, password:pass, options:{ emailRedirectTo: location.origin + '/content.html' } });
+        if(up.error){ setMsg(up.error.message); }
+        else if(up.data && up.data.session){ goToWizard(); }
+        else { setMsg('Check your email to confirm your account, then come back and log in.', true); setTab(false); }
+      } else {
+        var inr = await sb.auth.signInWithPassword({ email:email, password:pass });
+        if(inr.error){ setMsg(inr.error.message); }
+        else { goToWizard(); }
+      }
+    }catch(ex){ setMsg((ex&&ex.message)||'Something went wrong — please try again.'); }
+    finally{ btn.disabled=false; btn.textContent=label; }
+  });
+
+  // If they're already signed in (or just confirmed their email), go straight in.
+  (async function(){
+    if(DEMO) return;
+    try{ var sb=await getSupabase(); var r=await sb.auth.getSession(); if(r&&r.data&&r.data.session){ goToWizard(); } }catch(e){}
+  })();
+</script>
+</body>
+</html>
