@@ -314,6 +314,7 @@ var AUTOMATION_CHECKOUT_FN = '/.netlify/functions/create-automation-checkout';
 var HOOK_KEY   = 'rt_auto_webhook';
 var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
+var voiceCache = null;   // in-memory copy of the voice profile (source of truth = Supabase)
 
 /* ---- tiny helpers ---- */
 function $(id){return document.getElementById(id);}
@@ -403,8 +404,36 @@ function saveHook(){
 }
 function startCreate(){ renderPlatforms(); show('scrCreate'); }
 
-/* ---- voice profile (the heart of the product) ---- */
-function loadVoice(){ try{ return JSON.parse(localStorage.getItem(VOICE_KEY)||'null'); }catch(e){ return null; } }
+/* ---- voice profile (the heart of the product) — persisted in Supabase ---- */
+function lsVoice(){ try{ return JSON.parse(localStorage.getItem(VOICE_KEY)||'null'); }catch(e){ return null; } }
+function loadVoice(){ return voiceCache || lsVoice(); }   // synchronous, cache-first
+async function loadVoiceRemote(){
+  var local=lsVoice();
+  try{
+    var sb=await rtClient();
+    if(!sb){ voiceCache=local; return voiceCache; }            // demo / not configured → local only
+    var r=await sb.auth.getSession();
+    var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
+    if(!uid){ voiceCache=local; return voiceCache; }
+    var q=await sb.from('voice_profiles').select('profile').eq('user_id',uid).maybeSingle();
+    if(q&&q.data&&q.data.profile){
+      voiceCache=q.data.profile;
+      try{ localStorage.setItem(VOICE_KEY, JSON.stringify(voiceCache)); }catch(e){}
+      return voiceCache;
+    }
+    if(local){ voiceCache=local; saveVoiceRemote(local); return voiceCache; }  // migrate an older local profile up
+    voiceCache=null; return null;
+  }catch(e){ voiceCache=local; return voiceCache; }
+}
+async function saveVoiceRemote(v){
+  try{
+    var sb=await rtClient(); if(!sb) return;
+    var r=await sb.auth.getSession();
+    var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
+    if(!uid) return;
+    await sb.from('voice_profiles').upsert({user_id:uid, profile:v, updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  }catch(e){ /* local copy is still saved; it re-syncs on the next save */ }
+}
 function renderTones(sel){
   var box=$('voiceTone'); box.innerHTML='';
   TONES.forEach(function(t){
@@ -422,7 +451,9 @@ function fillVoiceForm(){
 function saveVoice(){
   var sel=$('voiceTone').querySelector('.chip.on');
   var v={ tone: sel?sel.textContent:'', audience:$('vAudience').value.trim(), topics:$('vTopics').value.trim(), avoid:$('vAvoid').value.trim(), sample:$('vSample').value.trim() };
-  localStorage.setItem(VOICE_KEY, JSON.stringify(v));
+  voiceCache=v;
+  try{ localStorage.setItem(VOICE_KEY, JSON.stringify(v)); }catch(e){}
+  saveVoiceRemote(v);   // persist to Supabase in the background
   startCreate();
 }
 function openVoice(){ fillVoiceForm(); show('scrVoice'); }
@@ -512,6 +543,13 @@ function renderFullSystem(){
   var g=$('fsGuide'); if(g && SETUP.fullSystem && SETUP.fullSystem.guideUrl){ g.href=SETUP.fullSystem.guideUrl; g.classList.remove('todo'); }
 }
 
+async function route(){
+  try{ await loadVoiceRemote(); }catch(e){}        // know their voice before deciding the screen
+  if(!localStorage.getItem(HOOK_KEY)){ show('scrSetup'); }
+  else if(!loadVoice()){ openVoice(); }
+  else { startCreate(); }
+}
+
 function boot(){
   // wire setup links/config
   if(SETUP.publisherBlueprint){ var b=$('bpPub'); b.href=SETUP.publisherBlueprint; b.classList.remove('todo'); }
@@ -541,10 +579,8 @@ function boot(){
   $('ideaBtn').onclick=fetchIdeas;
   $('editVoice').onclick=openVoice;
   $('fsBack').onclick=function(){ show('scrCreate'); };
-  // route: connected? -> create, else setup
-  if(!localStorage.getItem(HOOK_KEY)){ show('scrSetup'); }
-  else if(!loadVoice()){ openVoice(); }
-  else { startCreate(); }
+  // route once we know their voice (from Supabase, with a local fallback)
+  route();
   checkUnlocked();   // if they've already bought the full system, reveal it in-app
 }
 boot();
