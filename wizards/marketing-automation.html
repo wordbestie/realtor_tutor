@@ -28,6 +28,7 @@
   .rt-brand{font-family:var(--display);font-weight:800;font-size:1.02rem;display:flex;align-items:center;gap:.5ch;color:#fff}
   .rt-tick{width:9px;height:9px;background:var(--gold);border-radius:2px;transform:rotate(45deg);display:inline-block}
   .rt-spacer{width:74px}
+  .rt-plan{color:var(--gold);text-decoration:none;font-weight:800;font-size:.92rem;font-family:var(--display);cursor:pointer;white-space:nowrap}
   .rtgate{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;align-items:center;justify-content:center}
   .rtgate-box{font-family:var(--display);font-weight:700;color:var(--muted)}
 
@@ -69,6 +70,13 @@
   .ideas{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
   .idea{text-align:left;border:1.5px solid var(--line);background:var(--card-2);border-radius:12px;padding:11px 14px;font-size:.92rem;line-height:1.35;color:var(--ink);cursor:pointer;transition:.12s}
   .idea:hover{border-color:var(--gold);background:#fff}
+
+  .plan{border:1.5px solid var(--line);background:var(--card);border-radius:16px;padding:18px;margin:0 0 12px}
+  .plan.featured{border-color:var(--gold);box-shadow:0 6px 22px rgba(224,162,39,.14)}
+  .plan-name{font-family:var(--display);font-weight:800;font-size:1.1rem;color:var(--ink)}
+  .price{font-family:var(--display);font-weight:800;font-size:2rem;color:var(--ink);margin:4px 0}
+  .price span{font-size:1rem;font-weight:600;color:var(--muted)}
+  .plan-desc{color:var(--muted);font-size:.9rem;line-height:1.4;margin:0 0 14px}
 
   .err{color:var(--danger);font-size:.9rem;margin-top:10px;font-weight:600;display:none}
   .err.show{display:block}
@@ -122,7 +130,7 @@
   <div class="rt-top-in">
     <a class="rt-back" href="../index.html">&larr; Dashboard</a>
     <span class="rt-brand"><span class="rt-tick"></span> Realtor&nbsp;Tutor</span>
-    <span class="rt-spacer"></span>
+    <a class="rt-plan" id="planLink">Plan</a>
   </div>
 </header>
 
@@ -154,6 +162,35 @@
       <div class="row"><button class="btn" id="saveHook">Save &amp; continue →</button></div>
       <div class="err" id="setupErr"></div>
     </div>
+  </section>
+
+  <!-- ===================== PLAN / SUBSCRIBE ===================== -->
+  <section class="screen" id="scrPlan">
+    <div class="card" id="planActive" style="display:none">
+      <label class="fld">Your subscription</label>
+      <p class="hint">You're on the <b id="planTier">Solo</b> plan — thank you! You can manage or cancel anytime.</p>
+      <button class="btn block" id="manageBtn">Manage subscription</button>
+    </div>
+    <div id="planChoose">
+      <div class="card">
+        <label class="fld">Unlock the full content engine</label>
+        <p class="hint">Generate in your voice and publish on autopilot. Cancel anytime.</p>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Solo</div>
+        <div class="price">$67<span> CAD/mo</span></div>
+        <div class="plan-desc">For one agent — your voice, your socials, on autopilot.</div>
+        <button class="btn block" id="subSolo">Choose Solo →</button>
+      </div>
+      <div class="plan featured">
+        <div class="plan-name">Pro / Team</div>
+        <div class="price">$197<span> CAD/mo</span></div>
+        <div class="plan-desc">Up to 5 seats — each with the full monthly post allowance.</div>
+        <button class="btn block" id="subPro">Choose Pro →</button>
+      </div>
+    </div>
+    <div class="err" id="planErr"></div>
+    <button class="ghost" id="planBack" type="button" style="margin-top:14px">← Back</button>
   </section>
 
   <!-- ===================== VOICE ===================== -->
@@ -311,6 +348,8 @@ var CAPTION_FN = '/.netlify/functions/generate-caption';
 var IDEAS_FN   = '/.netlify/functions/suggest-ideas';
 var PUBLISH_FN = '/.netlify/functions/publish-post';
 var AUTOMATION_CHECKOUT_FN = '/.netlify/functions/create-automation-checkout';
+var SUB_CHECKOUT_FN = '/.netlify/functions/create-subscription-checkout';
+var PORTAL_FN       = '/.netlify/functions/create-portal-session';
 var HOOK_KEY   = 'rt_auto_webhook';
 var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
@@ -318,7 +357,7 @@ var voiceCache = null;   // in-memory copy of the voice profile (source of truth
 
 /* ---- tiny helpers ---- */
 function $(id){return document.getElementById(id);}
-function show(id){['scrSetup','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
+function show(id){['scrSetup','scrPlan','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
 function err(id,msg){var e=$(id);if(msg){e.textContent=msg;e.classList.add('show');}else{e.classList.remove('show');}}
 
 var state = { base64:null, mediaType:'image/jpeg', dataUrl:null, caption:'' };
@@ -543,6 +582,50 @@ function renderFullSystem(){
   var g=$('fsGuide'); if(g && SETUP.fullSystem && SETUP.fullSystem.guideUrl){ g.href=SETUP.fullSystem.guideUrl; g.classList.remove('todo'); }
 }
 
+/* ---- subscription: pricing, checkout, portal, live status ---- */
+async function openPlan(){ show('scrPlan'); await checkSub(); }
+async function checkSub(){
+  try{
+    var sb=await rtClient(); if(!sb) return;
+    var r=await sb.auth.getSession();
+    var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
+    if(!uid) return;
+    var q=await sb.from('entitlements').select('sub_tier,sub_status').eq('user_id',uid).maybeSingle();
+    var active = q && q.data && q.data.sub_status === 'active';
+    $('planActive').style.display = active ? 'block' : 'none';
+    $('planChoose').style.display = active ? 'none' : 'block';
+    if(active){ $('planTier').textContent = (q.data.sub_tier === 'pro') ? 'Pro / Team' : 'Solo'; }
+  }catch(e){ /* if we can't tell, leave the choices visible */ }
+}
+async function startSub(tier, btn){
+  if(window.RT_DEMO_MODE){ err('planErr','Subscriptions are disabled in demo mode.'); return; }
+  var o=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Loading checkout…'; err('planErr','');
+  try{
+    var sb=await rtClient(); if(!sb) throw new Error('client');
+    var r=await sb.auth.getSession();
+    var token=(r&&r.data&&r.data.session)?r.data.session.access_token:null;
+    if(!token){ location.replace('../index.html'); return; }
+    var res=await fetch(SUB_CHECKOUT_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_token:token, tier:tier})});
+    var out=await res.json();
+    if(out.url){ window.location=out.url; return; }
+    throw new Error(out.error||'checkout');
+  }catch(e){ btn.disabled=false; btn.innerHTML=o; err('planErr','Could not start checkout — please try again, or email rebecca@realtortutor.com.'); }
+}
+async function openPortal(btn){
+  if(window.RT_DEMO_MODE){ err('planErr','The billing portal is disabled in demo mode.'); return; }
+  var o=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Opening…'; err('planErr','');
+  try{
+    var sb=await rtClient(); if(!sb) throw new Error('client');
+    var r=await sb.auth.getSession();
+    var token=(r&&r.data&&r.data.session)?r.data.session.access_token:null;
+    if(!token){ location.replace('../index.html'); return; }
+    var res=await fetch(PORTAL_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_token:token})});
+    var out=await res.json();
+    if(out.url){ window.location=out.url; return; }
+    throw new Error(out.error||'portal');
+  }catch(e){ btn.disabled=false; btn.innerHTML=o; err('planErr','Could not open the billing portal — please try again.'); }
+}
+
 async function route(){
   try{ await loadVoiceRemote(); }catch(e){}        // know their voice before deciding the screen
   if(!localStorage.getItem(HOOK_KEY)){ show('scrSetup'); }
@@ -577,6 +660,11 @@ function boot(){
   $('changeConn').onclick=function(){ show('scrSetup'); };
   $('saveVoice').onclick=saveVoice;
   $('ideaBtn').onclick=fetchIdeas;
+  $('planLink').onclick=openPlan;
+  $('subSolo').onclick=function(){ startSub('solo', this); };
+  $('subPro').onclick=function(){ startSub('pro', this); };
+  $('manageBtn').onclick=function(){ openPortal(this); };
+  $('planBack').onclick=function(){ if(!localStorage.getItem(HOOK_KEY)){show('scrSetup');} else if(!loadVoice()){openVoice();} else {startCreate();} };
   $('editVoice').onclick=openVoice;
   $('fsBack').onclick=function(){ show('scrCreate'); };
   // route once we know their voice (from Supabase, with a local fallback)
