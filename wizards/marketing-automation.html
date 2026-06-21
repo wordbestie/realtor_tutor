@@ -81,6 +81,8 @@
   .connbar{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.84rem;color:var(--muted);margin:-6px 0 18px}
   .connbar b{color:var(--green)}
   .connbar a{color:var(--muted);text-decoration:underline;cursor:pointer}
+  .unlockedbar{display:block;background:linear-gradient(120deg,var(--ink),var(--ink-2));color:#fff;font-family:var(--display);font-weight:700;font-size:.95rem;text-align:center;text-decoration:none;border-radius:12px;padding:12px 16px;margin:0 0 16px;cursor:pointer;border:1px solid rgba(224,162,39,.4)}
+  .unlockedbar:hover{filter:brightness(1.1)}
 
   .caption-out{white-space:pre-wrap;background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:1rem;min-height:120px}
 
@@ -148,9 +150,40 @@
     </div>
   </section>
 
+  <!-- ===================== VOICE ===================== -->
+  <section class="screen" id="scrVoice">
+    <div class="card">
+      <label class="fld">Let's learn your voice</label>
+      <p class="hint">A few quick questions so everything we write sounds like <em>you</em> — not a robot. Change these anytime.</p>
+    </div>
+    <div class="card">
+      <label class="fld">Your tone</label>
+      <div class="row" id="voiceTone"></div>
+    </div>
+    <div class="card">
+      <label class="fld">Who you're talking to</label>
+      <input type="text" id="vAudience" placeholder="e.g. first-time buyers in Hamilton">
+    </div>
+    <div class="card">
+      <label class="fld">What you post about</label>
+      <input type="text" id="vTopics" placeholder="e.g. new listings, market updates, neighbourhood tips">
+    </div>
+    <div class="card">
+      <label class="fld">Anything to avoid? <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+      <input type="text" id="vAvoid" placeholder="e.g. no hard sell, no clichés, skip emojis">
+    </div>
+    <div class="card">
+      <label class="fld">Sound like you <span style="font-weight:400;color:var(--muted)">(optional, but powerful)</span></label>
+      <p class="hint">Paste something you've written — a post, a bio, an email. We'll match your style.</p>
+      <textarea id="vSample" placeholder="Paste a few sentences in your own words…"></textarea>
+    </div>
+    <button class="btn block" id="saveVoice">Save my voice →</button>
+  </section>
+
   <!-- ===================== CREATE ===================== -->
   <section class="screen" id="scrCreate">
-    <div class="connbar"><span>Publishing to <b id="connList">your connected socials</b></span><a id="changeConn">change setup</a></div>
+    <a class="unlockedbar" id="unlockedBar" style="display:none">✨ You've unlocked the full system — set it up →</a>
+    <div class="connbar"><span>Publishing to <b id="connList">your connected socials</b></span><span><a id="editVoice">edit voice</a> · <a id="changeConn">change setup</a></span></div>
     <div class="card">
       <label class="fld">1 · Your image</label>
       <p class="hint">A listing photo, a sold sign, a headshot — whatever this post is about.</p>
@@ -215,6 +248,27 @@
       <a class="cta" id="upsellCta" href="#">Unlock the full system — $397 →</a>
       <p class="fine">One-time. Plugs straight into the Make account you just set up.</p>
     </section>
+    <a class="unlockedbar" id="doneUnlocked" style="display:none;margin-top:18px">✨ Open your full-system setup →</a>
+  </section>
+
+  <!-- ===================== UNLOCKED (full system, after $397) ===================== -->
+  <section class="screen" id="scrUnlocked">
+    <div class="card center">
+      <div class="done-ic" style="background:var(--gold);color:var(--ink)">★</div>
+      <h3 style="font-family:var(--display);font-weight:800;font-size:1.35rem;margin:0 0 6px">The full system is yours.</h3>
+      <p style="color:var(--muted);margin:0">Add each engine to your Make account, connect your apps once, and your whole content calendar runs itself.</p>
+    </div>
+    <div class="card">
+      <label class="fld">1 · Add the engines to your Make</label>
+      <p class="hint">Each button copies one piece of the full system into the same Make account you already set up.</p>
+      <div id="fsTemplates"></div>
+    </div>
+    <div class="card">
+      <label class="fld">2 · Connect &amp; switch on</label>
+      <p>As you import each engine, Make will ask you to connect your apps. Your socials are already connected from the first setup — so you'll just add <b>Dropbox</b> and your <b>AI key</b>, set up your content folders, and flip each scenario <b>ON</b>.</p>
+      <a class="btnlink todo" id="fsGuide" href="#" target="_blank" rel="noopener">Open the full setup guide →</a>
+    </div>
+    <div class="row"><button class="btn-ghost" id="fsBack">← Back</button></div>
   </section>
 
   <p class="foot">Built &amp; supported by Rebecca Zak, REALTOR®. Stuck? <a href="mailto:rebecca@realtortutor.com">rebecca@realtortutor.com</a></p>
@@ -232,16 +286,29 @@ var SETUP = {
     {id:'instagram', label:'Instagram'},
     {id:'facebook',  label:'Facebook'},
     {id:'linkedin',  label:'LinkedIn'}
-  ]
+  ],
+  // ----- FULL SYSTEM (shown automatically AFTER someone buys the $397 package) -----
+  // Publish each full-suite scenario as a Make Template, then paste its install link here.
+  // Buttons with a blank url stay greyed as "coming soon".
+  fullSystem: {
+    templates: [
+      { label:'Add the Image engine',     url:'' },
+      { label:'Add the Shorts engine',    url:'' },
+      { label:'Add the Long-form engine', url:'' }
+    ],
+    guideUrl: ''                   // optional: link to your full setup guide or walkthrough video
+  }
 };
 var CAPTION_FN = '/.netlify/functions/generate-caption';
 var PUBLISH_FN = '/.netlify/functions/publish-post';
 var AUTOMATION_CHECKOUT_FN = '/.netlify/functions/create-automation-checkout';
 var HOOK_KEY   = 'rt_auto_webhook';
+var VOICE_KEY  = 'rt_voice_profile';
+var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
 
 /* ---- tiny helpers ---- */
 function $(id){return document.getElementById(id);}
-function show(id){['scrSetup','scrCreate','scrReview','scrDone'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
+function show(id){['scrSetup','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
 function err(id,msg){var e=$(id);if(msg){e.textContent=msg;e.classList.add('show');}else{e.classList.remove('show');}}
 
 var state = { base64:null, mediaType:'image/jpeg', dataUrl:null, caption:'' };
@@ -271,7 +338,7 @@ function generate(btn,errId){
   if(!brief){ err(errId,'Add a quick brief first.'); return; }
   err(errId,'');
   var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Writing…';
-  fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64}})})
+  fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64},voice:loadVoice()})})
     .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
     .then(function(res){
       btn.disabled=false; btn.innerHTML=orig;
@@ -323,9 +390,44 @@ function publish(btn){
 function saveHook(){
   var v=$('hookInput').value.trim();
   if(!/^https:\/\/hook[a-z0-9.\-]*\.make\.com\//i.test(v)){ err('setupErr','That doesn\'t look like a Make webhook link (it should start with https://hook…make.com/).'); return; }
-  err('setupErr',''); localStorage.setItem(HOOK_KEY,v); startCreate();
+  err('setupErr',''); localStorage.setItem(HOOK_KEY,v); if(loadVoice()){ startCreate(); } else { openVoice(); }
 }
 function startCreate(){ renderPlatforms(); show('scrCreate'); }
+
+/* ---- voice profile (the heart of the product) ---- */
+function loadVoice(){ try{ return JSON.parse(localStorage.getItem(VOICE_KEY)||'null'); }catch(e){ return null; } }
+function renderTones(sel){
+  var box=$('voiceTone'); box.innerHTML='';
+  TONES.forEach(function(t){
+    var el=document.createElement('div'); el.className='chip'+(t===sel?' on':''); el.textContent=t;
+    el.onclick=function(){ box.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');}); el.classList.add('on'); };
+    box.appendChild(el);
+  });
+}
+function fillVoiceForm(){
+  var v=loadVoice()||{};
+  renderTones(v.tone||TONES[0]);
+  $('vAudience').value=v.audience||''; $('vTopics').value=v.topics||'';
+  $('vAvoid').value=v.avoid||''; $('vSample').value=v.sample||'';
+}
+function saveVoice(){
+  var sel=$('voiceTone').querySelector('.chip.on');
+  var v={ tone: sel?sel.textContent:'', audience:$('vAudience').value.trim(), topics:$('vTopics').value.trim(), avoid:$('vAvoid').value.trim(), sample:$('vSample').value.trim() };
+  localStorage.setItem(VOICE_KEY, JSON.stringify(v));
+  startCreate();
+}
+function openVoice(){ fillVoiceForm(); show('scrVoice'); }
+
+/* ---- shared supabase client (live mode only) ---- */
+var _sb=null;
+async function rtClient(){
+  if(_sb) return _sb;
+  if(window.RT_DEMO_MODE || !window.RT_SUPABASE_URL || window.RT_SUPABASE_URL.indexOf('YOUR_')>-1) return null;
+  var mod=await import('https://esm.sh/@supabase/supabase-js@2.45.0');
+  _sb=mod.createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY,
+    {auth:{persistSession:true,autoRefreshToken:false,lock:function(n,t,fn){return fn();}}});
+  return _sb;
+}
 
 /* ---- $397 unlock: take the member's session token to the Stripe checkout ---- */
 async function startUnlock(e){
@@ -335,9 +437,7 @@ async function startUnlock(e){
   var cta=$('upsellCta'), orig=cta.innerHTML;
   cta.style.pointerEvents='none'; cta.innerHTML='Loading checkout…';
   try{
-    var mod=await import('https://esm.sh/@supabase/supabase-js@2.45.0');
-    var sb=mod.createClient(window.RT_SUPABASE_URL, window.RT_SUPABASE_ANON_KEY,
-      {auth:{persistSession:true,autoRefreshToken:false,lock:function(n,t,fn){return fn();}}});
+    var sb=await rtClient(); if(!sb) throw new Error('client');
     var r=await sb.auth.getSession();
     var token=(r&&r.data&&r.data.session)?r.data.session.access_token:null;
     if(!token){ location.replace('../index.html'); return; }
@@ -349,6 +449,33 @@ async function startUnlock(e){
     cta.style.pointerEvents=''; cta.innerHTML=orig;
     alert('Could not start checkout — please try again, or email rebecca@realtortutor.com.');
   }
+}
+
+/* ---- after purchase: detect has_automation and reveal the full system ---- */
+async function checkUnlocked(){
+  try{
+    var sb=await rtClient(); if(!sb) return;
+    var r=await sb.auth.getSession();
+    var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
+    if(!uid) return;
+    var q=await sb.from('entitlements').select('has_automation').eq('user_id',uid).maybeSingle();
+    if(q&&q.data&&q.data.has_automation){ applyUnlocked(); }
+  }catch(e){ /* if anything fails, just leave the upsell as-is */ }
+}
+function applyUnlocked(){
+  renderFullSystem();
+  var ub=$('unlockedBar'); if(ub){ ub.style.display='block'; ub.onclick=function(){ show('scrUnlocked'); }; }
+  var du=$('doneUnlocked'); if(du){ du.style.display='block'; du.onclick=function(){ show('scrUnlocked'); }; }
+  var up=document.querySelector('.upsell'); if(up){ up.style.display='none'; }   // buyers aren't re-pitched
+}
+function renderFullSystem(){
+  var box=$('fsTemplates'); if(!box) return; box.innerHTML='';
+  ((SETUP.fullSystem&&SETUP.fullSystem.templates)||[]).forEach(function(t){
+    var a=document.createElement('a'); a.className='btnlink'+(t.url?'':' todo'); a.textContent=t.label+' →';
+    if(t.url){ a.href=t.url; a.target='_blank'; a.rel='noopener'; } else { a.href='#'; }
+    box.appendChild(a);
+  });
+  var g=$('fsGuide'); if(g && SETUP.fullSystem && SETUP.fullSystem.guideUrl){ g.href=SETUP.fullSystem.guideUrl; g.classList.remove('todo'); }
 }
 
 function boot(){
@@ -368,7 +495,7 @@ function boot(){
   $('rmImg').onclick=clearImg;
   $('genBtn').onclick=function(){ generate(this,'createErr'); };
   $('regenBtn').onclick=function(){ var b=this; var o=b.innerHTML; b.disabled=true; b.innerHTML='<span class="spin"></span> Rewriting…';
-    fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:$('brief').value.trim(),image:{media_type:state.mediaType,data:state.base64}})})
+    fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:$('brief').value.trim(),image:{media_type:state.mediaType,data:state.base64},voice:loadVoice()})})
     .then(function(r){return r.json();}).then(function(d){ b.disabled=false; b.innerHTML=o; if(d.caption){$('caption').value=d.caption;} })
     .catch(function(){ b.disabled=false; b.innerHTML=o; }); };
   $('pubBtn').onclick=function(){ publish(this); };
@@ -376,8 +503,14 @@ function boot(){
   $('againBtn').onclick=function(){ $('brief').value=''; clearImg(); $('caption').value=''; show('scrCreate'); };
   $('saveHook').onclick=saveHook;
   $('changeConn').onclick=function(){ show('scrSetup'); };
+  $('saveVoice').onclick=saveVoice;
+  $('editVoice').onclick=openVoice;
+  $('fsBack').onclick=function(){ show('scrCreate'); };
   // route: connected? -> create, else setup
-  if(localStorage.getItem(HOOK_KEY)){ startCreate(); } else { show('scrSetup'); }
+  if(!localStorage.getItem(HOOK_KEY)){ show('scrSetup'); }
+  else if(!loadVoice()){ openVoice(); }
+  else { startCreate(); }
+  checkUnlocked();   // if they've already bought the full system, reveal it in-app
 }
 boot();
 </script>
