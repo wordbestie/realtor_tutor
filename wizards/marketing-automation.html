@@ -244,6 +244,7 @@
       <textarea id="brief" placeholder="e.g. Just listed — 3 bed bungalow in east Hamilton, big backyard, open house Saturday 2–4."></textarea>
     </div>
     <button class="btn block" id="genBtn">Write my caption →</button>
+    <p class="hint" id="usageNote" style="display:none;text-align:center;margin:10px 0 0"></p>
     <div class="err" id="createErr"></div>
   </section>
 
@@ -354,6 +355,7 @@ var HOOK_KEY   = 'rt_auto_webhook';
 var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
 var voiceCache = null;   // in-memory copy of the voice profile (source of truth = Supabase)
+var FREE_LIMIT = 3;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 3)
 
 /* ---- tiny helpers ---- */
 function $(id){return document.getElementById(id);}
@@ -381,21 +383,49 @@ function handleFile(file){
 function clearImg(){ state.base64=null; state.dataUrl=null; $('file').value=''; $('preview').style.display='none'; $('drop').style.display='block'; }
 
 /* ---- caption ---- */
-function generate(btn,errId){
+async function getToken(){
+  try{ var sb=await rtClient(); if(!sb) return null; var r=await sb.auth.getSession();
+    return (r&&r.data&&r.data.session)?r.data.session.access_token:null; }catch(e){ return null; }
+}
+function updateUsageNote(used,limit){
+  var note=$('usageNote'); if(!note) return;
+  var lim=limit||FREE_LIMIT; var left=Math.max(0,lim-used);
+  note.textContent=left+' of '+lim+' free posts left this month';
+  note.style.display='block';
+}
+async function checkUsage(){
+  var note=$('usageNote'); if(note) note.style.display='none';
+  try{
+    var sb=await rtClient(); if(!sb) return;
+    var r=await sb.auth.getSession();
+    var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
+    if(!uid) return;
+    var q=await sb.from('entitlements').select('sub_status,usage_period,usage_count').eq('user_id',uid).maybeSingle();
+    var d=(q&&q.data)?q.data:{};
+    if(!note) return;
+    if(d.sub_status==='active'){ note.textContent='Unlimited posts ✓'; note.style.display='block'; return; }
+    var per=new Date().toISOString().slice(0,7);
+    var used=(d.usage_period===per)?(d.usage_count||0):0;
+    updateUsageNote(used, FREE_LIMIT);
+  }catch(e){ /* if we can't read usage, just don't show the note */ }
+}
+async function generate(btn,errId){
   var brief=$('brief').value.trim();
   if(!state.base64){ err(errId,'Add a photo first.'); return; }
   if(!brief){ err(errId,'Add a quick brief first.'); return; }
   err(errId,'');
   var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Writing…';
-  fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64},voice:loadVoice()})})
-    .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
-    .then(function(res){
-      btn.disabled=false; btn.innerHTML=orig;
-      if(!res.ok){ err(errId,(res.d&&res.d.error)||'Could not write the caption. Try again.'); return; }
-      state.caption=res.d.caption||''; $('caption').value=state.caption;
-      $('reviewImg').src=state.dataUrl; show('scrReview');
-    })
-    .catch(function(){ btn.disabled=false; btn.innerHTML=orig; err(errId,'Connection problem. Try again.'); });
+  try{
+    var token=await getToken();
+    var r=await fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64},voice:loadVoice(),access_token:token,meter:true})});
+    var d=await r.json();
+    btn.disabled=false; btn.innerHTML=orig;
+    if(r.status===402){ err(errId,'You\'ve used all '+(d.limit||FREE_LIMIT)+' free posts this month. Subscribe for unlimited posting.'); openPlan(); return; }
+    if(!r.ok){ err(errId,(d&&d.error)||'Could not write the caption. Try again.'); return; }
+    state.caption=d.caption||''; $('caption').value=state.caption;
+    if(!d.subscribed && typeof d.used!=='undefined'){ updateUsageNote(d.used, d.limit); }
+    $('reviewImg').src=state.dataUrl; show('scrReview');
+  }catch(e){ btn.disabled=false; btn.innerHTML=orig; err(errId,'Connection problem. Try again.'); }
 }
 
 /* ---- platforms ---- */
@@ -441,7 +471,7 @@ function saveHook(){
   if(!/^https:\/\/hook[a-z0-9.\-]*\.make\.com\//i.test(v)){ err('setupErr','That doesn\'t look like a Make webhook link (it should start with https://hook…make.com/).'); return; }
   err('setupErr',''); localStorage.setItem(HOOK_KEY,v); if(loadVoice()){ startCreate(); } else { openVoice(); }
 }
-function startCreate(){ renderPlatforms(); show('scrCreate'); }
+function startCreate(){ renderPlatforms(); show('scrCreate'); checkUsage(); }
 
 /* ---- voice profile (the heart of the product) — persisted in Supabase ---- */
 function lsVoice(){ try{ return JSON.parse(localStorage.getItem(VOICE_KEY)||'null'); }catch(e){ return null; } }
