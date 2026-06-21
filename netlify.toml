@@ -11,6 +11,10 @@
 [functions."stripe-webhook"]
   # (esbuild bundles node_modules automatically; nothing extra needed)
 
+# Scheduled publisher: every 5 minutes, send out any posts whose time has come.
+[functions."run-scheduled-posts"]
+  schedule = "*/5 * * * *"
+
 # NOTE: No catch-all redirect. This site is plain .html files (index + wizards),
 # so every page is a real file. A missing file should return a real 404 — not
 # silently serve the homepage — so deployment mistakes are obvious.
