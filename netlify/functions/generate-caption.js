@@ -28,10 +28,21 @@ exports.handler = async (event) => {
   // Optional image for context: { media_type: 'image/jpeg', data: '<base64>' }
   const image = body.image && body.image.data && body.image.media_type ? body.image : null;
 
+  // The user's voice profile (built during onboarding) — this is what makes captions sound like THEM.
+  const v = body.voice || {};
+  const voiceLines = [];
+  if (v.tone)     voiceLines.push('Tone and personality: ' + v.tone + '.');
+  if (v.audience) voiceLines.push('Who they are talking to: ' + v.audience + '.');
+  if (v.topics)   voiceLines.push('What they post about: ' + v.topics + '.');
+  if (v.avoid)    voiceLines.push('Things to avoid: ' + v.avoid + '.');
+  if (v.sample)   voiceLines.push('A sample of how this person writes — match this style closely:\n"' + String(v.sample).slice(0, 1200) + '"');
+
   const system =
-    "You are a social media copywriter for an individual real estate agent. " +
-    "Write ONE ready-to-post caption based on the agent's brief (and the image, if provided). " +
-    "Tone: warm, professional, and authentic — never salesy, hype-y, or spammy. " +
+    "You are a social media copywriter who writes in the user's OWN voice. " +
+    "Write ONE ready-to-post caption based on their brief (and the image, if provided). " +
+    (voiceLines.length
+      ? "Write it so it genuinely sounds like this specific person:\n" + voiceLines.join("\n") + "\n"
+      : "Tone: warm, authentic, and professional — never salesy or spammy. ") +
     "Structure: 1 to 3 short paragraphs, then a single line with 3 to 6 relevant hashtags. " +
     "Do not use markdown, asterisks, bold, or headers. Return ONLY the caption text, nothing else.";
 
