@@ -1,0 +1,298 @@
+{
+	"name": "Content Engine — Auto Publisher",
+	"flow": [
+		{
+			"id": 1,
+			"mapper": {},
+			"module": "gateway:CustomWebHook",
+			"version": 1,
+			"metadata": {
+				"restore": {
+					"parameters": {
+						"hook": {
+							"data": {
+								"editable": "true"
+							},
+							"label": "My Content Engine Webhook"
+						}
+					}
+				},
+				"designer": {
+					"x": 0,
+					"y": 0
+				},
+				"parameters": [
+					{
+						"name": "hook",
+						"type": "hook:gateway-webhook",
+						"label": "Webhook",
+						"required": true
+					},
+					{
+						"name": "maxResults",
+						"type": "number",
+						"label": "Maximum number of results"
+					}
+				]
+			},
+			"parameters": {
+				"maxResults": 1
+			}
+		},
+		{
+			"id": 2,
+			"mapper": {
+				"url": "{{1.imageUrl}}",
+				"method": "get",
+				"serializeUrl": false,
+				"shareCookies": false
+			},
+			"module": "http:ActionGetFile",
+			"version": 3,
+			"metadata": {
+				"designer": {
+					"x": 300,
+					"y": 0
+				},
+				"parameters": [
+					{
+						"name": "handleErrors",
+						"type": "boolean",
+						"label": "Evaluate all states as errors (except for 2xx and 3xx )",
+						"required": true
+					}
+				]
+			},
+			"parameters": {
+				"handleErrors": false
+			}
+		},
+		{
+			"id": 6,
+			"mapper": null,
+			"module": "builtin:BasicRouter",
+			"routes": [
+				{
+					"flow": [
+						{
+							"id": 3,
+							"filter": {
+								"name": "Instagram on",
+								"conditions": [
+									[
+										{
+											"a": "{{1.platforms.instagram}}",
+											"b": "true",
+											"o": "text:equal"
+										}
+									]
+								]
+							},
+							"mapper": {
+								"caption": "{{1.caption}}",
+								"accountId": "",
+								"image_url": "{{1.imageUrl}}"
+							},
+							"module": "instagram-business:CreatePostPhoto",
+							"version": 1,
+							"metadata": {
+								"expect": [
+									{
+										"name": "accountId",
+										"type": "select",
+										"label": "Page",
+										"required": true
+									},
+									{
+										"name": "image_url",
+										"type": "url",
+										"label": "Photo URL",
+										"required": true
+									},
+									{
+										"name": "caption",
+										"type": "text",
+										"label": "Caption"
+									},
+									{
+										"name": "location_id",
+										"type": "text",
+										"label": "Location ID"
+									}
+								],
+								"restore": {},
+								"designer": {
+									"x": 900,
+									"y": -150
+								},
+								"parameters": [
+									{
+										"name": "__IMTCONN__",
+										"type": "account:facebook",
+										"label": "Connection",
+										"required": true
+									}
+								]
+							},
+							"parameters": {}
+						}
+					]
+				},
+				{
+					"flow": [
+						{
+							"id": 4,
+							"filter": {
+								"name": "Facebook on",
+								"conditions": [
+									[
+										{
+											"a": "{{1.platforms.facebook}}",
+											"b": "true",
+											"o": "text:equal"
+										}
+									]
+								]
+							},
+							"mapper": {
+								"data": "{{2.data}}",
+								"message": "{{1.caption}}",
+								"page_id": "",
+								"fileName": "post.jpg"
+							},
+							"module": "facebook-pages:UploadPhoto",
+							"version": 6,
+							"metadata": {
+								"expect": [
+									{
+										"name": "page_id",
+										"type": "select",
+										"label": "Page",
+										"required": true
+									},
+									{
+										"name": "fileName",
+										"type": "filename",
+										"label": "File name",
+										"required": true
+									},
+									{
+										"name": "data",
+										"type": "buffer",
+										"label": "Data",
+										"required": true
+									},
+									{
+										"name": "message",
+										"type": "text",
+										"label": "Photo caption"
+									}
+								],
+								"restore": {},
+								"designer": {
+									"x": 900,
+									"y": 0
+								},
+								"parameters": [
+									{
+										"name": "__IMTCONN__",
+										"type": "account:facebook",
+										"label": "Connection",
+										"required": true
+									}
+								]
+							},
+							"parameters": {}
+						}
+					]
+				},
+				{
+					"flow": [
+						{
+							"id": 5,
+							"filter": {
+								"name": "LinkedIn on",
+								"conditions": [
+									[
+										{
+											"a": "{{1.platforms.linkedin}}",
+											"b": "true",
+											"o": "text:equal"
+										}
+									]
+								]
+							},
+							"mapper": {
+								"url": "{{1.imageUrl}}",
+								"method": "link",
+								"content": "{{1.caption}}",
+								"visibility": "PUBLIC",
+								"feedDistribution": "MAIN_FEED",
+								"isReshareDisabledByAuthor": false
+							},
+							"module": "linkedin:ShareImage",
+							"version": 2,
+							"metadata": {
+								"restore": {
+									"expect": {
+										"method": {
+											"label": "Upload by link"
+										},
+										"visibility": {
+											"mode": "chose",
+											"label": "Anyone"
+										},
+										"feedDistribution": {
+											"mode": "chose",
+											"label": "Main feed"
+										},
+										"isReshareDisabledByAuthor": {
+											"mode": "chose"
+										}
+									}
+								},
+								"designer": {
+									"x": 900,
+									"y": 150
+								},
+								"parameters": [
+									{
+										"name": "__IMTCONN__",
+										"type": "account:linkedin2,linkedin-openid",
+										"label": "Connection",
+										"required": true
+									}
+								]
+							},
+							"parameters": {}
+						}
+					]
+				}
+			],
+			"version": 1,
+			"metadata": {
+				"designer": {
+					"x": 600,
+					"y": 0
+				}
+			}
+		}
+	],
+	"metadata": {
+		"instant": true,
+		"version": 1,
+		"designer": {
+			"orphans": []
+		},
+		"scenario": {
+			"dlq": false,
+			"maxErrors": 3,
+			"autoCommit": true,
+			"roundtrips": 1,
+			"sequential": false,
+			"confidential": false,
+			"freshVariables": false,
+			"autoCommitTriggerLast": true
+		}
+	}
+}
