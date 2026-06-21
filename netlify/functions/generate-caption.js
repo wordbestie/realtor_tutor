@@ -1,10 +1,26 @@
 // generate-caption.js
-// Turns an agent's brief (+ optional image) into a ready-to-post social caption
-// using Claude. Server-side so members never need their own AI key for the in-RT flow.
+// Turns a brief (+ optional image) into a ready-to-post caption in the user's voice.
+// Server-side so members never need their own AI key.
 //
-// Requires a Netlify environment variable: ANTHROPIC_API_KEY  (your Anthropic key)
+// Also enforces the FREE-TIER monthly post limit (this is the paywall lever):
+//   - Subscribers (sub_status = 'active') are unlimited.
+//   - Free users get FREE_POST_LIMIT posts per calendar month (default 3).
+//   - Only the primary "write my caption" call is metered (meter:true); rewrites are free.
+//
+// Env vars: ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+//           FREE_POST_LIMIT (optional, default 3)
+
+const { createClient } = require('@supabase/supabase-js');
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+const FREE_LIMIT = parseInt(process.env.FREE_POST_LIMIT || '3', 10);
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+function period() { return new Date().toISOString().slice(0, 7); } // 'YYYY-MM'
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -25,10 +41,36 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Please add a brief so I know what to write.' }) };
   }
 
-  // Optional image for context: { media_type: 'image/jpeg', data: '<base64>' }
   const image = body.image && body.image.data && body.image.media_type ? body.image : null;
 
-  // The user's voice profile (built during onboarding) — this is what makes captions sound like THEM.
+  // ----- usage metering (only when the client asks for it, i.e. the primary generate) -----
+  let meterUser = null, subscribed = false, used = 0;
+  if (body.access_token) {
+    try {
+      const { data: { user } } = await supabaseAdmin.auth.getUser(body.access_token);
+      if (user) {
+        meterUser = user;
+        const { data: ent } = await supabaseAdmin
+          .from('entitlements')
+          .select('sub_status,usage_period,usage_count')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        subscribed = !!(ent && ent.sub_status === 'active');
+        used = (ent && ent.usage_period === period()) ? (ent.usage_count || 0) : 0;
+      }
+    } catch (e) { /* if we can't verify, fall through unmetered (preview) */ }
+  }
+
+  const willMeter = body.meter === true && meterUser && !subscribed;
+  if (willMeter && used >= FREE_LIMIT) {
+    return {
+      statusCode: 402,
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ error: 'limit_reached', limit: FREE_LIMIT, used }),
+    };
+  }
+
+  // ----- the user's voice profile -----
   const v = body.voice || {};
   const voiceLines = [];
   if (v.tone)     voiceLines.push('Tone and personality: ' + v.tone + '.');
@@ -55,25 +97,13 @@ exports.handler = async (event) => {
   try {
     const r = await fetch(ANTHROPIC_URL, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 500,
-        system,
-        messages: [{ role: 'user', content }]
-      })
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system, messages: [{ role: 'user', content }] }),
     });
 
     const data = await r.json();
     if (!r.ok) {
-      return {
-        statusCode: 502,
-        body: JSON.stringify({ error: 'The caption service had a problem. Please try again.' })
-      };
+      return { statusCode: 502, body: JSON.stringify({ error: 'The caption service had a problem. Please try again.' }) };
     }
 
     const caption = (data.content || [])
@@ -82,10 +112,20 @@ exports.handler = async (event) => {
       .join('\n')
       .trim();
 
+    // Count this post against the free allowance (only for metered free-tier calls).
+    if (willMeter) {
+      try {
+        await supabaseAdmin.from('entitlements').upsert(
+          { user_id: meterUser.id, usage_period: period(), usage_count: used + 1, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' }
+        );
+      } catch (e) { /* don't fail the caption if the counter write hiccups */ }
+    }
+
     return {
       statusCode: 200,
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ caption })
+      body: JSON.stringify({ caption, subscribed, used: willMeter ? used + 1 : used, limit: FREE_LIMIT }),
     };
   } catch (e) {
     return { statusCode: 502, body: JSON.stringify({ error: 'The caption service is unavailable right now.' }) };
