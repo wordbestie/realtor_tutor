@@ -15,12 +15,35 @@ const { createClient } = require('@supabase/supabase-js');
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const FREE_LIMIT = parseInt(process.env.FREE_POST_LIMIT || '3', 10);
 
+// Tailors the writing to the kind of post the user picked. Realtor-flavoured for
+// now (the engine's go-to-market vertical); add/edit freely for other niches.
+const POST_TYPE_GUIDE = {
+  just_listed:   "This is a JUST LISTED post. Build genuine excitement about a brand-new listing. Highlight what makes the property special and end with a soft invitation to book a showing or message for details.",
+  just_sold:     "This is a JUST SOLD / success post. Celebrate a closed sale and let it quietly show results. Keep it gracious and client-focused, with a light invitation for anyone thinking of making a move.",
+  open_house:    "This is an OPEN HOUSE post. Make it instantly clear it's an open house, and make the date, time, and place feel inviting and easy to act on. End with a clear, friendly 'come on by' style call to action.",
+  market_update: "This is a MARKET UPDATE post. Share a useful, credible insight about the local market. Be helpful and authoritative, not salesy — informative first, with no pressure.",
+  tip:           "This is a TIP / ADVICE post. Teach the audience one genuinely useful thing about buying, selling, or owning a home. Lead with value; keep any call to action soft.",
+  testimonial:   "This is a TESTIMONIAL / client-love post. Center the client's experience and gratitude. Warm and human — let the social proof do the selling.",
+  behind_scenes: "This is a BEHIND-THE-SCENES / personal post. Show the real human behind the business — a moment, a lesson, a slice of the day. Build connection and relatability over selling."
+};
+
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 function period() { return new Date().toISOString().slice(0, 7); } // 'YYYY-MM'
+
+// True if this email is an active seat on someone's active Pro team.
+async function coveredByTeam(email) {
+  try {
+    const { data: invites } = await supabaseAdmin.from('team_members').select('owner_id').eq('email', email).eq('status', 'invited');
+    if (!invites || !invites.length) return false;
+    const ids = invites.map(i => i.owner_id);
+    const { data: owners } = await supabaseAdmin.from('entitlements').select('user_id').in('user_id', ids).eq('sub_tier', 'pro').eq('sub_status', 'active');
+    return !!(owners && owners.length);
+  } catch (e) { return false; }
+}
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -57,6 +80,10 @@ exports.handler = async (event) => {
           .maybeSingle();
         subscribed = !!(ent && ent.sub_status === 'active');
         used = (ent && ent.usage_period === period()) ? (ent.usage_count || 0) : 0;
+        // Pro/Team seats: covered by their team owner's active Pro plan (resolved live).
+        if (!subscribed && user.email) {
+          subscribed = await coveredByTeam(user.email.toLowerCase());
+        }
       }
     } catch (e) { /* if we can't verify, fall through unmetered (preview) */ }
   }
@@ -79,12 +106,15 @@ exports.handler = async (event) => {
   if (v.avoid)    voiceLines.push('Things to avoid: ' + v.avoid + '.');
   if (v.sample)   voiceLines.push('A sample of how this person writes — match this style closely:\n"' + String(v.sample).slice(0, 1200) + '"');
 
+  const typeGuide = POST_TYPE_GUIDE[(body.postType || '').toString()] || '';
+
   const system =
     "You are a social media copywriter who writes in the user's OWN voice. " +
     "Write ONE ready-to-post caption based on their brief (and the image, if provided). " +
     (voiceLines.length
       ? "Write it so it genuinely sounds like this specific person:\n" + voiceLines.join("\n") + "\n"
       : "Tone: warm, authentic, and professional — never salesy or spammy. ") +
+    (typeGuide ? typeGuide + ' ' : '') +
     "Structure: 1 to 3 short paragraphs, then a single line with 3 to 6 relevant hashtags. " +
     "Do not use markdown, asterisks, bold, or headers. Return ONLY the caption text, nothing else.";
 
