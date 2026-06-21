@@ -277,24 +277,11 @@
 
     <section class="upsell">
       <div class="tag">You just did that in three taps</div>
-      <div class="commercial">
-        <video id="upsellVideo" autoplay muted loop playsinline preload="metadata">
-          <source src="../automation-commercial.mp4" type="video/mp4">
-        </video>
-        <button class="unmute" id="unmute" type="button" style="display:none">🔊 Tap for sound</button>
-        <div class="commercial-fallback" id="commFall">
-          <h2>Now imagine never doing it again.</h2>
-          <p>That was one post, by hand. The full Content Automation Package runs your entire calendar — every format, every platform — completely hands-off.</p>
-          <div class="grid">
-            <span class="gchip">📸 Image posts</span><span class="gchip">🎬 Shorts &amp; Reels</span>
-            <span class="gchip">📝 Long-form &amp; blog</span><span class="gchip">📅 Auto-scheduled</span>
-          </div>
-        </div>
-      </div>
-      <a class="cta" id="upsellCta" href="#">Unlock the full system — $397 →</a>
-      <p class="fine">One-time. Plugs straight into the Make account you just set up.</p>
+      <h2 style="font-family:var(--display);font-weight:800;font-size:1.25rem;margin:10px 0 6px;color:var(--ink)">Want this on autopilot?</h2>
+      <p style="color:var(--muted);margin:0 0 16px">That was one post. Subscribers post unlimited — in their own voice, with no monthly cap.</p>
+      <a class="cta" id="subCta" href="#">See plans →</a>
+      <p class="fine">From $67/mo. Cancel anytime.</p>
     </section>
-    <a class="unlockedbar" id="doneUnlocked" style="display:none;margin-top:18px">✨ Open your full-system setup →</a>
   </section>
 
   <!-- ===================== UNLOCKED (full system, after $397) ===================== -->
@@ -356,6 +343,7 @@ var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
 var voiceCache = null;   // in-memory copy of the voice profile (source of truth = Supabase)
 var FREE_LIMIT = 3;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 3)
+var subActive = false;   // cached: is this member an active subscriber?
 
 /* ---- tiny helpers ---- */
 function $(id){return document.getElementById(id);}
@@ -402,6 +390,7 @@ async function checkUsage(){
     if(!uid) return;
     var q=await sb.from('entitlements').select('sub_status,usage_period,usage_count').eq('user_id',uid).maybeSingle();
     var d=(q&&q.data)?q.data:{};
+    subActive = d.sub_status==='active';
     if(!note) return;
     if(d.sub_status==='active'){ note.textContent='Unlimited posts ✓'; note.style.display='block'; return; }
     var per=new Date().toISOString().slice(0,7);
@@ -460,6 +449,7 @@ function publish(btn){
     .then(function(res){
       btn.disabled=false; btn.innerHTML=orig;
       if(!res.ok){ err('reviewErr',(res.d&&res.d.error)||'Publishing failed. Try again.'); return; }
+      var up=document.querySelector('.upsell'); if(up){ up.style.display = subActive ? 'none' : ''; }
       show('scrDone');
     })
     .catch(function(){ btn.disabled=false; btn.innerHTML=orig; err('reviewErr','Connection problem. Try again.'); });
@@ -666,15 +656,7 @@ async function route(){
 function boot(){
   // wire setup links/config
   if(SETUP.publisherBlueprint){ var b=$('bpPub'); b.href=SETUP.publisherBlueprint; b.classList.remove('todo'); }
-  var cta=$('upsellCta');
-  if(SETUP.upsellUrl){ cta.href=SETUP.upsellUrl; }
-  else { cta.href='mailto:rebecca@realtortutor.com?subject=Full%20Content%20Automation%20Package%20-%20%24397'; cta.addEventListener('click',startUnlock); }
-  // upsell commercial video: hide the text fallback once it plays; offer sound
-  var uv=$('upsellVideo'), cf=$('commFall'), um=$('unmute');
-  if(uv){
-    uv.addEventListener('loadeddata',function(){ if(cf)cf.style.display='none'; if(um)um.style.display='inline-block'; });
-    if(um){ um.onclick=function(){ uv.muted=!uv.muted; um.textContent = uv.muted ? '🔊 Tap for sound' : '🔇 Mute'; if(!uv.muted){ uv.play(); } }; }
-  }
+  var subCta=$('subCta'); if(subCta){ subCta.onclick=function(e){ e.preventDefault(); openPlan(); }; }
   // events
   $('file').addEventListener('change',function(e){ handleFile(e.target.files[0]); });
   $('rmImg').onclick=clearImg;
@@ -699,7 +681,6 @@ function boot(){
   $('fsBack').onclick=function(){ show('scrCreate'); };
   // route once we know their voice (from Supabase, with a local fallback)
   route();
-  checkUnlocked();   // if they've already bought the full system, reveal it in-app
 }
 boot();
 </script>
