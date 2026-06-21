@@ -29,6 +29,18 @@
   .rt-tick{width:9px;height:9px;background:var(--gold);border-radius:2px;transform:rotate(45deg);display:inline-block}
   .rt-spacer{width:74px}
   .rt-plan{color:var(--gold);text-decoration:none;font-weight:800;font-size:.92rem;font-family:var(--display);cursor:pointer;white-space:nowrap}
+  .rt-links{display:flex;gap:16px;align-items:center}
+  .btn-ghost.block{display:block;width:100%}
+  .sched-input{width:100%;font-family:var(--body);font-size:1rem;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:0 0 12px}
+  .sched-input:focus{outline:none;border-color:var(--gold)}
+  .sched-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+  .sched-row:last-child{border-bottom:none}
+  .sched-info{min-width:0}
+  .sched-when{font-family:var(--display);font-weight:800;font-size:.95rem;color:var(--ink)}
+  .sched-cap{color:var(--muted);font-size:.9rem;margin-top:2px;overflow-wrap:anywhere}
+  .sched-meta{color:var(--gold-soft,#B5821C);font-size:.8rem;font-weight:700;margin-top:3px;text-transform:capitalize}
+  .sched-cancel{flex:none;background:none;border:1px solid var(--line);border-radius:20px;color:var(--muted);font-weight:700;font-size:.82rem;padding:6px 12px;cursor:pointer}
+  .sched-cancel:hover{border-color:#B23B2E;color:#B23B2E}
   .rtgate{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;align-items:center;justify-content:center}
   .rtgate-box{font-family:var(--display);font-weight:700;color:var(--muted)}
 
@@ -130,7 +142,7 @@
   <div class="rt-top-in">
     <a class="rt-back" href="../index.html">&larr; Dashboard</a>
     <span class="rt-brand"><span class="rt-tick"></span> Realtor&nbsp;Tutor</span>
-    <a class="rt-plan" id="planLink">Plan</a>
+    <span class="rt-links"><a class="rt-plan" id="schedLink">Scheduled</a><a class="rt-plan" id="planLink">Plan</a></span>
   </div>
 </header>
 
@@ -170,6 +182,18 @@
       <label class="fld">Your subscription</label>
       <p class="hint">You're on the <b id="planTier">Solo</b> plan — thank you! You can manage or cancel anytime.</p>
       <button class="btn block" id="manageBtn">Manage subscription</button>
+    </div>
+    <div class="card" id="planTeam" style="display:none">
+      <label class="fld">Your team <span style="font-weight:400;color:var(--muted)">(<span id="seatCount">1</span> of 5 seats)</span></label>
+      <p class="hint">Invite up to 4 teammates by email. Each gets their own login and unlimited posting while your Pro plan is active. They sign in at your content engine with that email.</p>
+      <div id="seatList"></div>
+      <input type="email" id="seatEmail" class="sched-input" placeholder="teammate@email.com" style="margin-top:10px;margin-bottom:0">
+      <button class="btn-ghost block" id="inviteBtn" style="margin-top:10px">＋ Add teammate</button>
+      <div class="err" id="teamErr"></div>
+    </div>
+    <div class="card" id="planSeat" style="display:none">
+      <label class="fld">You're on a Pro team</label>
+      <p class="hint">You have unlimited posting as part of <b id="seatOwner">your team admin</b>'s Pro plan. There's no billing to manage here — your team admin takes care of that.</p>
     </div>
     <div id="planChoose">
       <div class="card">
@@ -228,7 +252,12 @@
     <a class="unlockedbar" id="unlockedBar" style="display:none">✨ You've unlocked the full system — set it up →</a>
     <div class="connbar"><span>Publishing to <b id="connList">your connected socials</b></span><span><a id="editVoice">edit voice</a> · <a id="changeConn">change setup</a></span></div>
     <div class="card">
-      <label class="fld">1 · Your image</label>
+      <label class="fld">1 · What kind of post?</label>
+      <p class="hint">Pick one and we'll tailor the writing. Not sure? Leave it on “Anything”.</p>
+      <div class="row" id="postTypes"></div>
+    </div>
+    <div class="card">
+      <label class="fld">2 · Your image</label>
       <p class="hint">A listing photo, a sold sign, a headshot — whatever this post is about.</p>
       <label class="drop" id="drop">
         <input type="file" id="file" accept="image/*">
@@ -237,7 +266,7 @@
       <div class="preview" id="preview" style="display:none"><img id="previewImg" alt=""><button class="rm" id="rmImg">Remove</button></div>
     </div>
     <div class="card">
-      <label class="fld">2 · Your brief</label>
+      <label class="fld">3 · Your brief</label>
       <p class="hint">A sentence or two on what to say — or tap “Suggest ideas” and pick one to start.</p>
       <button class="ghost" id="ideaBtn" type="button">💡 Suggest ideas</button>
       <div class="ideas" id="ideaBox" style="display:none"></div>
@@ -262,6 +291,12 @@
       <div class="row" id="platforms"></div>
     </div>
     <button class="btn block" id="pubBtn">Publish now →</button>
+    <div class="card" id="schedCard" style="margin-top:12px">
+      <label class="fld">…or schedule it for later</label>
+      <p class="hint">Pick a date and time and it posts automatically — you don't have to be here.</p>
+      <input type="datetime-local" id="schedWhen" class="sched-input">
+      <button class="btn-ghost block" id="schedBtn">📅 Schedule this post</button>
+    </div>
     <div class="err" id="reviewErr"></div>
     <div class="row" style="margin-top:10px"><button class="btn-ghost" id="backCreate">← Start over</button></div>
   </section>
@@ -270,8 +305,8 @@
   <section class="screen" id="scrDone">
     <div class="card center">
       <div class="done-ic">✓</div>
-      <h3 style="font-family:var(--display);font-weight:800;font-size:1.3rem;margin:0 0 6px">Published!</h3>
-      <p style="color:var(--muted);margin:0 0 16px">Your post is on its way to your socials. Check your accounts in a minute.</p>
+      <h3 id="doneTitle" style="font-family:var(--display);font-weight:800;font-size:1.3rem;margin:0 0 6px">Published!</h3>
+      <p id="doneMsg" style="color:var(--muted);margin:0 0 16px">Your post is on its way to your socials. Check your accounts in a minute.</p>
       <button class="btn" id="againBtn">Make another →</button>
     </div>
 
@@ -282,6 +317,16 @@
       <a class="cta" id="subCta" href="#">See plans →</a>
       <p class="fine">From $67/mo. Cancel anytime.</p>
     </section>
+  </section>
+
+  <!-- ===================== SCHEDULED (content calendar) ===================== -->
+  <section class="screen" id="scrCalendar">
+    <div class="card">
+      <label class="fld">Scheduled posts</label>
+      <p class="hint">Posts waiting to go out. They publish automatically at the time you picked — you don't need to be online.</p>
+      <div id="schedList"><p class="hint">Loading…</p></div>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn-ghost" id="calBack">← Back to posting</button></div>
   </section>
 
   <!-- ===================== UNLOCKED (full system, after $397) ===================== -->
@@ -335,9 +380,13 @@ var SETUP = {
 var CAPTION_FN = '/.netlify/functions/generate-caption';
 var IDEAS_FN   = '/.netlify/functions/suggest-ideas';
 var PUBLISH_FN = '/.netlify/functions/publish-post';
+var SCHEDULE_FN= '/.netlify/functions/schedule-post';
 var AUTOMATION_CHECKOUT_FN = '/.netlify/functions/create-automation-checkout';
 var SUB_CHECKOUT_FN = '/.netlify/functions/create-subscription-checkout';
 var PORTAL_FN       = '/.netlify/functions/create-portal-session';
+var TEAM_SYNC_FN    = '/.netlify/functions/team-sync';
+var TEAM_INVITE_FN  = '/.netlify/functions/team-invite';
+var TEAM_REMOVE_FN  = '/.netlify/functions/team-remove';
 var HOOK_KEY   = 'rt_auto_webhook';
 var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
@@ -347,10 +396,10 @@ var subActive = false;   // cached: is this member an active subscriber?
 
 /* ---- tiny helpers ---- */
 function $(id){return document.getElementById(id);}
-function show(id){['scrSetup','scrPlan','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
+function show(id){['scrSetup','scrPlan','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked','scrCalendar'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
 function err(id,msg){var e=$(id);if(msg){e.textContent=msg;e.classList.add('show');}else{e.classList.remove('show');}}
 
-var state = { base64:null, mediaType:'image/jpeg', dataUrl:null, caption:'' };
+var state = { base64:null, mediaType:'image/jpeg', dataUrl:null, caption:'', postType:'free' };
 
 /* ---- image: read + downscale to keep payloads small ---- */
 function handleFile(file){
@@ -384,18 +433,11 @@ function updateUsageNote(used,limit){
 async function checkUsage(){
   var note=$('usageNote'); if(note) note.style.display='none';
   try{
-    var sb=await rtClient(); if(!sb) return;
-    var r=await sb.auth.getSession();
-    var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
-    if(!uid) return;
-    var q=await sb.from('entitlements').select('sub_status,usage_period,usage_count').eq('user_id',uid).maybeSingle();
-    var d=(q&&q.data)?q.data:{};
-    subActive = d.sub_status==='active';
+    var t=await teamSync(true);
+    subActive = !!t.active;
     if(!note) return;
-    if(d.sub_status==='active'){ note.textContent='Unlimited posts ✓'; note.style.display='block'; return; }
-    var per=new Date().toISOString().slice(0,7);
-    var used=(d.usage_period===per)?(d.usage_count||0):0;
-    updateUsageNote(used, FREE_LIMIT);
+    if(t.active){ note.textContent='Unlimited posts ✓'; note.style.display='block'; return; }
+    updateUsageNote(t.used||0, t.limit||FREE_LIMIT);
   }catch(e){ /* if we can't read usage, just don't show the note */ }
 }
 async function generate(btn,errId){
@@ -406,7 +448,7 @@ async function generate(btn,errId){
   var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Writing…';
   try{
     var token=await getToken();
-    var r=await fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64},voice:loadVoice(),access_token:token,meter:true})});
+    var r=await fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64},voice:loadVoice(),postType:state.postType,access_token:token,meter:true})});
     var d=await r.json();
     btn.disabled=false; btn.innerHTML=orig;
     if(r.status===402){ err(errId,'You\'ve used all '+(d.limit||FREE_LIMIT)+' free posts this month. Subscribe for unlimited posting.'); openPlan(); return; }
@@ -415,6 +457,30 @@ async function generate(btn,errId){
     if(!d.subscribed && typeof d.used!=='undefined'){ updateUsageNote(d.used, d.limit); }
     $('reviewImg').src=state.dataUrl; show('scrReview');
   }catch(e){ btn.disabled=false; btn.innerHTML=orig; err(errId,'Connection problem. Try again.'); }
+}
+
+/* ---- post types ---- */
+var POST_TYPES = [
+  {id:'free',          label:'Anything',          ph:'e.g. Just listed — 3 bed bungalow in east Hamilton, big backyard, open house Saturday 2–4.'},
+  {id:'just_listed',   label:'Just Listed',       ph:'e.g. 3 bed bungalow, east Hamilton, big backyard, $799k — showings start Friday.'},
+  {id:'just_sold',     label:'Just Sold',         ph:'e.g. Sold in 6 days, over asking — so happy for my first-time buyers.'},
+  {id:'open_house',    label:'Open House',        ph:'e.g. Sat 2–4pm, 12 Maple St, Dundas — bright family home, finished basement.'},
+  {id:'market_update', label:'Market Update',     ph:'e.g. Hamilton prices held steady in May; inventory up 8% — a good window for buyers.'},
+  {id:'tip',           label:'Tip / Advice',      ph:'e.g. The one cost first-time buyers always forget: closing costs.'},
+  {id:'testimonial',   label:'Testimonial',       ph:'e.g. The Patels just closed on their first home — paste their words or describe them.'},
+  {id:'behind_scenes', label:'Behind the Scenes', ph:'e.g. Late-night offer prep, coffee #3 — why I love this job.'}
+];
+function renderPostTypes(){
+  var box=$('postTypes'); if(!box) return; box.innerHTML='';
+  POST_TYPES.forEach(function(t){
+    var el=document.createElement('div'); el.className='chip'+(state.postType===t.id?' on':''); el.dataset.id=t.id; el.textContent=t.label;
+    el.onclick=function(){
+      state.postType=t.id;
+      document.querySelectorAll('#postTypes .chip').forEach(function(c){ c.classList.toggle('on', c.dataset.id===t.id); });
+      var b=$('brief'); if(b) b.placeholder=t.ph;
+    };
+    box.appendChild(el);
+  });
 }
 
 /* ---- platforms ---- */
@@ -449,10 +515,75 @@ function publish(btn){
     .then(function(res){
       btn.disabled=false; btn.innerHTML=orig;
       if(!res.ok){ err('reviewErr',(res.d&&res.d.error)||'Publishing failed. Try again.'); return; }
-      var up=document.querySelector('.upsell'); if(up){ up.style.display = subActive ? 'none' : ''; }
-      show('scrDone');
+      showDone('Published!','Your post is on its way to your socials. Check your accounts in a minute.');
     })
     .catch(function(){ btn.disabled=false; btn.innerHTML=orig; err('reviewErr','Connection problem. Try again.'); });
+}
+
+/* ---- schedule for later + content calendar ---- */
+function fmtWhen(d){ try{ return d.toLocaleString(undefined,{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return d.toString(); } }
+function escHtml(s){ return (s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function showDone(title,msg){
+  var h=$('doneTitle'); if(h) h.textContent=title;
+  var p=$('doneMsg'); if(p) p.textContent=msg;
+  var up=document.querySelector('.upsell'); if(up){ up.style.display = subActive ? 'none' : ''; }
+  show('scrDone');
+}
+function schedulePost(btn){
+  var hook=localStorage.getItem(HOOK_KEY);
+  if(!hook){ show('scrSetup'); return; }
+  var caption=$('caption').value.trim();
+  var plats=selectedPlatforms();
+  var whenVal=$('schedWhen').value;
+  if(!Object.keys(plats).some(function(k){return plats[k];})){ err('reviewErr','Pick at least one place to post.'); return; }
+  if(!caption){ err('reviewErr','Your caption is empty.'); return; }
+  if(!whenVal){ err('reviewErr','Pick a date and time first.'); return; }
+  var when=new Date(whenVal);
+  if(isNaN(when.getTime())||when.getTime()<Date.now()+60000){ err('reviewErr','Pick a time at least a minute from now.'); return; }
+  err('reviewErr','');
+  var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Scheduling…';
+  getToken().then(function(token){
+    return fetch(SCHEDULE_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+      access_token:token, webhookUrl:hook, caption:caption, platforms:plats,
+      image:state.base64, imageType:state.mediaType, scheduledFor:when.toISOString()
+    })});
+  }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+  .then(function(res){
+    btn.disabled=false; btn.innerHTML=orig;
+    if(!res.ok){ err('reviewErr',(res.d&&res.d.error)||'Could not schedule. Try again.'); return; }
+    showDone('Scheduled \u2713','We\'ll post it for you on '+fmtWhen(when)+'. You can see or cancel it under \u201CScheduled\u201D.');
+  }).catch(function(){ btn.disabled=false; btn.innerHTML=orig; err('reviewErr','Connection problem. Try again.'); });
+}
+async function openCalendar(){ show('scrCalendar'); await loadScheduled(); }
+async function loadScheduled(){
+  var list=$('schedList'); list.innerHTML='<p class="hint">Loading\u2026</p>';
+  try{
+    var sb=await rtClient(); if(!sb){ list.innerHTML='<p class="hint">Sign in to see scheduled posts.</p>'; return; }
+    var r=await sb.auth.getSession(); var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
+    if(!uid){ list.innerHTML='<p class="hint">Sign in to see scheduled posts.</p>'; return; }
+    var q=await sb.from('scheduled_posts').select('id,caption,platforms,scheduled_for').eq('user_id',uid).eq('status','pending').order('scheduled_for',{ascending:true});
+    var rows=(q&&q.data)?q.data:[];
+    if(!rows.length){ list.innerHTML='<p class="hint">Nothing scheduled yet. Make a post and choose \u201CSchedule this post\u201D.</p>'; return; }
+    list.innerHTML='';
+    rows.forEach(function(row){
+      var el=document.createElement('div'); el.className='sched-row';
+      var plats=Object.keys(row.platforms||{}).filter(function(k){return row.platforms[k];}).join(', ');
+      var cap=row.caption||''; var snip=cap.slice(0,90)+(cap.length>90?'\u2026':'');
+      var info=document.createElement('div'); info.className='sched-info';
+      info.innerHTML='<div class="sched-when">'+escHtml(fmtWhen(new Date(row.scheduled_for)))+'</div>'+
+                     '<div class="sched-cap">'+escHtml(snip)+'</div>'+
+                     (plats?'<div class="sched-meta">'+escHtml(plats)+'</div>':'');
+      var cx=document.createElement('button'); cx.className='sched-cancel'; cx.type='button'; cx.textContent='Cancel';
+      cx.onclick=function(){ cancelScheduled(row.id, el); };
+      el.appendChild(info); el.appendChild(cx);
+      list.appendChild(el);
+    });
+  }catch(e){ list.innerHTML='<p class="hint">Could not load scheduled posts.</p>'; }
+}
+async function cancelScheduled(id, el){
+  try{ var sb=await rtClient(); if(!sb) return; await sb.from('scheduled_posts').update({status:'canceled'}).eq('id',id); if(el) el.remove();
+    var list=$('schedList'); if(list && !list.querySelector('.sched-row')){ list.innerHTML='<p class="hint">Nothing scheduled yet.</p>'; }
+  }catch(e){}
 }
 
 /* ---- setup / routing ---- */
@@ -461,7 +592,7 @@ function saveHook(){
   if(!/^https:\/\/hook[a-z0-9.\-]*\.make\.com\//i.test(v)){ err('setupErr','That doesn\'t look like a Make webhook link (it should start with https://hook…make.com/).'); return; }
   err('setupErr',''); localStorage.setItem(HOOK_KEY,v); if(loadVoice()){ startCreate(); } else { openVoice(); }
 }
-function startCreate(){ renderPlatforms(); show('scrCreate'); checkUsage(); }
+function startCreate(){ renderPostTypes(); renderPlatforms(); show('scrCreate'); checkUsage(); }
 
 /* ---- voice profile (the heart of the product) — persisted in Supabase ---- */
 function lsVoice(){ try{ return JSON.parse(localStorage.getItem(VOICE_KEY)||'null'); }catch(e){ return null; } }
@@ -604,18 +735,72 @@ function renderFullSystem(){
 
 /* ---- subscription: pricing, checkout, portal, live status ---- */
 async function openPlan(){ show('scrPlan'); await checkSub(); }
+var teamCache=null;
+async function teamSync(force){
+  if(teamCache && !force) return teamCache;
+  try{
+    var token=await getToken();
+    if(!token){ teamCache={active:false,role:'none'}; return teamCache; }
+    var r=await fetch(TEAM_SYNC_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_token:token})});
+    teamCache=await r.json();
+  }catch(e){ teamCache={active:false,role:'none'}; }
+  return teamCache;
+}
 async function checkSub(){
   try{
-    var sb=await rtClient(); if(!sb) return;
-    var r=await sb.auth.getSession();
-    var uid=(r&&r.data&&r.data.session)?r.data.session.user.id:null;
-    if(!uid) return;
-    var q=await sb.from('entitlements').select('sub_tier,sub_status').eq('user_id',uid).maybeSingle();
-    var active = q && q.data && q.data.sub_status === 'active';
-    $('planActive').style.display = active ? 'block' : 'none';
-    $('planChoose').style.display = active ? 'none' : 'block';
-    if(active){ $('planTier').textContent = (q.data.sub_tier === 'pro') ? 'Pro / Team' : 'Solo'; }
+    var t=await teamSync(true);
+    var role=t.role||'none';
+    $('planChoose').style.display = (role==='none') ? 'block' : 'none';
+    $('planActive').style.display = (role==='owner'||role==='solo') ? 'block' : 'none';
+    $('planTeam').style.display   = (role==='owner') ? 'block' : 'none';
+    $('planSeat').style.display   = (role==='seat') ? 'block' : 'none';
+    if(role==='owner'||role==='solo'){ $('planTier').textContent = (role==='owner') ? 'Pro / Team' : 'Solo'; }
+    if(role==='owner'){ renderSeats(t); }
+    if(role==='seat'){ $('seatOwner').textContent = t.ownerEmail||'your team admin'; }
   }catch(e){ /* if we can't tell, leave the choices visible */ }
+}
+function renderSeats(t){
+  var seats=t.seats||[]; var list=$('seatList'); if(!list) return;
+  var used=(t.seatsUsed!=null)?t.seatsUsed:(1+seats.length);
+  var lim=t.seatLimit||5;
+  $('seatCount').textContent=used;
+  if(!seats.length){ list.innerHTML='<p class="hint">No teammates yet — add one below.</p>'; }
+  else{
+    list.innerHTML='';
+    seats.forEach(function(s){
+      var el=document.createElement('div'); el.className='sched-row';
+      var info=document.createElement('div'); info.className='sched-info';
+      info.innerHTML='<div class="sched-when">'+escHtml(s.email)+'</div><div class="sched-meta">Seat</div>';
+      var cx=document.createElement('button'); cx.className='sched-cancel'; cx.type='button'; cx.textContent='Remove';
+      cx.onclick=function(){ removeSeat(s.email, el); };
+      el.appendChild(info); el.appendChild(cx); list.appendChild(el);
+    });
+  }
+  var full=used>=lim; var ib=$('inviteBtn');
+  if(ib){ ib.disabled=full; ib.textContent=full?'Team full (5 seats)':'＋ Add teammate'; }
+}
+function inviteSeat(btn){
+  var email=($('seatEmail').value||'').trim();
+  if(!email){ err('teamErr','Enter a teammate\'s email.'); return; }
+  err('teamErr','');
+  var o=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Adding…';
+  getToken().then(function(token){
+    return fetch(TEAM_INVITE_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_token:token,email:email})});
+  }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+  .then(function(res){
+    btn.disabled=false; btn.innerHTML=o;
+    if(!res.ok){ err('teamErr',(res.d&&res.d.error)||'Could not add that teammate.'); return; }
+    $('seatEmail').value=''; teamCache=null; renderSeats(res.d);
+  }).catch(function(){ btn.disabled=false; btn.innerHTML=o; err('teamErr','Connection problem. Try again.'); });
+}
+function removeSeat(email, el){
+  getToken().then(function(token){
+    return fetch(TEAM_REMOVE_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({access_token:token,email:email})});
+  }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+  .then(function(res){
+    if(!res.ok){ err('teamErr',(res.d&&res.d.error)||'Could not remove that seat.'); return; }
+    teamCache=null; renderSeats(res.d);
+  }).catch(function(){ err('teamErr','Connection problem. Try again.'); });
 }
 async function startSub(tier, btn){
   if(window.RT_DEMO_MODE){ err('planErr','Subscriptions are disabled in demo mode.'); return; }
@@ -662,10 +847,11 @@ function boot(){
   $('rmImg').onclick=clearImg;
   $('genBtn').onclick=function(){ generate(this,'createErr'); };
   $('regenBtn').onclick=function(){ var b=this; var o=b.innerHTML; b.disabled=true; b.innerHTML='<span class="spin"></span> Rewriting…';
-    fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:$('brief').value.trim(),image:{media_type:state.mediaType,data:state.base64},voice:loadVoice()})})
+    fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:$('brief').value.trim(),image:{media_type:state.mediaType,data:state.base64},voice:loadVoice(),postType:state.postType})})
     .then(function(r){return r.json();}).then(function(d){ b.disabled=false; b.innerHTML=o; if(d.caption){$('caption').value=d.caption;} })
     .catch(function(){ b.disabled=false; b.innerHTML=o; }); };
   $('pubBtn').onclick=function(){ publish(this); };
+  $('schedBtn').onclick=function(){ schedulePost(this); };
   $('backCreate').onclick=function(){ show('scrCreate'); };
   $('againBtn').onclick=function(){ $('brief').value=''; clearImg(); $('caption').value=''; show('scrCreate'); };
   $('saveHook').onclick=saveHook;
@@ -673,9 +859,12 @@ function boot(){
   $('saveVoice').onclick=saveVoice;
   $('ideaBtn').onclick=fetchIdeas;
   $('planLink').onclick=openPlan;
+  $('schedLink').onclick=openCalendar;
+  $('calBack').onclick=function(){ startCreate(); };
   $('subSolo').onclick=function(){ startSub('solo', this); };
   $('subPro').onclick=function(){ startSub('pro', this); };
   $('manageBtn').onclick=function(){ openPortal(this); };
+  $('inviteBtn').onclick=function(){ inviteSeat(this); };
   $('planBack').onclick=function(){ if(!localStorage.getItem(HOOK_KEY)){show('scrSetup');} else if(!loadVoice()){openVoice();} else {startCreate();} };
   $('editVoice').onclick=openVoice;
   $('fsBack').onclick=function(){ show('scrCreate'); };
@@ -686,6 +875,6 @@ boot();
 </script>
 
 <script src="../gate.js"></script>
-<script>window.requireMemberAccess({home:'../index.html'}).then(function(ok){if(ok){var g=document.getElementById('rtgate');if(g)g.remove();}});</script>
+<script>window.requireLogin({home:'../content.html'}).then(function(ok){if(ok){var g=document.getElementById('rtgate');if(g)g.remove();}});</script>
 </body>
 </html>
