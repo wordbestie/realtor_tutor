@@ -16,7 +16,7 @@ const SEAT_LIMIT = 5;
 const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
 function period() { return new Date().toISOString().slice(0, 7); }
-function freeLimit() { return parseInt(process.env.FREE_POST_LIMIT || '3', 10); }
+function freeLimit() { return parseInt(process.env.FREE_POST_LIMIT || '5', 10); }
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return resp(405, { error: 'Method not allowed' });
