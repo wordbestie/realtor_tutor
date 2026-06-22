@@ -13,7 +13,7 @@
 const { createClient } = require('@supabase/supabase-js');
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
-const FREE_LIMIT = parseInt(process.env.FREE_POST_LIMIT || '3', 10);
+const FREE_LIMIT = parseInt(process.env.FREE_POST_LIMIT || '5', 10);
 
 // Tailors the writing to the kind of post the user picked. Realtor-flavoured for
 // now (the engine's go-to-market vertical); add/edit freely for other niches.
@@ -65,30 +65,37 @@ exports.handler = async (event) => {
   }
 
   const image = body.image && body.image.data && body.image.media_type ? body.image : null;
+  const isVideo = body.mediaType === 'video';
 
   // ----- usage metering (only when the client asks for it, i.e. the primary generate) -----
+  // Generation requires a signed-in account. This ties every caption to a user so
+  // the free limit (and your API budget) stays enforceable — no anonymous calls.
+  if (!body.access_token) {
+    return { statusCode: 401, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: 'Please sign in to generate.' }) };
+  }
   let meterUser = null, subscribed = false, used = 0;
-  if (body.access_token) {
-    try {
-      const { data: { user } } = await supabaseAdmin.auth.getUser(body.access_token);
-      if (user) {
-        meterUser = user;
-        const { data: ent } = await supabaseAdmin
-          .from('entitlements')
-          .select('sub_status,usage_period,usage_count')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        subscribed = !!(ent && ent.sub_status === 'active');
-        used = (ent && ent.usage_period === period()) ? (ent.usage_count || 0) : 0;
-        // Pro/Team seats: covered by their team owner's active Pro plan (resolved live).
-        if (!subscribed && user.email) {
-          subscribed = await coveredByTeam(user.email.toLowerCase());
-        }
+  try {
+    const { data: { user } } = await supabaseAdmin.auth.getUser(body.access_token);
+    if (user) {
+      meterUser = user;
+      const { data: ent } = await supabaseAdmin
+        .from('entitlements')
+        .select('sub_status,usage_period,usage_count')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      subscribed = !!(ent && ent.sub_status === 'active');
+      used = (ent && ent.usage_period === period()) ? (ent.usage_count || 0) : 0;
+      // Pro/Team seats: covered by their team owner's active Pro plan (resolved live).
+      if (!subscribed && user.email) {
+        subscribed = await coveredByTeam(user.email.toLowerCase());
       }
-    } catch (e) { /* if we can't verify, fall through unmetered (preview) */ }
+    }
+  } catch (e) { /* handled just below */ }
+  if (!meterUser) {
+    return { statusCode: 401, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: 'Your session expired — please sign in again.' }) };
   }
 
-  const willMeter = body.meter === true && meterUser && !subscribed;
+  const willMeter = body.meter === true && !subscribed;
   if (willMeter && used >= FREE_LIMIT) {
     return {
       statusCode: 402,
@@ -108,15 +115,24 @@ exports.handler = async (event) => {
 
   const typeGuide = POST_TYPE_GUIDE[(body.postType || '').toString()] || '';
 
-  const system =
-    "You are a social media copywriter who writes in the user's OWN voice. " +
-    "Write ONE ready-to-post caption based on their brief (and the image, if provided). " +
-    (voiceLines.length
+  const voiceBlock = voiceLines.length
       ? "Write it so it genuinely sounds like this specific person:\n" + voiceLines.join("\n") + "\n"
-      : "Tone: warm, authentic, and professional — never salesy or spammy. ") +
-    (typeGuide ? typeGuide + ' ' : '') +
-    "Structure: 1 to 3 short paragraphs, then a single line with 3 to 6 relevant hashtags. " +
-    "Do not use markdown, asterisks, bold, or headers. Return ONLY the caption text, nothing else.";
+      : "Tone: warm, authentic, and professional — never salesy or spammy. ";
+
+  const system = isVideo
+    ? ("You are a social media copywriter who writes in the user's OWN voice. " +
+       "They are posting a VIDEO. Based on their brief, write the post text. " +
+       voiceBlock + (typeGuide ? typeGuide + ' ' : '') +
+       "Return ONLY a JSON object (no markdown, no code fences) with exactly these keys: " +
+       '"caption" (the social caption for Instagram/Facebook/LinkedIn: 1 to 3 short paragraphs, then a line with 3 to 6 relevant hashtags), ' +
+       '"ytTitle" (a punchy YouTube title, max 100 characters, no hashtags), ' +
+       '"ytDescription" (a YouTube description: 2 to 4 sentences in their voice, may end with a soft call to action). ' +
+       "Do not use markdown, asterisks, bold, or headers inside any value.")
+    : ("You are a social media copywriter who writes in the user's OWN voice. " +
+       "Write ONE ready-to-post caption based on their brief (and the image, if provided). " +
+       voiceBlock + (typeGuide ? typeGuide + ' ' : '') +
+       "Structure: 1 to 3 short paragraphs, then a single line with 3 to 6 relevant hashtags. " +
+       "Do not use markdown, asterisks, bold, or headers. Return ONLY the caption text, nothing else.");
 
   const content = [];
   if (image) {
@@ -128,7 +144,7 @@ exports.handler = async (event) => {
     const r = await fetch(ANTHROPIC_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 500, system, messages: [{ role: 'user', content }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: isVideo ? 700 : 500, system, messages: [{ role: 'user', content }] }),
     });
 
     const data = await r.json();
@@ -136,11 +152,26 @@ exports.handler = async (event) => {
       return { statusCode: 502, body: JSON.stringify({ error: 'The caption service had a problem. Please try again.' }) };
     }
 
-    const caption = (data.content || [])
+    const raw = (data.content || [])
       .filter(b => b.type === 'text')
       .map(b => b.text)
       .join('\n')
       .trim();
+
+    let caption = raw, ytTitle = '', ytDescription = '';
+    if (isVideo) {
+      try {
+        const clean = raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+        const j = JSON.parse(clean);
+        caption = (j.caption || '').toString().trim();
+        ytTitle = (j.ytTitle || '').toString().trim().slice(0, 100);
+        ytDescription = (j.ytDescription || '').toString().trim();
+      } catch (e) {
+        caption = raw;
+        ytTitle = (raw.split('\n')[0] || '').slice(0, 100);
+        ytDescription = raw;
+      }
+    }
 
     // Count this post against the free allowance (only for metered free-tier calls).
     if (willMeter) {
@@ -155,7 +186,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ caption, subscribed, used: willMeter ? used + 1 : used, limit: FREE_LIMIT }),
+      body: JSON.stringify(Object.assign({ caption, subscribed, used: willMeter ? used + 1 : used, limit: FREE_LIMIT }, isVideo ? { ytTitle, ytDescription } : {})),
     };
   } catch (e) {
     return { statusCode: 502, body: JSON.stringify({ error: 'The caption service is unavailable right now.' }) };
