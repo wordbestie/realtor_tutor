@@ -41,6 +41,9 @@
   .sched-meta{color:var(--gold-soft,#B5821C);font-size:.8rem;font-weight:700;margin-top:3px;text-transform:capitalize}
   .sched-cancel{flex:none;background:none;border:1px solid var(--line);border-radius:20px;color:var(--muted);font-weight:700;font-size:.82rem;padding:6px 12px;cursor:pointer}
   .sched-cancel:hover{border-color:#B23B2E;color:#B23B2E}
+  .seat-acts{display:flex;gap:6px;flex:none;align-items:flex-start}
+  .seat-invite{background:none;border:1px solid var(--line);border-radius:20px;color:var(--gold-soft,#B5821C);font-weight:700;font-size:.82rem;padding:6px 12px;cursor:pointer;white-space:nowrap}
+  .seat-invite:hover{border-color:var(--gold,#E0A227)}
   .rtgate{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;align-items:center;justify-content:center}
   .rtgate-box{font-family:var(--display);font-weight:700;color:var(--muted)}
 
@@ -185,7 +188,7 @@
     </div>
     <div class="card" id="planTeam" style="display:none">
       <label class="fld">Your team <span style="font-weight:400;color:var(--muted)">(<span id="seatCount">1</span> of 5 seats)</span></label>
-      <p class="hint">Invite up to 4 teammates by email. Each gets their own login and unlimited posting while your Pro plan is active. They sign in at your content engine with that email.</p>
+      <p class="hint">Invite up to 4 teammates by email, then tap <b>Copy invite</b> to send each one a ready-made signup link. Each gets their own login and unlimited posting while your Pro plan is active.</p>
       <div id="seatList"></div>
       <input type="email" id="seatEmail" class="sched-input" placeholder="teammate@email.com" style="margin-top:10px;margin-bottom:0">
       <button class="btn-ghost block" id="inviteBtn" style="margin-top:10px">＋ Add teammate</button>
@@ -257,13 +260,19 @@
       <div class="row" id="postTypes"></div>
     </div>
     <div class="card">
-      <label class="fld">2 · Your image</label>
-      <p class="hint">A listing photo, a sold sign, a headshot — whatever this post is about.</p>
+      <label class="fld">2 · Photo or video?</label>
+      <div class="row" id="mediaKind">
+        <div class="chip on" data-kind="photo">📷 Photo</div>
+        <div class="chip" data-kind="video">🎬 Video</div>
+      </div>
+      <p class="hint" id="mediaHint">A listing photo, a sold sign, a headshot — whatever this post is about.</p>
       <label class="drop" id="drop">
         <input type="file" id="file" accept="image/*">
         <div id="dropText">📷 Tap to add a photo</div>
       </label>
       <div class="preview" id="preview" style="display:none"><img id="previewImg" alt=""><button class="rm" id="rmImg">Remove</button></div>
+      <div class="preview" id="vpreview" style="display:none"><video id="previewVid" controls playsinline style="width:100%;border-radius:12px;display:block"></video><button class="rm" id="rmVid">Remove</button></div>
+      <div id="vidProg" class="hint" style="display:none"><span class="spin"></span> Uploading video… long clips can take a minute.</div>
     </div>
     <div class="card">
       <label class="fld">3 · Your brief</label>
@@ -282,13 +291,19 @@
     <div class="card">
       <label class="fld">Review your post</label>
       <p class="hint">Edit the words however you like, pick where it goes, then publish.</p>
-      <div class="preview" id="reviewImgWrap" style="margin-bottom:14px"><img id="reviewImg" alt=""></div>
+      <div class="preview" id="reviewImgWrap" style="margin-bottom:14px"><img id="reviewImg" alt=""><video id="reviewVid" controls playsinline style="display:none;width:100%;border-radius:12px"></video></div>
       <textarea id="caption" class="caption-out" aria-label="Caption"></textarea>
       <div class="row"><button class="btn-ghost" id="regenBtn">↻ Rewrite caption</button></div>
     </div>
     <div class="card">
       <label class="fld">Publish to</label>
       <div class="row" id="platforms"></div>
+    </div>
+    <div class="card" id="ytCard" style="display:none">
+      <label class="fld">YouTube details</label>
+      <p class="hint">YouTube wants a title and description, not just a caption — edit these however you like.</p>
+      <input type="text" id="ytTitle" maxlength="100" placeholder="Video title (max 100 characters)" style="margin-bottom:8px">
+      <textarea id="ytDesc" placeholder="Description…"></textarea>
     </div>
     <button class="btn block" id="pubBtn">Publish now →</button>
     <div class="card" id="schedCard" style="margin-top:12px">
@@ -363,7 +378,8 @@ var SETUP = {
   platforms: [                     // platforms to offer (match what your Publisher posts to)
     {id:'instagram', label:'Instagram'},
     {id:'facebook',  label:'Facebook'},
-    {id:'linkedin',  label:'LinkedIn'}
+    {id:'linkedin',  label:'LinkedIn'},
+    {id:'youtube',   label:'YouTube'}   // video only
   ],
   // ----- FULL SYSTEM (shown automatically AFTER someone buys the $397 package) -----
   // Publish each full-suite scenario as a Make Template, then paste its install link here.
@@ -391,7 +407,7 @@ var HOOK_KEY   = 'rt_auto_webhook';
 var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
 var voiceCache = null;   // in-memory copy of the voice profile (source of truth = Supabase)
-var FREE_LIMIT = 3;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 3)
+var FREE_LIMIT = 5;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 5)
 var subActive = false;   // cached: is this member an active subscriber?
 
 /* ---- tiny helpers ---- */
@@ -399,10 +415,37 @@ function $(id){return document.getElementById(id);}
 function show(id){['scrSetup','scrPlan','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked','scrCalendar'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
 function err(id,msg){var e=$(id);if(msg){e.textContent=msg;e.classList.add('show');}else{e.classList.remove('show');}}
 
-var state = { base64:null, mediaType:'image/jpeg', dataUrl:null, caption:'', postType:'free' };
+var state = { kind:'photo', base64:null, mediaType:'image/jpeg', dataUrl:null, mediaUrl:null, caption:'', postType:'free', ytTitle:'', ytDescription:'' };
+var afterSetup = null;   // remembers to return to Review after a just-in-time Make connect
 
-/* ---- image: read + downscale to keep payloads small ---- */
+/* ---- media: photo (downscale) or video (direct upload to storage) ---- */
+var VIDEO_MAX = 500*1024*1024;   // 500 MB client-side cap
+function setKind(k){
+  state.kind = (k==='video') ? 'video' : 'photo';
+  document.querySelectorAll('#mediaKind .chip').forEach(function(c){ c.classList.toggle('on', c.dataset.kind===state.kind); });
+  var inp=$('file'); var dt=$('dropText'); var mh=$('mediaHint');
+  if(state.kind==='video'){
+    if(inp) inp.accept='video/*';
+    if(dt) dt.textContent='🎬 Tap to add a video';
+    if(mh) mh.textContent='A listing tour, a market update, a reel — horizontal or vertical.';
+  } else {
+    if(inp) inp.accept='image/*';
+    if(dt) dt.textContent='📷 Tap to add a photo';
+    if(mh) mh.textContent='A listing photo, a sold sign, a headshot — whatever this post is about.';
+  }
+  clearMedia();
+}
+function clearMedia(){
+  state.base64=null; state.dataUrl=null; state.mediaUrl=null;
+  var f=$('file'); if(f) f.value='';
+  var p=$('preview'); if(p) p.style.display='none';
+  var v=$('vpreview'); if(v) v.style.display='none';
+  var pv=$('previewVid'); if(pv){ try{ pv.pause(); }catch(e){} pv.removeAttribute('src'); }
+  var vp=$('vidProg'); if(vp) vp.style.display='none';
+  var d=$('drop'); if(d) d.style.display='block';
+}
 function handleFile(file){
+  state.kind='photo';
   if(!file || !/^image\//.test(file.type)){ err('createErr','That doesn\'t look like an image.'); return; }
   err('createErr','');
   var img=new Image(), rd=new FileReader();
@@ -417,7 +460,30 @@ function handleFile(file){
   }; img.src=rd.result; };
   rd.readAsDataURL(file);
 }
-function clearImg(){ state.base64=null; state.dataUrl=null; $('file').value=''; $('preview').style.display='none'; $('drop').style.display='block'; }
+async function handleVideo(file){
+  if(!file || !/^video\//.test(file.type)){ err('createErr','That doesn\'t look like a video.'); return; }
+  if(file.size > VIDEO_MAX){ err('createErr','That video is over 500 MB — please trim or compress it first.'); return; }
+  err('createErr','');
+  var sb=await rtClient();
+  if(!sb){ err('createErr','Please sign in again to upload a video.'); return; }
+  var uid='anon'; try{ var u=await sb.auth.getUser(); if(u&&u.data&&u.data.user) uid=u.data.user.id; }catch(e){}
+  var ext=((file.name||'').split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'') || 'mp4';
+  var path='vid/'+uid+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+  $('drop').style.display='none'; var vp=$('vidProg'); if(vp) vp.style.display='block';
+  try{
+    var up=await sb.storage.from('post-media').upload(path, file, {contentType:file.type||'video/mp4', upsert:true});
+    if(up.error) throw up.error;
+    var pub=sb.storage.from('post-media').getPublicUrl(path);
+    state.mediaUrl=(pub&&pub.data&&pub.data.publicUrl)||''; state.kind='video';
+    if(!state.mediaUrl) throw new Error('no url');
+    state.dataUrl=URL.createObjectURL(file);
+    if(vp) vp.style.display='none';
+    $('previewVid').src=state.dataUrl; $('vpreview').style.display='block';
+  }catch(e){
+    if(vp) vp.style.display='none'; $('drop').style.display='block';
+    err('createErr','Video upload failed — check your connection or try a smaller file. ('+((e&&e.message)||'error')+')');
+  }
+}
 
 /* ---- caption ---- */
 async function getToken(){
@@ -442,21 +508,36 @@ async function checkUsage(){
 }
 async function generate(btn,errId){
   var brief=$('brief').value.trim();
-  if(!state.base64){ err(errId,'Add a photo first.'); return; }
+  if(state.kind==='video'){ if(!state.mediaUrl){ err(errId,'Add a video first.'); return; } }
+  else if(!state.base64){ err(errId,'Add a photo first.'); return; }
   if(!brief){ err(errId,'Add a quick brief first.'); return; }
   err(errId,'');
   var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Writing…';
   try{
     var token=await getToken();
-    var r=await fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:brief,image:{media_type:state.mediaType,data:state.base64},voice:loadVoice(),postType:state.postType,access_token:token,meter:true})});
+    var payload={brief:brief,voice:loadVoice(),postType:state.postType,access_token:token,meter:true,mediaType:state.kind};
+    if(state.kind==='photo'){ payload.image={media_type:state.mediaType,data:state.base64}; }
+    var r=await fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
     var d=await r.json();
     btn.disabled=false; btn.innerHTML=orig;
     if(r.status===402){ err(errId,'You\'ve used all '+(d.limit||FREE_LIMIT)+' free posts this month. Subscribe for unlimited posting.'); openPlan(); return; }
     if(!r.ok){ err(errId,(d&&d.error)||'Could not write the caption. Try again.'); return; }
     state.caption=d.caption||''; $('caption').value=state.caption;
+    if(state.kind==='video'){ state.ytTitle=d.ytTitle||''; state.ytDescription=d.ytDescription||''; var yt=$('ytTitle'); if(yt) yt.value=state.ytTitle; var yd=$('ytDesc'); if(yd) yd.value=state.ytDescription; }
     if(!d.subscribed && typeof d.used!=='undefined'){ updateUsageNote(d.used, d.limit); }
-    $('reviewImg').src=state.dataUrl; show('scrReview');
+    showReviewMedia(); show('scrReview');
   }catch(e){ btn.disabled=false; btn.innerHTML=orig; err(errId,'Connection problem. Try again.'); }
+}
+function showReviewMedia(){
+  var img=$('reviewImg'), rv=$('reviewVid');
+  if(state.kind==='video'){
+    if(img){ img.style.display='none'; img.removeAttribute('src'); }
+    if(rv){ rv.src=state.dataUrl||''; rv.style.display='block'; }
+  } else {
+    if(rv){ try{rv.pause();}catch(e){} rv.removeAttribute('src'); rv.style.display='none'; }
+    if(img){ img.src=state.dataUrl; img.style.display='block'; }
+  }
+  renderPlatforms(); renderYtFields();
 }
 
 /* ---- post types ---- */
@@ -487,9 +568,10 @@ function renderPostTypes(){
 function renderPlatforms(){
   var box=$('platforms'); box.innerHTML='';
   SETUP.platforms.forEach(function(p){
+    if(p.id==='youtube' && state.kind!=='video') return;   // YouTube is video-only
     var el=document.createElement('div'); el.className='chip on'; el.dataset.id=p.id;
     el.innerHTML='<span class="dot"></span>'+p.label;
-    el.onclick=function(){ el.classList.toggle('on'); };
+    el.onclick=function(){ el.classList.toggle('on'); renderYtFields(); };
     box.appendChild(el);
   });
 }
@@ -497,20 +579,43 @@ function selectedPlatforms(){
   var out={}; document.querySelectorAll('#platforms .chip').forEach(function(c){ out[c.dataset.id]=c.classList.contains('on'); });
   return out;
 }
+function renderYtFields(){
+  var card=$('ytCard'); if(!card) return;
+  var plats=selectedPlatforms();
+  var on = state.kind==='video' && plats.youtube;
+  card.style.display = on ? 'block' : 'none';
+  if(on){
+    if(!$('ytTitle').value) $('ytTitle').value = state.ytTitle||'';
+    if(!$('ytDesc').value)  $('ytDesc').value  = state.ytDescription||'';
+  }
+}
+function mediaPayload(){
+  if(state.kind==='video') return { mediaType:'video', mediaUrl:state.mediaUrl };
+  return { mediaType:'photo', image:state.base64, imageType:state.mediaType };
+}
+function ytPayload(plats){
+  if(state.kind==='video' && plats.youtube){
+    return { title:(($('ytTitle').value||state.ytTitle||'').trim()).slice(0,100), description:($('ytDesc').value||state.ytDescription||'').trim() };
+  }
+  return null;
+}
 
 /* ---- publish ---- */
 function publish(btn){
   var hook=localStorage.getItem(HOOK_KEY);
-  if(!hook){ show('scrSetup'); return; }
+  if(!hook){ afterSetup='review'; show('scrSetup'); return; }
   var caption=$('caption').value.trim();
   var plats=selectedPlatforms();
   if(!Object.keys(plats).some(function(k){return plats[k];})){ err('reviewErr','Pick at least one place to post.'); return; }
   if(!caption){ err('reviewErr','Your caption is empty.'); return; }
+  if(state.kind==='video' && !state.mediaUrl){ err('reviewErr','Your video is missing — add it again.'); return; }
+  var yt=ytPayload(plats);
+  if(plats.youtube && (!yt || !yt.title)){ err('reviewErr','Add a YouTube title.'); return; }
   err('reviewErr','');
   var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Publishing…';
-  fetch(PUBLISH_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
-    webhookUrl:hook, caption:caption, platforms:plats, image:state.base64, imageType:state.mediaType
-  })})
+  var body=Object.assign({ webhookUrl:hook, caption:caption, platforms:plats }, mediaPayload());
+  if(yt) body.youtube=yt;
+  fetch(PUBLISH_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
     .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
     .then(function(res){
       btn.disabled=false; btn.innerHTML=orig;
@@ -531,7 +636,7 @@ function showDone(title,msg){
 }
 function schedulePost(btn){
   var hook=localStorage.getItem(HOOK_KEY);
-  if(!hook){ show('scrSetup'); return; }
+  if(!hook){ afterSetup='review'; show('scrSetup'); return; }
   var caption=$('caption').value.trim();
   var plats=selectedPlatforms();
   var whenVal=$('schedWhen').value;
@@ -540,13 +645,15 @@ function schedulePost(btn){
   if(!whenVal){ err('reviewErr','Pick a date and time first.'); return; }
   var when=new Date(whenVal);
   if(isNaN(when.getTime())||when.getTime()<Date.now()+60000){ err('reviewErr','Pick a time at least a minute from now.'); return; }
+  if(state.kind==='video' && !state.mediaUrl){ err('reviewErr','Your video is missing — add it again.'); return; }
+  var yt=ytPayload(plats);
+  if(plats.youtube && (!yt || !yt.title)){ err('reviewErr','Add a YouTube title.'); return; }
   err('reviewErr','');
   var orig=btn.innerHTML; btn.disabled=true; btn.innerHTML='<span class="spin"></span> Scheduling…';
   getToken().then(function(token){
-    return fetch(SCHEDULE_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
-      access_token:token, webhookUrl:hook, caption:caption, platforms:plats,
-      image:state.base64, imageType:state.mediaType, scheduledFor:when.toISOString()
-    })});
+    var body=Object.assign({ access_token:token, webhookUrl:hook, caption:caption, platforms:plats, scheduledFor:when.toISOString() }, mediaPayload());
+    if(yt) body.youtube=yt;
+    return fetch(SCHEDULE_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
   }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
   .then(function(res){
     btn.disabled=false; btn.innerHTML=orig;
@@ -590,9 +697,11 @@ async function cancelScheduled(id, el){
 function saveHook(){
   var v=$('hookInput').value.trim();
   if(!/^https:\/\/hook[a-z0-9.\-]*\.make\.com\//i.test(v)){ err('setupErr','That doesn\'t look like a Make webhook link (it should start with https://hook…make.com/).'); return; }
-  err('setupErr',''); localStorage.setItem(HOOK_KEY,v); if(loadVoice()){ startCreate(); } else { openVoice(); }
+  err('setupErr',''); localStorage.setItem(HOOK_KEY,v);
+  if(afterSetup==='review'){ afterSetup=null; show('scrReview'); return; }
+  if(loadVoice()){ startCreate(); } else { openVoice(); }
 }
-function startCreate(){ renderPostTypes(); renderPlatforms(); show('scrCreate'); checkUsage(); }
+function startCreate(){ renderPostTypes(); renderPlatforms(); var cl=$('connList'); if(cl){ cl.textContent = localStorage.getItem(HOOK_KEY) ? 'your connected socials' : 'your socials (connect when you publish)'; } show('scrCreate'); checkUsage(); }
 
 /* ---- voice profile (the heart of the product) — persisted in Supabase ---- */
 function lsVoice(){ try{ return JSON.parse(localStorage.getItem(VOICE_KEY)||'null'); }catch(e){ return null; } }
@@ -771,13 +880,29 @@ function renderSeats(t){
       var el=document.createElement('div'); el.className='sched-row';
       var info=document.createElement('div'); info.className='sched-info';
       info.innerHTML='<div class="sched-when">'+escHtml(s.email)+'</div><div class="sched-meta">Seat</div>';
+      var acts=document.createElement('div'); acts.className='seat-acts';
+      var ci=document.createElement('button'); ci.className='seat-invite'; ci.type='button'; ci.textContent='Copy invite';
+      ci.onclick=function(){ copyInvite(s.email, ci); };
       var cx=document.createElement('button'); cx.className='sched-cancel'; cx.type='button'; cx.textContent='Remove';
       cx.onclick=function(){ removeSeat(s.email, el); };
-      el.appendChild(info); el.appendChild(cx); list.appendChild(el);
+      acts.appendChild(ci); acts.appendChild(cx);
+      el.appendChild(info); el.appendChild(acts); list.appendChild(el);
     });
   }
   var full=used>=lim; var ib=$('inviteBtn');
   if(ib){ ib.disabled=full; ib.textContent=full?'Team full (5 seats)':'＋ Add teammate'; }
+}
+function copyInvite(email, btn){
+  var url=location.origin+'/content.html';
+  var msg="You're on my content team! Create your free account here, and make sure to sign up with THIS email address — "+email+" — so your access connects:\n\n"+url+"\n\nOnce you're in, you'll have unlimited posting as part of my plan. (If you use a different email, the team access won't link up.)";
+  var done=function(){ var o=btn.textContent; btn.textContent='Copied ✓'; setTimeout(function(){ btn.textContent=o; },1600); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(msg).then(done).catch(function(){ fallbackCopy(msg); done(); });
+  } else { fallbackCopy(msg); done(); }
+}
+function fallbackCopy(text){
+  try{ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }catch(e){}
 }
 function inviteSeat(btn){
   var email=($('seatEmail').value||'').trim();
@@ -833,8 +958,9 @@ async function openPortal(btn){
 
 async function route(){
   try{ await loadVoiceRemote(); }catch(e){}        // know their voice before deciding the screen
-  if(!localStorage.getItem(HOOK_KEY)){ show('scrSetup'); }
-  else if(!loadVoice()){ openVoice(); }
+  // Generate-first funnel: go straight to voice → create. Make (publishing) is set up
+  // later, only when they actually publish or schedule their first post.
+  if(!loadVoice()){ openVoice(); }
   else { startCreate(); }
 }
 
@@ -843,17 +969,23 @@ function boot(){
   if(SETUP.publisherBlueprint){ var b=$('bpPub'); b.href=SETUP.publisherBlueprint; b.classList.remove('todo'); }
   var subCta=$('subCta'); if(subCta){ subCta.onclick=function(e){ e.preventDefault(); openPlan(); }; }
   // events
-  $('file').addEventListener('change',function(e){ handleFile(e.target.files[0]); });
-  $('rmImg').onclick=clearImg;
+  $('file').addEventListener('change',function(e){ var f=e.target.files[0]; if(state.kind==='video') handleVideo(f); else handleFile(f); });
+  $('rmImg').onclick=clearMedia;
+  var rmV=$('rmVid'); if(rmV) rmV.onclick=clearMedia;
+  document.querySelectorAll('#mediaKind .chip').forEach(function(c){ c.onclick=function(){ setKind(c.dataset.kind); }; });
   $('genBtn').onclick=function(){ generate(this,'createErr'); };
   $('regenBtn').onclick=function(){ var b=this; var o=b.innerHTML; b.disabled=true; b.innerHTML='<span class="spin"></span> Rewriting…';
-    fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({brief:$('brief').value.trim(),image:{media_type:state.mediaType,data:state.base64},voice:loadVoice(),postType:state.postType})})
-    .then(function(r){return r.json();}).then(function(d){ b.disabled=false; b.innerHTML=o; if(d.caption){$('caption').value=d.caption;} })
+    getToken().then(function(token){
+      var p={brief:$('brief').value.trim(),voice:loadVoice(),postType:state.postType,access_token:token,mediaType:state.kind};
+      if(state.kind==='photo'){ p.image={media_type:state.mediaType,data:state.base64}; }
+      return fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(p)});
+    })
+    .then(function(r){return r.json();}).then(function(d){ b.disabled=false; b.innerHTML=o; if(d.caption){$('caption').value=d.caption;} if(state.kind==='video'){ if(d.ytTitle){state.ytTitle=d.ytTitle;} if(d.ytDescription){state.ytDescription=d.ytDescription;} } })
     .catch(function(){ b.disabled=false; b.innerHTML=o; }); };
   $('pubBtn').onclick=function(){ publish(this); };
   $('schedBtn').onclick=function(){ schedulePost(this); };
   $('backCreate').onclick=function(){ show('scrCreate'); };
-  $('againBtn').onclick=function(){ $('brief').value=''; clearImg(); $('caption').value=''; show('scrCreate'); };
+  $('againBtn').onclick=function(){ $('brief').value=''; setKind('photo'); $('caption').value=''; var yt=$('ytTitle'); if(yt) yt.value=''; var yd=$('ytDesc'); if(yd) yd.value=''; show('scrCreate'); };
   $('saveHook').onclick=saveHook;
   $('changeConn').onclick=function(){ show('scrSetup'); };
   $('saveVoice').onclick=saveVoice;
@@ -865,7 +997,7 @@ function boot(){
   $('subPro').onclick=function(){ startSub('pro', this); };
   $('manageBtn').onclick=function(){ openPortal(this); };
   $('inviteBtn').onclick=function(){ inviteSeat(this); };
-  $('planBack').onclick=function(){ if(!localStorage.getItem(HOOK_KEY)){show('scrSetup');} else if(!loadVoice()){openVoice();} else {startCreate();} };
+  $('planBack').onclick=function(){ if(!loadVoice()){openVoice();} else {startCreate();} };
   $('editVoice').onclick=openVoice;
   $('fsBack').onclick=function(){ show('scrCreate'); };
   // route once we know their voice (from Supabase, with a local fallback)
