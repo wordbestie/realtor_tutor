@@ -152,7 +152,7 @@
 <main class="wrap">
   <div class="kicker">Content Automation</div>
   <h1 id="hTitle">Post to your socials in three taps.</h1>
-  <p class="sub" id="hSub">Add a photo and a brief description — Realtor Tutor will write the proper caption, you review it, and it will publish to your own Instagram, Facebook and/or LinkedIn. First a one-time setup, then it's this easy every time.</p>
+  <p class="sub" id="hSub">Add a photo or video and a brief description — Realtor Tutor writes the caption, you review it, and it posts to your own Instagram, Facebook, LinkedIn, and/or YouTube. The first time you publish there's a quick one-time setup — after that, it's this easy every time.</p>
 
   <!-- ===================== SETUP (first run) ===================== -->
   <section class="screen" id="scrSetup">
@@ -293,7 +293,7 @@
       <p class="hint">Edit the words however you like, pick where it goes, then publish.</p>
       <div class="preview" id="reviewImgWrap" style="margin-bottom:14px"><img id="reviewImg" alt=""><video id="reviewVid" controls playsinline style="display:none;width:100%;border-radius:12px"></video></div>
       <textarea id="caption" class="caption-out" aria-label="Caption"></textarea>
-      <div class="row"><button class="btn-ghost" id="regenBtn">↻ Rewrite caption</button></div>
+      <div class="row"><button class="btn-ghost" id="changeMedia">↻ Change photo/video</button><button class="btn-ghost" id="regenBtn">↻ Rewrite caption</button></div>
     </div>
     <div class="card">
       <label class="fld">Publish to</label>
@@ -376,10 +376,12 @@ var SETUP = {
   upsellUrl: '',                   // OPTIONAL override: external link for the unlock button.
                                    // Leave BLANK to use the built-in $397 Stripe checkout.
   platforms: [                     // platforms to offer (match what your Publisher posts to)
-    {id:'instagram', label:'Instagram'},
-    {id:'facebook',  label:'Facebook'},
-    {id:'linkedin',  label:'LinkedIn'},
-    {id:'youtube',   label:'YouTube'}   // video only
+    {id:'instagram', label:'Instagram', media:'both'},
+    {id:'facebook',  label:'Facebook',  media:'both'},
+    {id:'linkedin',  label:'LinkedIn',  media:'both'},
+    {id:'youtube',   label:'YouTube',   media:'video'},
+    {id:'pinterest', label:'Pinterest', media:'photo'},
+    {id:'gbp',       label:'Google Business', media:'photo'}
   ],
   // ----- FULL SYSTEM (shown automatically AFTER someone buys the $397 package) -----
   // Publish each full-suite scenario as a Make Template, then paste its install link here.
@@ -407,7 +409,7 @@ var HOOK_KEY   = 'rt_auto_webhook';
 var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
 var voiceCache = null;   // in-memory copy of the voice profile (source of truth = Supabase)
-var FREE_LIMIT = 5;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 5)
+var FREE_LIMIT = 3;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 3)
 var subActive = false;   // cached: is this member an active subscriber?
 
 /* ---- tiny helpers ---- */
@@ -568,7 +570,8 @@ function renderPostTypes(){
 function renderPlatforms(){
   var box=$('platforms'); box.innerHTML='';
   SETUP.platforms.forEach(function(p){
-    if(p.id==='youtube' && state.kind!=='video') return;   // YouTube is video-only
+    var m=p.media||'both';
+    if(m!=='both' && m!==state.kind) return;   // show only platforms that fit this media kind
     var el=document.createElement('div'); el.className='chip on'; el.dataset.id=p.id;
     el.innerHTML='<span class="dot"></span>'+p.label;
     el.onclick=function(){ el.classList.toggle('on'); renderYtFields(); };
@@ -985,6 +988,7 @@ function boot(){
   $('pubBtn').onclick=function(){ publish(this); };
   $('schedBtn').onclick=function(){ schedulePost(this); };
   $('backCreate').onclick=function(){ show('scrCreate'); };
+  $('changeMedia').onclick=function(){ show('scrCreate'); };
   $('againBtn').onclick=function(){ $('brief').value=''; setKind('photo'); $('caption').value=''; var yt=$('ytTitle'); if(yt) yt.value=''; var yd=$('ytDesc'); if(yd) yd.value=''; show('scrCreate'); };
   $('saveHook').onclick=saveHook;
   $('changeConn').onclick=function(){ show('scrSetup'); };
