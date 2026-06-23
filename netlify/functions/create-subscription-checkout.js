@@ -64,7 +64,7 @@ exports.handler = async (event) => {
         quantity: 1,
         tax_rates: TAX_RATE_ID ? [TAX_RATE_ID] : undefined,
       }],
-      allow_promotion_codes: true,
+      allow_promotion_codes: false,
       success_url: `${siteUrl}/?subscribed=1`,
       cancel_url: `${siteUrl}/?canceled=1`,
     });
