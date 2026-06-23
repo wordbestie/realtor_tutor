@@ -156,26 +156,18 @@
 
   <!-- ===================== SETUP (first run) ===================== -->
   <section class="screen" id="scrSetup">
-    <div class="card step">
-      <span class="stepnum">1</span>
-      <h3>Create a free Make account</h3>
-      <p>Make (an automation platform) securely connects to your social accounts and does the publishing. The free plan in Make is all you need.</p>
-      <a class="btnlink" href="https://www.make.com/en/register" target="_blank" rel="noopener">Create my free Make account →</a>
-    </div>
-    <div class="card step">
-      <span class="stepnum">2</span>
-      <h3>Add the Publisher to your account</h3>
-      <p>Download our ready-made publishing automation, then import it into Make — about a minute. In Make: <b>＋ Create a new scenario → the ⋯ menu → Import Blueprint</b>, and choose the file you just downloaded. Then click each social module to log in — that connects Instagram, Facebook and LinkedIn as <b>you</b>.</p>
-      <a class="btnlink todo" id="bpPub" href="#" download target="_blank" rel="noopener">Download the Publisher →</a>
-      <div class="note"><span class="k">One-time note</span>Instagram must be a free <b>Business or Creator</b> account linked to a Facebook Page — that's Meta's rule for any auto-posting tool. The setup guide shows exactly how.</div>
-    </div>
-    <div class="card step">
-      <span class="stepnum">3</span>
-      <h3>Paste your webhook link</h3>
-      <p>When you turn the Publisher on, Make shows a <b>webhook URL</b>. Copy it and paste it here once — this is what lets Realtor Tutor deliver your post to your Make automation.</p>
-      <input type="url" id="hookInput" placeholder="https://hook…make.com/…">
-      <div class="row"><button class="btn" id="saveHook">Save &amp; continue →</button></div>
-      <div class="err" id="setupErr"></div>
+    <div class="card">
+      <div id="setupVideo" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#0b1f3a;margin-bottom:18px"></div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a class="btn block" href="https://www.make.com/en/register" target="_blank" rel="noopener">Create Make account</a>
+        <a class="btn block todo" id="bpPub" href="#" download target="_blank" rel="noopener">Download file</a>
+        <button class="btn block" id="pasteToggle" type="button">Paste webhook</button>
+      </div>
+      <div id="webhookPanel" hidden style="margin-top:14px">
+        <input type="url" id="hookInput" placeholder="Paste your webhook link (https://hook…make.com/…)">
+        <div class="row"><button class="btn block" id="saveHook">Save and continue →</button></div>
+        <div class="err" id="setupErr"></div>
+      </div>
     </div>
   </section>
 
@@ -373,6 +365,9 @@
    =================================================================== */
 var SETUP = {
   publisherBlueprint: '/publisher-blueprint.json',  // downloadable Make blueprint for the webhook Publisher
+  setupVideo: '',                  // ▶ Paste your setup walkthrough video link here (YouTube or Loom).
+                                   //   e.g. 'https://youtu.be/abc123'  or  'https://www.loom.com/share/abc123'
+                                   //   Leave BLANK to show a placeholder until your video is recorded.
   upsellUrl: '',                   // OPTIONAL override: external link for the unlock button.
                                    // Leave BLANK to use the built-in $397 Stripe checkout.
   platforms: [                     // platforms to offer (match what your Publisher posts to)
@@ -414,7 +409,9 @@ var subActive = false;   // cached: is this member an active subscriber?
 
 /* ---- tiny helpers ---- */
 function $(id){return document.getElementById(id);}
-function show(id){['scrSetup','scrPlan','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked','scrCalendar'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});window.scrollTo(0,0);}
+function show(id){['scrSetup','scrPlan','scrVoice','scrCreate','scrReview','scrDone','scrUnlocked','scrCalendar'].forEach(function(s){$(s).classList.toggle('is-on', s===id);});
+  var hideHead=(id==='scrSetup'); var ht=$('hTitle'), hs=$('hSub'); if(ht) ht.style.display=hideHead?'none':''; if(hs) hs.style.display=hideHead?'none':'';
+  window.scrollTo(0,0);}
 function err(id,msg){var e=$(id);if(msg){e.textContent=msg;e.classList.add('show');}else{e.classList.remove('show');}}
 
 var state = { kind:'photo', base64:null, mediaType:'image/jpeg', dataUrl:null, mediaUrl:null, caption:'', postType:'free', ytTitle:'', ytDescription:'' };
@@ -967,8 +964,24 @@ async function route(){
   else { startCreate(); }
 }
 
+function toEmbed(u){
+  u=(u||'').trim(); if(!u) return null; var m;
+  if((m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/))) return {type:'iframe',src:'https://www.youtube.com/embed/'+m[1]};
+  if((m=u.match(/loom\.com\/(?:share|embed)\/([\w-]+)/)))                                   return {type:'iframe',src:'https://www.loom.com/embed/'+m[1]};
+  if((m=u.match(/vimeo\.com\/(?:video\/)?(\d+)/)))                                           return {type:'iframe',src:'https://player.vimeo.com/video/'+m[1]};
+  if(/\.mp4($|\?)/i.test(u))                                                                 return {type:'video',src:u};
+  return {type:'iframe',src:u};
+}
+function renderSetupVideo(){
+  var box=$('setupVideo'); if(!box) return; var e=toEmbed(SETUP.setupVideo);
+  if(!e){ box.innerHTML='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#cdd6e6;text-align:center;gap:8px;font-size:14px"><div style="font-size:34px">▶</div><div>Setup walkthrough video</div></div>'; return; }
+  if(e.type==='video'){ box.innerHTML='<video src="'+e.src+'" controls playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>'; }
+  else { box.innerHTML='<iframe src="'+e.src+'" title="Setup walkthrough" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%"></iframe>'; }
+}
 function boot(){
   // wire setup links/config
+  renderSetupVideo();
+  $('pasteToggle').onclick=function(){ var p=$('webhookPanel'); p.hidden=!p.hidden; if(!p.hidden){ var hi=$('hookInput'); if(hi) hi.focus(); } };
   if(SETUP.publisherBlueprint){ var b=$('bpPub'); b.href=SETUP.publisherBlueprint; b.classList.remove('todo'); }
   var subCta=$('subCta'); if(subCta){ subCta.onclick=function(e){ e.preventDefault(); openPlan(); }; }
   // events
