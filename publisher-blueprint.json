@@ -10,10 +10,10 @@
 				"restore": {
 					"parameters": {
 						"hook": {
+							"label": "Content Engine Publisher Webhook",
 							"data": {
 								"editable": "true"
-							},
-							"label": "My Content Engine Webhook"
+							}
 						}
 					}
 				},
@@ -36,6 +36,7 @@
 				]
 			},
 			"parameters": {
+				"hook": 2488344,
 				"maxResults": 1
 			}
 		},
@@ -689,58 +690,6 @@
 									{
 										"name": "__IMTCONN__",
 										"type": "account:pinterest2",
-										"label": "Connection",
-										"required": true
-									}
-								]
-							},
-							"parameters": {}
-						}
-					]
-				},
-				{
-					"flow": [
-						{
-							"id": 21,
-							"filter": {
-								"name": "Google Business · photo",
-								"conditions": [
-									[
-										{
-											"a": "{{1.platforms.gbp}}",
-											"b": "true",
-											"o": "text:equal"
-										},
-										{
-											"a": "{{1.mediaType}}",
-											"b": "photo",
-											"o": "text:equal"
-										}
-									]
-								]
-							},
-							"mapper": {
-								"title": "{{1.caption}}",
-								"summary": "{{1.caption}}",
-								"media": [
-									{
-										"mediaFormat": "PHOTO",
-										"sourceUrl": "{{1.mediaUrl}}"
-									}
-								]
-							},
-							"module": "google-my-business:createAPost",
-							"version": 1,
-							"metadata": {
-								"restore": {},
-								"designer": {
-									"x": 600,
-									"y": 600
-								},
-								"parameters": [
-									{
-										"name": "__IMTCONN__",
-										"type": "account:google-custom,google-my-business2",
 										"label": "Connection",
 										"required": true
 									}
