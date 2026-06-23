@@ -159,9 +159,9 @@
     <div class="card">
       <div id="setupVideo" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#0b1f3a;margin-bottom:18px"></div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <a class="btn block" href="https://www.make.com/en/register" target="_blank" rel="noopener">Create Make account</a>
-        <a class="btn block todo" id="bpPub" href="#" download target="_blank" rel="noopener">Download file</a>
-        <button class="btn block" id="pasteToggle" type="button">Paste webhook</button>
+        <a class="btn block" href="https://www.make.com/en/register" target="_blank" rel="noopener">STEP 1: Create Make account</a>
+        <a class="btn block todo" id="bpPub" href="#" download target="_blank" rel="noopener">STEP 2: Download file</a>
+        <button class="btn block" id="pasteToggle" type="button">STEP 3: Paste Webhook</button>
       </div>
       <div id="webhookPanel" hidden style="margin-top:14px">
         <input type="url" id="hookInput" placeholder="Paste your webhook link (https://hook…make.com/…)">
@@ -375,8 +375,7 @@ var SETUP = {
     {id:'facebook',  label:'Facebook',  media:'both'},
     {id:'linkedin',  label:'LinkedIn',  media:'both'},
     {id:'youtube',   label:'YouTube',   media:'video'},
-    {id:'pinterest', label:'Pinterest', media:'photo'},
-    {id:'gbp',       label:'Google Business', media:'photo'}
+    {id:'pinterest', label:'Pinterest', media:'photo'}
   ],
   // ----- FULL SYSTEM (shown automatically AFTER someone buys the $397 package) -----
   // Publish each full-suite scenario as a Make Template, then paste its install link here.
