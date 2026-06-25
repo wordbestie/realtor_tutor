@@ -449,23 +449,23 @@
    ================================================================ */
 const CATEGORIES = [
   { key:'prelisting', name:'Getting Started', unit:'walkthrough', wizards:[
-      { name:'Touring ITSO Systems', blurb:'A tour of the ITSO systems and what each one is for.', url:'wizards/itso-dashboard-tour.html', video:'itso-tour-demo.mp4' },
-      { name:'Understanding & Interpreting Data in Matrix', blurb:'A guided walkthrough of Matrix and how to pull every piece of data you need.', url:'wizards/understanding-interpreting-data.html', video:'matrix-walkthrough-demo.mp4' },
-      { name:'Customizing your Branding', blurb:'Build a Brand Kit — logo and colours — that applies across your client-facing apps.', url:'wizards/customizing-branding.html', video:'branding-center-demo.mp4' },
-      { name:'Setting Up Property Email Notifications', blurb:'How to add new contacts to your email marketing list, step by step.', url:'wizards/property-email-notifications.html', video:'email-list-demo.mp4' },
+      { name:'Touring ITSO Systems', blurb:'A tour of the ITSO systems and what each one is for.', url:'wizards/itso-dashboard-tour.html', video:'itso-tour-demo.mp4' , kind:'walkthrough', cta:'Open walkthrough' },
+      { name:'Understanding & Interpreting Data in Matrix', blurb:'A guided walkthrough of Matrix and how to pull every piece of data you need.', url:'wizards/understanding-interpreting-data.html', video:'matrix-walkthrough-demo.mp4' , kind:'walkthrough', cta:'Open walkthrough' },
+      { name:'Customizing your Branding', blurb:'Build a Brand Kit — logo and colours — that applies across your client-facing apps.', url:'wizards/customizing-branding.html', video:'branding-center-demo.mp4' , kind:'walkthrough', cta:'Open walkthrough' },
+      { name:'Setting Up Property Email Notifications', blurb:'How to add new contacts to your email marketing list, step by step.', url:'wizards/property-email-notifications.html', video:'email-list-demo.mp4' , kind:'walkthrough', cta:'Open walkthrough' },
   ]},
   { key:'listing', name:'Listing', wizards:[
       { name:'Gathering Listing Info', blurb:'Capture every detail of a new listing in minutes.', url:'wizards/listing-intake.html', video:'listing-intake-demo.mp4' },
       { name:'Loading a Listing into Realtor.ca', blurb:'Get your listing loaded correctly — every field, in the right order.', url:'wizards/broker-load.html', video:'broker-load-demo.mp4' },
-      { name:'Posting Open House Info', blurb:'Post open house details by phone or desktop.', url:'wizards/open-house.html', video:'open-house-demo.mp4' },
-      { name:'Setting Up Your Lockbox', blurb:'Program, place, and manage your lockbox properly.', videoOnly:true, video:'lockbox-demo.mp4' },
-      { name:'Setting Up Showings', blurb:'Configure BrokerBay end to end — profile, notifications, and lockbox syncing — so showing requests flow through one dashboard.', url:'wizards/setting-up-showings.html', video:'setting-up-showings-demo.mp4' },
+      { name:'Posting Open House Info', blurb:'Post open house details by phone or desktop.', url:'wizards/open-house.html', video:'open-house-demo.mp4' , kind:'walkthrough', cta:'Open walkthrough' },
+      { name:'Setting Up Your Lockbox', blurb:'Open, set the combination, mount, and troubleshoot a Master Lock box — step by step.', url:'wizards/setting-up-lockbox.html', video:'lockbox-demo.mp4', kind:'walkthrough', cta:'Open walkthrough' },
+      { name:'Setting Up Showings', blurb:'Configure BrokerBay end to end — profile, notifications, and lockbox syncing — so showing requests flow through one dashboard.', url:'wizards/setting-up-showings.html', video:'setting-up-showings-demo.mp4' , kind:'walkthrough', cta:'Open walkthrough' },
   ]},
   { key:'buying', name:'Offering', wizards:[
       { name:'Preparing an Offer to Purchase', blurb:'Build a clean, complete offer with clear clauses and nothing missed.', url:'wizards/making-an-offer.html', video:'making-an-offer-demo.mp4' },
       { name:'Firming Up an Offer', blurb:'Take a conditional deal all the way to firm.', url:'wizards/going-firm.html', video:'going-firm-demo.mp4' },
       { name:'Preparing a Lease Offer', blurb:'Assemble the Agreement to Lease, deposit, and tenant package for a competitive lease offer.', url:'wizards/lease-offer-docs.html', video:'lease-offer-demo.mp4' },
-      { name:'Vetting a Lease Application', blurb:'Screen a prospective tenant — application, income, credit, references — and summarize for your landlord.', url:'wizards/lease-vetting.html', video:'lease-vetting-demo.mp4' },
+      { name:'Vetting a Lease Application', blurb:'Screen a prospective tenant — application, income, credit, references — and summarize for your landlord.', url:'wizards/lease-vetting.html', video:'lease-vetting-demo.mp4' , kind:'walkthrough', cta:'Open walkthrough' },
       { name:'Writing up the Ontario Standard Lease', blurb:'Fill out Ontario\'s required Standard Form of Lease (Form 2229E) field by field, then hand your client a clean, complete copy.', url:'wizards/ontario-standard-lease.html', video:'ontario-standard-lease-demo.mp4' },
   ]},
   { key:'marketing', name:'Marketing', wizards:[
@@ -739,7 +739,7 @@ CATEGORIES.forEach(cat=>{
     body = `<div class="wz-list">${cat.wizards.map(cardHTML).join('')}</div>`;
   }
   const unit = cat.unit || 'wizard';
-  sec.innerHTML=`<div class="cat-head"><h3>${cat.name}</h3><i></i><span class="count">${cat.wizards.length} ${cat.wizards.length===1?unit:unit+'s'}</span><span class="chev">${caret}</span></div><div class="cat-body">${body}</div>`;
+  sec.innerHTML=`<div class="cat-head"><h3>${cat.name}</h3><i></i><span class="count">${(function(){var ws=cat.wizards||[];if(cat.unit){return ws.length+' '+(ws.length===1?unit:unit+'s');}var wt=ws.filter(function(x){return x.kind==='walkthrough';}).length;var wz=ws.length-wt;var p=[];if(wt)p.push(wt+' '+(wt===1?'walkthrough':'walkthroughs'));if(wz)p.push(wz+' '+(wz===1?'wizard':'wizards'));return p.join(' · ');})()}</span><span class="chev">${caret}</span></div><div class="cat-body">${body}</div>`;
   catalog.appendChild(sec);
 });
 // accordion: click a category headline or a resource sub-headline to expand/collapse
