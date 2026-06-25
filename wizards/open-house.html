@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loading Open House Info · Realtor Tutor</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Post an Open House to a Listing · Realtor Tutor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+
   :root{--ink:#10302A;--ink-2:#0B221D;--paper:#F4F1E8;--card:#FBFAF4;--line:#DED7C6;--gold:#E0A227;--green:#2E7D5B;--muted:#5B6A60;
     --display:'Bricolage Grotesque',system-ui,sans-serif;--body:'Hanken Grotesk',system-ui,sans-serif;}
   *{box-sizing:border-box}
@@ -80,148 +81,127 @@
   .rtgate-card{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--muted);font-weight:600}
   .rtgate-spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:rtspin .8s linear infinite}
   @keyframes rtspin{to{transform:rotate(360deg)}}
-</style>
+
+
+      @keyframes claude-pulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+      #claude-agent-glow-border-inner {
+        animation: claude-pulse 2s ease-in-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #claude-agent-glow-border-inner {
+          animation: none;
+        }
+      }
+    
+
+  /* instructional layout */
+  .stepnum{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .leadnote{color:var(--ink);font-size:1.02rem;margin:0 0 18px;max-width:64ch}
+  .howto{list-style:none;margin:0;padding:0;counter-reset:howto}
+  .howto li{position:relative;padding:14px 16px 14px 52px;margin:0 0 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;line-height:1.55}
+  .howto li::before{counter-increment:howto;content:counter(howto);position:absolute;left:14px;top:14px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tiptag{display:inline-block;background:var(--gold);color:var(--ink-2);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:6px;margin-right:6px}
+  .nav{display:flex;gap:12px;margin-top:26px}
+  .btn{font-family:var(--body);font-weight:700;font-size:.95rem;padding:12px 22px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:transform .1s,box-shadow .15s}
+  .btn:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  .btn.primary{background:var(--gold);border-color:var(--gold);color:var(--ink-2)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .step{display:none}
+  .step.active{display:block}
+
+  </style>
 </head>
 <body>
-  <div id="rtGate" class="rtgate"><div class="rtgate-card"><div class="rtgate-spin"></div><p>Checking your access&hellip;</p></div></div>
-  <header class="top">
-    <div class="top-in">
-      <a class="back" href="../index.html">&larr; Dashboard</a>
-      <div class="brand"><span class="tick"></span> Realtor Tutor</div>
-      <div class="spacer"></div>
-    </div>
-  </header>
+  <header class="top"><div class="top-in">
+    <a class="back" href="/">← Dashboard</a>
+    <div class="brand"><span class="tick"></span>Realtor Tutor</div>
+    <div class="spacer"></div>
+  </div></header>
   <main class="main">
     <div class="intro">
-      <div class="kicker">LISTING WIZARD</div>
-      <h1>Loading Open House Info</h1>
-      <p>Set up and run an open house from your phone or desktop — logistics, promotion, and follow-up.</p>
+      <div class="kicker">Matrix How-To</div>
+      <h1>Post an Open House to a Listing</h1>
+      <p>Add an open house to one of your listings in Matrix yourself — from finding the listing through to the “Input Succeeded” confirmation.</p>
     </div>
     <div class="progress">
       <div class="bar"><span id="barFill"></span></div>
-      <div class="dots" id="dots"></div>
-    </div>
-    <form id="wiz" class="card" novalidate>
-      <div id="host"></div>
-      <div id="review" style="display:none"></div>
-      <div class="nav">
-        <button type="button" class="btn ghost" id="backBtn" hidden>Back</button>
-        <button type="button" class="btn" id="nextBtn">Next</button>
+      <div class="dots" id="dots">
+          <div class="dot active">Find the listing<b></b></div>
+          <div class="dot">Open the listing for editing<b></b></div>
+          <div class="dot">Open the Open Houses form<b></b></div>
+          <div class="dot">Fill in the open house details<b></b></div>
       </div>
-    </form>
+    </div>
+    <div class="card" style="background:transparent;border:none;padding:0">
+      <section class="step active" data-step="0">
+        <div class="stepnum">Step 1 of 4</div>
+        <h2>Find the listing</h2>
+        <p class="leadnote">Go to the <strong>Add/Edit</strong> tab in the top navigation. This opens the <em>Modify Property</em> search page.</p>
+        <ul class="howto">
+            <li>In the <strong>Location</strong> section, type the street number into the <strong>St #</strong> field and the street name into the <strong>Street / Island</strong> field — for example, <em>1095</em> and <em>Mineral Springs</em>.</li>
+            <li>Click the <strong>Search</strong> button at the bottom of the section to find your listing.</li>
+        </ul>
+      </section>
+      <section class="step" data-step="1">
+        <div class="stepnum">Step 2 of 4</div>
+        <h2>Open the listing for editing</h2>
+        <p class="leadnote">When your listing appears in the results, you’ll see three edit links next to it: <strong>Data</strong>, <strong>Photo</strong>, and <strong>Sup</strong>.</p>
+        <ul class="howto">
+            <li>Click <strong>Data</strong> to open the listing edit options.</li>
+            <li>This brings you to the <strong>Modify Listing</strong> page.</li>
+        </ul>
+      </section>
+      <section class="step" data-step="2">
+        <div class="stepnum">Step 3 of 4</div>
+        <h2>Open the Open Houses form</h2>
+        <p class="leadnote">On the Modify Listing page, scroll to the <strong>Select Form</strong> section and click <strong>Open Houses</strong>.</p>
+        <ul class="howto">
+            <li>This opens the <strong>Manage Open Houses</strong> form, which shows any existing open houses plus a blank entry at the bottom for adding a new one.</li>
+            <li>The blank entry’s <strong>Status</strong> will say <em>Active</em> — that’s the one you fill in.</li>
+        </ul>
+      </section>
+      <section class="step" data-step="3">
+        <div class="stepnum">Step 4 of 4</div>
+        <h2>Fill in the open house details</h2>
+        <p class="leadnote">In the blank <em>Active</em> entry, fill in the details, then submit.</p>
+        <ul class="howto">
+            <li>Enter the <strong>Date</strong> (e.g. 06/28/2026 for the upcoming Sunday) and choose the <strong>Open House Type</strong> (Public).</li>
+            <li>Set the <strong>Start Time</strong> and <strong>End Time</strong>: type each value (like “11:00” and “01:00”) and select the correct <strong>AM/PM</strong> radio button beside it. This is the easiest thing to get wrong — double-check that start is <strong>AM</strong> and end is <strong>PM</strong> for a late-morning-to-afternoon event.</li>
+            <li>Optionally add notes in <strong>Refreshments</strong> or <strong>Remarks</strong>. Don’t use commas in Remarks — REALTOR.ca doesn’t support them.</li>
+            <li>Click <strong>Submit Listing</strong> at the bottom. You’ll see an <strong>“Input Succeeded”</strong> confirmation, which means the open house was saved and will appear on the system shortly.</li>
+            <li><span class="tiptag">Tip</span> There’s a <strong>Validate</strong> button next to Submit if you want to check for errors first, and each open house entry has its own <strong>Delete</strong> button if you ever need to remove one.</li>
+        </ul>
+      </section>
+      <div class="nav">
+        <button class="btn" id="backBtn">Back</button>
+        <button class="btn primary" id="nextBtn">Next</button>
+      </div>
+    </div>
   </main>
-<script src="../gate.js"></script>
-<script>
-(async function(){
-  const ok = await window.requireMemberAccess({ home:'../index.html' });
-  if(ok){ const g=document.getElementById('rtGate'); if(g) g.remove(); }
-})();
-</script>
-<script>
-const CONFIG = {"steps": [{"title": "Open house details", "fields": [{"id": "address", "label": "Property address", "type": "text", "required": true}, {"id": "date", "label": "Open house date", "type": "date", "required": true, "half": true}, {"id": "type", "label": "Type", "type": "radio", "options": ["Public", "Agents / Broker"], "half": true}, {"id": "start", "label": "Start time", "type": "text", "half": true}, {"id": "end", "label": "End time", "type": "text", "half": true}, {"id": "host", "label": "Hosting agent", "type": "text", "half": true}, {"id": "occupancy", "label": "Occupancy", "type": "radio", "options": ["Vacant", "Occupied"], "half": true}]}, {"title": "Logistics", "fields": [{"id": "signs", "label": "Directional signs needed", "type": "number", "half": true}, {"id": "lockbox", "label": "Lockbox / key", "type": "text", "half": true}, {"id": "signin", "label": "Sign-in method", "type": "radio", "options": ["Paper (Form 270)", "Digital sign-in"], "half": true}, {"id": "valuables", "label": "Valuables & medications secured", "type": "check", "half": true}, {"id": "parking", "label": "Parking & access notes", "type": "textarea"}, {"id": "refreshments", "label": "Refreshments", "type": "text"}, {"id": "safety", "label": "Safety plan / second person", "type": "textarea"}]}, {"title": "Promotion", "fields": [{"id": "mls", "label": "Posted to MLS / board", "type": "check", "half": true}, {"id": "brokerbay", "label": "Listed in BrokerBay / showing system", "type": "check", "half": true}, {"id": "social", "label": "Posted to social media", "type": "check", "half": true}, {"id": "neighbours", "label": "Neighbours invited", "type": "check", "half": true}, {"id": "emailblast", "label": "Email blast sent", "type": "check", "half": true}, {"id": "justlisted", "label": "Just-listed cards delivered", "type": "check", "half": true}, {"id": "feature", "label": "Feature sheet highlights", "type": "textarea"}]}, {"title": "After the open house", "fields": [{"id": "visitors", "label": "Visitor count", "type": "number", "half": true}, {"id": "hotleads", "label": "Hot leads", "type": "number", "half": true}, {"id": "leads", "label": "Interested parties / follow-ups", "type": "textarea"}, {"id": "feedback", "label": "Buyer feedback", "type": "textarea"}, {"id": "sellerupdate", "label": "Notes for seller update", "type": "textarea"}]}], "title": "Loading Open House Info", "kicker": "LISTING WIZARD", "subtitle": "Set up and run an open house from your phone or desktop — logistics, promotion, and follow-up."};
-const steps = CONFIG.steps;
-const host=document.getElementById('host'), reviewEl=document.getElementById('review');
-const dotsEl=document.getElementById('dots'), bar=document.getElementById('barFill');
-const backBtn=document.getElementById('backBtn'), nextBtn=document.getElementById('nextBtn');
-let cur=0; const total=steps.length; // review index = total
-
-function fieldHTML(f){
-  const half=f.half?' half':''; const req=f.required?'<span class="req">*</span>':'';
-  const ph=f.placeholder?`placeholder="${f.placeholder}"`:''; const rq=f.required?'data-req':'';
-  const help=f.help?`<div class="help">${f.help}</div>`:'';
-  if(f.type==='check'){
-    return `<div class="field${half} check-field"><label class="check"><input type="checkbox" id="${f.id}"> <span>${f.label}</span></label>${help}</div>`;
+  <script>
+(function(){
+  var steps = Array.prototype.slice.call(document.querySelectorAll(".step"));
+  var dots = Array.prototype.slice.call(document.querySelectorAll(".dot"));
+  var bar = document.getElementById("barFill");
+  var backBtn = document.getElementById("backBtn");
+  var nextBtn = document.getElementById("nextBtn");
+  var i = 0;
+  function show(n){
+    i = Math.max(0, Math.min(steps.length-1, n));
+    steps.forEach(function(s,k){ s.classList.toggle("active", k===i); });
+    dots.forEach(function(d,k){ d.classList.toggle("active", k<=i); });
+    bar.style.width = ((i)/(steps.length-1)*100) + "%";
+    backBtn.disabled = (i===0);
+    nextBtn.disabled = (i===steps.length-1);
+    window.scrollTo({top:0,behavior:"smooth"});
   }
-  let c='';
-  if(['text','email','tel','number','date'].includes(f.type)){ c=`<input id="${f.id}" type="${f.type}" ${ph} ${rq}>`; }
-  else if(f.type==='textarea'){ c=`<textarea id="${f.id}" ${ph} ${rq}></textarea>`; }
-  else if(f.type==='select'){ c=`<select id="${f.id}" ${rq}><option value="">Choose&hellip;</option>${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`; }
-  else if(f.type==='radio'){ c=`<div class="radios" id="${f.id}" ${f.required?'data-req-group':''}>${f.options.map(o=>`<label class="radio"><input type="radio" name="${f.id}" value="${o}"> ${o}</label>`).join('')}</div>`; }
-  return `<div class="field${half}"><label class="flbl" for="${f.id}">${f.label}${req}</label>${c}${help}</div>`;
-}
-// build steps
-steps.forEach((s,i)=>{
-  const d=document.createElement('div'); d.className='step'+(i===0?' active':'');
-  d.innerHTML=`<h2>${s.title}</h2><div class="fields">${s.fields.map(fieldHTML).join('')}</div>`;
-  host.appendChild(d);
-});
-// dots
-[...steps.map(s=>s.title),'Review'].forEach((t,i)=>{
-  const el=document.createElement('div'); el.className='dot'+(i===0?' active':''); el.dataset.i=i;
-  el.innerHTML=`<b></b>${t}`; dotsEl.appendChild(el);
-});
-const stepEls=[...host.querySelectorAll('.step')];
-const dotEls=[...dotsEl.querySelectorAll('.dot')];
-
-function valueOf(f){
-  if(f.type==='radio'){ const c=document.querySelector(`input[name="${f.id}"]:checked`); return c?c.value:''; }
-  if(f.type==='check'){ const e=document.getElementById(f.id); return e&&e.checked?'Yes':''; }
-  const e=document.getElementById(f.id); return e?(e.value||'').trim():'';
-}
-function validateStep(i){
-  let ok=true; const el=stepEls[i];
-  el.querySelectorAll('[data-req]').forEach(inp=>{
-    const fld=inp.closest('.field'); const bad=!inp.value.trim();
-    fld.classList.toggle('invalid',bad); if(bad) ok=false;
-  });
-  el.querySelectorAll('[data-req-group]').forEach(g=>{
-    const bad=!g.querySelector('input:checked'); const fld=g.closest('.field');
-    fld.classList.toggle('invalid',bad); if(bad) ok=false;
-  });
-  return ok;
-}
-function buildReview(){
-  let html='';
-  steps.forEach(s=>{
-    const rows=s.fields.map(f=>{const v=valueOf(f);return v?`<div class="rev-row"><div class="k">${f.label}</div><div class="v">${v.replace(/</g,'&lt;')}</div></div>`:''}).filter(Boolean).join('');
-    html+=`<div class="rev-block"><h3>${s.title}</h3>${rows||'<div class="rev-empty">Nothing entered.</div>'}</div>`;
-  });
-  reviewEl.innerHTML=`<div class="done-note">Looks good. Review below, then copy, print, or email it &mdash; or jump back to change anything.</div>${html}
-    <div class="rev-actions">
-      <button type="button" class="btn gold" id="copyBtn">Copy summary</button>
-      <button type="button" class="btn ghost" id="printBtn">Print</button>
-      <button type="button" class="btn ghost" id="emailBtn">Email it</button>
-      <button type="button" class="btn ghost" id="resetBtn">Start over</button>
-    </div>`;
-  document.getElementById('copyBtn').onclick=copySummary;
-  document.getElementById('printBtn').onclick=()=>window.print();
-  document.getElementById('emailBtn').onclick=emailSummary;
-  document.getElementById('resetBtn').onclick=()=>location.reload();
-}
-function summaryText(){
-  let out=CONFIG.title+'\n\n';
-  steps.forEach(s=>{
-    const rows=s.fields.map(f=>{const v=valueOf(f);return v?`  ${f.label}: ${v}`:''}).filter(Boolean);
-    if(rows.length){ out+=s.title+'\n'+rows.join('\n')+'\n\n'; }
-  });
-  return out.trim();
-}
-function copySummary(){
-  const t=summaryText(); const b=document.getElementById('copyBtn');
-  navigator.clipboard.writeText(t).then(()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy summary',1600);})
-    .catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();b.textContent='Copied!';setTimeout(()=>b.textContent='Copy summary',1600);});
-}
-function emailSummary(){
-  const addr=valueOf({id:'address',type:'text'});
-  const subj=encodeURIComponent(CONFIG.title+(addr?(' — '+addr):''));
-  const body=encodeURIComponent(summaryText());
-  window.location.href=`mailto:?subject=${subj}&body=${body}`;
-}
-function show(i){
-  cur=i;
-  stepEls.forEach((e,idx)=>e.classList.toggle('active',idx===i && i<total));
-  reviewEl.style.display = i===total?'block':'none';
-  dotEls.forEach((d,idx)=>{d.classList.toggle('active',idx===i);d.classList.toggle('done',idx<i);});
-  bar.style.width=((i)/(total))*100+'%';
-  backBtn.hidden = i===0;
-  if(i===total){ nextBtn.hidden=true; }
-  else { nextBtn.hidden=false; nextBtn.textContent = i===total-1?'Review':'Next'; }
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-nextBtn.onclick=()=>{ if(cur<total && !validateStep(cur)) return; if(cur===total-1){ buildReview(); } show(Math.min(cur+1,total)); };
-backBtn.onclick=()=>show(Math.max(cur-1,0));
-dotEls.forEach(d=>d.onclick=()=>{ const i=+d.dataset.i; if(i<=cur){ show(i); } });
-bar.style.width='0%';
-</script>
+  backBtn.addEventListener("click", function(){ show(i-1); });
+  nextBtn.addEventListener("click", function(){ show(i+1); });
+  show(0);
+})();
+  </script>
 </body>
 </html>
