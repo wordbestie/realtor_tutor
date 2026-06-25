@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Understanding & Interpreting Data in Matrix · Realtor Tutor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+
+  :root{--ink:#10302A;--ink-2:#0B221D;--paper:#F4F1E8;--card:#FBFAF4;--line:#DED7C6;--gold:#E0A227;--green:#2E7D5B;--muted:#5B6A60;
+    --display:'Bricolage Grotesque',system-ui,sans-serif;--body:'Hanken Grotesk',system-ui,sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--body);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  a{color:inherit}
+  /* top bar */
+  .top{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+  .top-in{max-width:780px;margin:0 auto;height:62px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .back{display:inline-flex;align-items:center;gap:8px;color:#cfe0d8;text-decoration:none;font-weight:600;font-size:.92rem;transition:color .15s}
+  .back:hover{color:#fff}
+  .brand{font-family:var(--display);font-weight:800;font-size:1.05rem;display:flex;align-items:center;gap:.5ch}
+  .brand .tick{width:9px;height:9px;background:var(--gold);border-radius:2px;transform:rotate(45deg);display:inline-block}
+  .top .spacer{width:84px}
+  /* main */
+  .main{max-width:780px;margin:0 auto;padding:34px 22px 96px}
+  .intro .kicker{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .intro h1{font-family:var(--display);font-weight:800;font-size:clamp(1.7rem,4.5vw,2.5rem);letter-spacing:-.02em;margin:8px 0 0}
+  .intro p{color:var(--muted);margin:8px 0 0;max-width:60ch}
+  /* progress */
+  .progress{margin:28px 0 22px}
+  .bar{height:6px;background:#E7E1D2;border-radius:100px;overflow:hidden}
+  .bar span{display:block;height:100%;width:0;background:var(--gold);border-radius:100px;transition:width .3s ease}
+  .dots{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px}
+  .dot{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--muted);display:flex;align-items:center;gap:7px;opacity:.6}
+  .dot b{width:8px;height:8px;border-radius:50%;background:#CFC8B6;display:inline-block}
+  .dot.done{opacity:1}.dot.done b{background:var(--green)}
+  .dot.active{opacity:1;color:var(--ink)}.dot.active b{background:var(--gold);box-shadow:0 0 0 4px rgba(224,162,39,.2)}
+  /* card */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px 26px;box-shadow:0 30px 60px -48px rgba(16,48,42,.4)}
+  .step{display:none}.step.active{display:block}
+  .step h2{font-family:var(--display);font-weight:700;font-size:1.4rem;letter-spacing:-.01em;margin:0 0 18px}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:16px 16px}
+  .field{grid-column:1/-1;min-width:0}
+  .field.half{grid-column:span 1}
+  .flbl{display:block;font-size:.84rem;font-weight:700;margin-bottom:7px}
+  .req{color:var(--gold);margin-left:3px}
+  input,select,textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:11px;padding:12px 13px;font-family:var(--body);font-size:1rem;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+  textarea{resize:vertical;min-height:84px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(46,125,91,.16)}
+  .field.invalid input,.field.invalid select,.field.invalid textarea,.field.invalid .radios{border-color:#c0473a;box-shadow:0 0 0 3px rgba(192,71,58,.14)}
+  .help{color:var(--muted);font-size:.8rem;margin-top:6px}
+  .radios{display:flex;flex-wrap:wrap;gap:8px;border:1px solid transparent;border-radius:11px}
+  .radio,.check{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-weight:600;font-size:.92rem;cursor:pointer;transition:border-color .15s,background .15s}
+  .radio:hover,.check:hover{border-color:#c8c0ac}
+  .radio input,.check input{width:auto;accent-color:var(--green)}
+  .checks{display:flex;flex-direction:column;gap:8px}
+  .check-field .check{width:100%}
+  /* nav */
+  .nav{display:flex;justify-content:space-between;gap:12px;margin-top:22px}
+  .btn{border:0;cursor:pointer;font-family:var(--body);font-weight:700;font-size:1rem;padding:13px 22px;border-radius:12px;background:var(--ink);color:#fff;transition:transform .12s,background .2s}
+  .btn:hover{background:var(--ink-2);transform:translateY(-1px)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#ECE7D9;transform:none}
+  .btn.gold{background:var(--gold);color:var(--ink)}
+  .btn.gold:hover{background:#cf9620}
+  .btn[hidden]{display:none}
+  /* review */
+  .rev-block{border-top:1px solid var(--line);padding:16px 0}
+  .rev-block:first-child{border-top:0;padding-top:0}
+  .rev-block h3{font-family:var(--display);font-weight:700;font-size:1.05rem;margin:0 0 8px}
+  .rev-row{display:flex;gap:12px;padding:4px 0;font-size:.95rem}
+  .rev-row .k{color:var(--muted);min-width:42%;max-width:42%}
+  .rev-row .v{font-weight:600}
+  .rev-empty{color:var(--muted);font-size:.9rem}
+  .rev-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .done-note{background:rgba(46,125,91,.1);border:1px solid rgba(46,125,91,.25);color:var(--ink);border-radius:12px;padding:12px 14px;font-weight:600;font-size:.92rem;margin-bottom:18px}
+  @media(max-width:600px){.fields{grid-template-columns:1fr}.field.half{grid-column:1/-1}.top .spacer{display:none}}
+  @media print{.top,.progress,.nav,.rev-actions{display:none!important}.card{box-shadow:none;border:0}}
+  .rtgate{position:fixed;inset:0;z-index:1000;background:var(--paper);display:flex;align-items:center;justify-content:center}
+  .rtgate-card{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--muted);font-weight:600}
+  .rtgate-spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:rtspin .8s linear infinite}
+  @keyframes rtspin{to{transform:rotate(360deg)}}
+
+
+      @keyframes claude-pulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+      #claude-agent-glow-border-inner {
+        animation: claude-pulse 2s ease-in-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #claude-agent-glow-border-inner {
+          animation: none;
+        }
+      }
+    
+
+  /* instructional layout */
+  .stepnum{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .leadnote{color:var(--ink);font-size:1.02rem;margin:0 0 18px;max-width:64ch}
+  .howto{list-style:none;margin:0;padding:0;counter-reset:howto}
+  .howto li{position:relative;padding:14px 16px 14px 52px;margin:0 0 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;line-height:1.55}
+  .howto li::before{counter-increment:howto;content:counter(howto);position:absolute;left:14px;top:14px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .tiptag{display:inline-block;background:var(--gold);color:var(--ink-2);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:6px;margin-right:6px}
+  .nav{display:flex;gap:12px;margin-top:26px}
+  .btn{font-family:var(--body);font-weight:700;font-size:.95rem;padding:12px 22px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:transform .1s,box-shadow .15s}
+  .btn:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+  .btn.primary{background:var(--gold);border-color:var(--gold);color:var(--ink-2)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+  .step{display:none}
+  .step.active{display:block}
+
+  </style>
+  <script src="../gate.js"></script>
+</head>
+<body>
+  <header class="top"><div class="top-in">
+    <a class="back" href="/">← Dashboard</a>
+    <div class="brand"><span class="tick"></span>Realtor Tutor</div>
+    <div class="spacer"></div>
+  </div></header>
+  <main class="main">
+    <div class="intro">
+      <div class="kicker">Matrix How-To</div>
+      <h1>Understanding &amp; Interpreting Data in Matrix</h1>
+      <p>Pull and read market data in Matrix — from opening the Statistics module and defining a segment, through running reports, to interpreting the metrics that signal pricing power and market velocity.</p>
+    </div>
+    <div class="progress">
+      <div class="bar"><span id="barFill"></span></div>
+      <div class="dots" id="dots">
+        <div class="dot active">Open the Statistics module<b></b></div>
+        <div class="dot">Define your dataset<b></b></div>
+        <div class="dot">Run a preset report<b></b></div>
+        <div class="dot">Build a custom report<b></b></div>
+        <div class="dot">View as Chart or Data<b></b></div>
+        <div class="dot">Share or save a report<b></b></div>
+        <div class="dot">Choose the right tool<b></b></div>
+        <div class="dot">Interpret the key metrics<b></b></div>
+        <div class="dot">A quick practical workflow<b></b></div>
+      </div>
+    <div class="card" style="background:transparent;border:none;padding:0">
+      
+      <section class="step active" data-step="0">
+        <div class="stepnum">Step 1 of 9</div>
+        <h2>Getting to the Statistics module</h2>
+        <p class="leadnote">Matrix keeps its market analytics under the MORE menu. Start here to open the statistics builder.</p>
+        <ul class="howto">
+            <li>From the top navigation, hover over <b>MORE</b>, then <b>STATS</b>, and choose <b>Matrix Stats</b>. This opens the statistics builder.</li>
+            <li>The same menu also offers <b>CREA HPI</b>, <b>MarketStats</b>, and the <b>Statistics Hub</b> — covered in later steps.</li>
+            <li>The page is laid out with <b>system presets on the left</b>, your <b>criteria filters in the centre and right</b>, and <b>output controls</b> (Search, Chart, Data) at the top right.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="1">
+        <div class="stepnum">Step 2 of 9</div>
+        <h2>Defining your dataset (criteria)</h2>
+        <p class="leadnote">Before running any report, tell Matrix which slice of the market to analyse — using the same filters as a property search.</p>
+        <ul class="howto">
+            <li>In the centre and right panels, choose one or more <b>Property Types</b> (Residential, Commercial, etc.) and <b>Sub-Types</b>, and set <b>Ownership Type</b> if needed.</li>
+            <li>Define <b>Price</b>, <b>Bedrooms</b>, <b>Bathrooms</b>, <b>Total Sqft</b>, and <b>Acres Range</b> as appropriate.</li>
+            <li>For location, use the <b>Map Search</b>, the radius <b>&ldquo;Within ___ km of&rdquo;</b> option, or the location fields (city, region, neighbourhood, postal code).</li>
+            <li><span class="tiptag">Tip</span> Pick a segment specific enough to be meaningful but broad enough for a healthy sample size. A single street over one month gives noisy numbers; a neighbourhood and property style over a year is trustworthy.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="2">
+        <div class="stepnum">Step 3 of 9</div>
+        <h2>Running a preset report</h2>
+        <p class="leadnote">The fastest path is the System Presets list on the left — run any of them against the segment you just defined.</p>
+        <ul class="howto">
+            <li>With your criteria set, click any <b>preset</b> in the System Presets list to generate that report against your defined segment.</li>
+            <li>Available presets include: new listings by board, average price over the last twelve months, original price vs. sold price, days on market (DOM) vs. sold price, historic count of active listings, historic sales by year, historic sales price trend, historic sales by price range, monthly stats, and sale-price-to-list-price ratios.</li>
+            <li>After selecting one, click <b>Generate</b> (bottom left) to produce the result.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="3">
+        <div class="stepnum">Step 4 of 9</div>
+        <h2>Building a custom report</h2>
+        <p class="leadnote">If no preset fits, the Customize tab lets you assemble exactly the view you want.</p>
+        <ul class="howto">
+            <li>Click the <b>Customize</b> tab at the top.</li>
+            <li>Choose <b>what to measure</b>, <b>how to group</b> the results (for example by month, by area, or by price range), and <b>how it should be charted</b>.</li>
+            <li>This is useful for a specific combination — say, median sold price grouped by month for one neighbourhood.</li>
+            <li><span class="tiptag">Tip</span> Click <b>Save</b> to store a custom report layout for reuse later.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="4">
+        <div class="stepnum">Step 5 of 9</div>
+        <h2>Viewing results as Chart or Data</h2>
+        <p class="leadnote">Once a report is generated, switch between a visual and a tabular view depending on your purpose.</p>
+        <ul class="howto">
+            <li>Use the toggle at the <b>top right</b> to switch between <b>Chart</b> and <b>Data</b> views.</li>
+            <li>The <b>Chart</b> view is best for presentations and spotting trends at a glance.</li>
+            <li>The <b>Data</b> view gives the underlying numbers in table form — better for precise figures or copying into your own analysis.</li>
+            <li>The <b>Search</b> toggle returns you to the criteria screen to adjust filters and re-run.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="5">
+        <div class="stepnum">Step 6 of 9</div>
+        <h2>Sharing or saving a report</h2>
+        <p class="leadnote">Package a finished report for a client or a listing presentation using the toolbar tools.</p>
+        <ul class="howto">
+            <li>The toolbar near the presets has <b>print</b> and <b>email</b> icons (and a Generate button).</li>
+            <li>Use these to email a pricing-trend chart to a client or print a market summary for a listing presentation.</li>
+            <li><span class="tiptag">Note</span> The underlying detailed MLS data, including sold prices, is members-only and governed by MLS redistribution rules — reports are intended for your analysis and client advising, not wholesale republishing.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="6">
+        <div class="stepnum">Step 7 of 9</div>
+        <h2>Choosing the right tool for the question</h2>
+        <p class="leadnote">Different tools answer different questions, so match the tool to your goal.</p>
+        <ul class="howto">
+            <li>For raw transaction activity and segment-level detail (DOM, list-to-sold ratios, sales by price range), use the <b>Matrix Stats</b> module described above.</li>
+            <li>For a clean read on whether prices are genuinely rising or falling over time, use <b>CREA HPI</b> (MORE → STATS → CREA HPI) — its benchmark-based index smooths out the distortion that average and median prices suffer when the mix of what sold changes month to month.</li>
+            <li>For broader curated market reporting, use <b>MarketStats</b> or the <b>Statistics Hub</b> from the same menu.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="7">
+        <div class="stepnum">Step 8 of 9</div>
+        <h2>Interpreting the key metrics</h2>
+        <p class="leadnote">A few reports are especially actionable — read them together for a rounded picture of pricing power and market velocity.</p>
+        <ul class="howto">
+            <li><b>List-price vs. sold-price (sale-to-list ratio):</b> tells you whether a segment favours buyers or sellers. Ratios near or above 100% signal a hot seller&rsquo;s market; lower ratios suggest room to negotiate.</li>
+            <li><b>Original-price vs. sold-price:</b> reveals how much sellers typically concede from their initial asking price — valuable for pricing a listing or framing an offer.</li>
+            <li><b>Days on Market:</b> indicates how quickly that segment is moving.</li>
+            <li><span class="tiptag">Tip</span> Reading these three together gives a well-rounded picture of pricing power and market velocity for any slice you define.</li>
+          </ul>
+      </section>
+      <section class="step" data-step="8">
+        <div class="stepnum">Step 9 of 9</div>
+        <h2>A quick practical workflow</h2>
+        <p class="leadnote">In practice, the efficient routine ties all of the above together into a few quick moves.</p>
+        <ul class="howto">
+            <li>Open <b>Matrix Stats</b> and set your location and property criteria.</li>
+            <li>Click a relevant <b>preset</b>, then hit <b>Generate</b>.</li>
+            <li>Glance at the <b>Chart</b> view for the trend, then switch to <b>Data</b> view if you need exact figures.</li>
+            <li>Finally, <b>print or email</b> it if it&rsquo;s for a client.</li>
+          </ul>
+      </section>
+      <div class="nav">
+        <button class="btn" id="backBtn">Back</button>
+        <button class="btn primary" id="nextBtn">Next</button>
+      </div>
+    </div>
+  </main>
+  <script>
+(function(){
+  var steps = Array.prototype.slice.call(document.querySelectorAll(".step"));
+  var dots = Array.prototype.slice.call(document.querySelectorAll(".dot"));
+  var bar = document.getElementById("barFill");
+  var backBtn = document.getElementById("backBtn");
+  var nextBtn = document.getElementById("nextBtn");
+  var i = 0;
+  function show(n){
+    i = Math.max(0, Math.min(steps.length-1, n));
+    steps.forEach(function(s,k){ s.classList.toggle("active", k===i); });
+    dots.forEach(function(d,k){ d.classList.toggle("active", k<=i); });
+    bar.style.width = ((i)/(steps.length-1)*100) + "%";
+    backBtn.disabled = (i===0);
+    nextBtn.disabled = (i===steps.length-1);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  backBtn.addEventListener("click", function(){ show(i-1); });
+  nextBtn.addEventListener("click", function(){ show(i+1); });
+  show(0);
+})();
+  </script>
+  <script>
+
+(async function(){
+  const ok = await window.requireMemberAccess({ home:'../index.html' });
+  if(ok){ const g=document.getElementById('rtGate'); if(g) g.remove(); }
+})();
+
+  </script>
+</body>
+</html>
