@@ -145,14 +145,12 @@
   <div class="rt-top-in">
     <a class="rt-back" href="../index.html">&larr; Dashboard</a>
     <span class="rt-brand"><span class="rt-tick"></span> Realtor&nbsp;Tutor</span>
-    <span class="rt-links"><a class="rt-plan" id="schedLink">Scheduled</a><a class="rt-plan" id="planLink">Plan</a></span>
+    <span class="rt-links"><a class="rt-plan" id="schedLink">Scheduled</a><a class="rt-plan" id="planLink">Upgrade</a></span>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="kicker">Content Automation</div>
-  <h1 id="hTitle">Post to your socials in three taps.</h1>
-  <p class="sub" id="hSub">Add a photo or video and a brief description — Realtor Tutor writes the caption, you review it, and it posts to your own Instagram, Facebook, LinkedIn, and/or YouTube. The first time you publish there's a quick one-time setup — after that, it's this easy every time.</p>
+  <div class="kicker">Upgrade Your Automation</div>
 
   <!-- ===================== SETUP (first run) ===================== -->
   <section class="screen" id="scrSetup">
@@ -175,7 +173,7 @@
   <section class="screen" id="scrPlan">
     <div class="card" id="planActive" style="display:none">
       <label class="fld">Your subscription</label>
-      <p class="hint">You're on the <b id="planTier">Solo</b> plan — thank you! You can manage or cancel anytime.</p>
+      <p class="hint">You're on the <b id="planTier">paid</b> plan — thank you! You can manage or cancel anytime.</p>
       <button class="btn block" id="manageBtn">Manage subscription</button>
     </div>
     <div class="card" id="planTeam" style="display:none">
@@ -191,21 +189,11 @@
       <p class="hint">You have unlimited posting as part of <b id="seatOwner">your team admin</b>'s Pro plan. There's no billing to manage here — your team admin takes care of that.</p>
     </div>
     <div id="planChoose">
-      <div class="card">
-        <label class="fld">Unlock the full content engine</label>
-        <p class="hint">Generate in your voice and publish on autopilot. Cancel anytime.</p>
-      </div>
-      <div class="plan">
-        <div class="plan-name">Solo</div>
-        <div class="price">$67<span> CAD/mo</span></div>
-        <div class="plan-desc">For one agent — your voice, your socials, on autopilot.</div>
-        <button class="btn block" id="subSolo">Choose Solo →</button>
-      </div>
       <div class="plan featured">
-        <div class="plan-name">Pro / Team</div>
-        <div class="price">$197<span> CAD/mo</span></div>
-        <div class="plan-desc">Up to 5 seats — each with the full monthly post allowance.</div>
-        <button class="btn block" id="subPro">Choose Pro →</button>
+        <div class="plan-name">Unlimited automation</div>
+        <div class="price">$27<span> CAD/mo</span></div>
+        <div class="plan-desc">Your voice, your socials, fully on autopilot — publish unlimited posts in real time or on a schedule. Cancel anytime.</div>
+        <button class="btn block" id="subSolo">Upgrade now →</button>
       </div>
     </div>
     <div class="err" id="planErr"></div>
@@ -248,7 +236,6 @@
     <div class="connbar"><span>Publishing to <b id="connList">your connected socials</b></span><span><a id="editVoice">edit voice</a> · <a id="changeConn">change setup</a></span></div>
     <div class="card">
       <label class="fld">1 · What kind of post?</label>
-      <p class="hint">Pick one and we'll tailor the writing. Not sure? Leave it on “Anything”.</p>
       <div class="row" id="postTypes"></div>
     </div>
     <div class="card">
@@ -257,7 +244,7 @@
         <div class="chip on" data-kind="photo">📷 Photo</div>
         <div class="chip" data-kind="video">🎬 Video</div>
       </div>
-      <p class="hint" id="mediaHint">A listing photo, a sold sign, a headshot — whatever this post is about.</p>
+      <p class="hint" id="mediaHint"></p>
       <label class="drop" id="drop">
         <input type="file" id="file" accept="image/*">
         <div id="dropText">📷 Tap to add a photo</div>
@@ -1010,7 +997,7 @@ function boot(){
   $('schedLink').onclick=openCalendar;
   $('calBack').onclick=function(){ startCreate(); };
   $('subSolo').onclick=function(){ startSub('solo', this); };
-  $('subPro').onclick=function(){ startSub('pro', this); };
+  ($('subPro')||{}).onclick=function(){ startSub('pro', this); };
   $('manageBtn').onclick=function(){ openPortal(this); };
   $('inviteBtn').onclick=function(){ inviteSeat(this); };
   $('planBack').onclick=function(){ if(!loadVoice()){openVoice();} else {startCreate();} };
