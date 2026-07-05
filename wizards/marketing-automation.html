@@ -145,14 +145,12 @@
   <div class="rt-top-in">
     <a class="rt-back" href="../index.html">&larr; Dashboard</a>
     <span class="rt-brand"><span class="rt-tick"></span> Realtor&nbsp;Tutor</span>
-    <span class="rt-links"><a class="rt-plan" id="schedLink">Scheduled</a><a class="rt-plan" id="planLink">Plan</a></span>
+    <span class="rt-links"><a class="rt-plan" id="schedLink">Scheduled</a><a class="rt-plan" id="planLink">Upgrade</a></span>
   </div>
 </header>
 
 <main class="wrap">
-  <div class="kicker">Content Automation</div>
-  <h1 id="hTitle">Post to your socials in three taps.</h1>
-  <p class="sub" id="hSub">Add a photo or video and a brief description — Realtor Tutor writes the caption, you review it, and it posts to your own Instagram, Facebook, LinkedIn, and/or YouTube. The first time you publish there's a quick one-time setup — after that, it's this easy every time.</p>
+  <div class="kicker">Upgrade Your Automation</div>
 
   <!-- ===================== SETUP (first run) ===================== -->
   <section class="screen" id="scrSetup">
@@ -175,7 +173,7 @@
   <section class="screen" id="scrPlan">
     <div class="card" id="planActive" style="display:none">
       <label class="fld">Your subscription</label>
-      <p class="hint">You're on the <b id="planTier">Solo</b> plan — thank you! You can manage or cancel anytime.</p>
+      <p class="hint">You're on the <b id="planTier">paid</b> plan — thank you! You can manage or cancel anytime.</p>
       <button class="btn block" id="manageBtn">Manage subscription</button>
     </div>
     <div class="card" id="planTeam" style="display:none">
@@ -191,21 +189,17 @@
       <p class="hint">You have unlimited posting as part of <b id="seatOwner">your team admin</b>'s Pro plan. There's no billing to manage here — your team admin takes care of that.</p>
     </div>
     <div id="planChoose">
-      <div class="card">
-        <label class="fld">Unlock the full content engine</label>
-        <p class="hint">Generate in your voice and publish on autopilot. Cancel anytime.</p>
-      </div>
-      <div class="plan">
-        <div class="plan-name">Solo</div>
-        <div class="price">$67<span> CAD/mo</span></div>
-        <div class="plan-desc">For one agent — your voice, your socials, on autopilot.</div>
-        <button class="btn block" id="subSolo">Choose Solo →</button>
+      <!-- REBECCA: demo video — autoplays, muted, loops. Add your video URL in the <source> src below. -->
+      <div id="autoDemoVideo" style="margin:0 0 12px">
+        <video style="width:100%;display:block;border-radius:16px;border:1.5px solid var(--line);background:#000" autoplay muted loop playsinline poster="">
+          <source src="" type="video/mp4">
+        </video>
       </div>
       <div class="plan featured">
-        <div class="plan-name">Pro / Team</div>
-        <div class="price">$197<span> CAD/mo</span></div>
-        <div class="plan-desc">Up to 5 seats — each with the full monthly post allowance.</div>
-        <button class="btn block" id="subPro">Choose Pro →</button>
+        <div class="plan-name">Unlimited automation</div>
+        <div class="price">$27<span> CAD/mo</span></div>
+        <div class="plan-desc">Your voice, your socials, fully on autopilot — publish unlimited posts in real time or on a schedule. Cancel anytime.</div>
+        <button class="btn block" id="subSolo">Upgrade now →</button>
       </div>
     </div>
     <div class="err" id="planErr"></div>
@@ -248,7 +242,6 @@
     <div class="connbar"><span>Publishing to <b id="connList">your connected socials</b></span><span><a id="editVoice">edit voice</a> · <a id="changeConn">change setup</a></span></div>
     <div class="card">
       <label class="fld">1 · What kind of post?</label>
-      <p class="hint">Pick one and we'll tailor the writing. Not sure? Leave it on “Anything”.</p>
       <div class="row" id="postTypes"></div>
     </div>
     <div class="card">
@@ -257,7 +250,7 @@
         <div class="chip on" data-kind="photo">📷 Photo</div>
         <div class="chip" data-kind="video">🎬 Video</div>
       </div>
-      <p class="hint" id="mediaHint">A listing photo, a sold sign, a headshot — whatever this post is about.</p>
+      <p class="hint" id="mediaHint"></p>
       <label class="drop" id="drop">
         <input type="file" id="file" accept="image/*">
         <div id="dropText">📷 Tap to add a photo</div>
@@ -275,6 +268,7 @@
     </div>
     <button class="btn block" id="genBtn">Write my caption →</button>
     <p class="hint" id="usageNote" style="display:none;text-align:center;margin:10px 0 0"></p>
+    <p class="hint" id="upgradeLink" style="text-align:center;margin:6px 0 0"><a class="rt-plan" href="#" onclick="openPlan();return false;">Upgrade for unlimited posting →</a></p>
     <div class="err" id="createErr"></div>
   </section>
 
@@ -403,7 +397,7 @@ var HOOK_KEY   = 'rt_auto_webhook';
 var VOICE_KEY  = 'rt_voice_profile';
 var TONES = ['Warm & friendly','Polished & professional','Bold & confident','Witty & casual'];
 var voiceCache = null;   // in-memory copy of the voice profile (source of truth = Supabase)
-var FREE_LIMIT = 3;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 3)
+var FREE_LIMIT = 4;      // free posts per month — keep in sync with FREE_POST_LIMIT env (default 3)
 var subActive = false;   // cached: is this member an active subscriber?
 
 /* ---- tiny helpers ---- */
@@ -491,7 +485,7 @@ async function getToken(){
 function updateUsageNote(used,limit){
   var note=$('usageNote'); if(!note) return;
   var lim=limit||FREE_LIMIT; var left=Math.max(0,lim-used);
-  note.textContent=left+' of '+lim+' free posts left this month';
+  note.textContent=left+' of '+lim+' available posts left this month';
   note.style.display='block';
 }
 async function checkUsage(){
@@ -518,7 +512,7 @@ async function generate(btn,errId){
     var r=await fetch(CAPTION_FN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
     var d=await r.json();
     btn.disabled=false; btn.innerHTML=orig;
-    if(r.status===402){ err(errId,'You\'ve used all '+(d.limit||FREE_LIMIT)+' free posts this month. Subscribe for unlimited posting.'); openPlan(); return; }
+    if(r.status===402){ err(errId,'You\'ve used all '+(d.limit||FREE_LIMIT)+' available posts this month. Subscribe for unlimited posting.'); openPlan(); return; }
     if(!r.ok){ err(errId,(d&&d.error)||'Could not write the caption. Try again.'); return; }
     state.caption=d.caption||''; $('caption').value=state.caption;
     if(state.kind==='video'){ state.ytTitle=d.ytTitle||''; state.ytDescription=d.ytDescription||''; var yt=$('ytTitle'); if(yt) yt.value=state.ytTitle; var yd=$('ytDesc'); if(yd) yd.value=state.ytDescription; }
@@ -1010,7 +1004,7 @@ function boot(){
   $('schedLink').onclick=openCalendar;
   $('calBack').onclick=function(){ startCreate(); };
   $('subSolo').onclick=function(){ startSub('solo', this); };
-  $('subPro').onclick=function(){ startSub('pro', this); };
+  ($('subPro')||{}).onclick=function(){ startSub('pro', this); };
   $('manageBtn').onclick=function(){ openPortal(this); };
   $('inviteBtn').onclick=function(){ inviteSeat(this); };
   $('planBack').onclick=function(){ if(!loadVoice()){openVoice();} else {startCreate();} };
