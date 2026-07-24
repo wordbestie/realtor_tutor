@@ -1,5 +1,5 @@
 // netlify/functions/create-checkout.js
-// Creates a Stripe Checkout session for the $349 one-time, lifetime-access purchase.
+// Creates a Stripe Checkout session for the $297 one-time, lifetime-access purchase.
 // Verifies the Supabase access token server-side, then attaches the user id to the
 // session so the webhook can grant access to the right account.
 
