@@ -347,7 +347,7 @@
       <div class="authbody">
         <div class="formstack">
         <form id="formSignup" class="authform is-on">
-          <div class="plan"><span class="price">$347&nbsp;CAD</span><span class="plan-sub">one-time purchase · lifetime access</span></div>
+          <div class="plan"><span class="price"><s style="color:#C0473A">$347&nbsp;CAD</s> $297&nbsp;CAD <small>limited time</small></span><span class="plan-sub">one-time purchase · lifetime access</span></div>
           <div class="field"><label for="su-email">Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"></div>
           <div class="field"><label for="su-pass">Create a password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
           <button class="btn" type="submit">Sign up</button>
@@ -376,13 +376,13 @@
     <div class="gate-card">
       <div class="label">You're signed in — one step left</div>
       <h2>Unlock the toolkit</h2>
-      <div class="gate-price"><b>$347&nbsp;CAD</b><span>one-time purchase · lifetime access</span></div>
+      <div class="gate-price"><b><s style="color:#C0473A">$347&nbsp;CAD</s> $297&nbsp;CAD</b> <small>limited time</small><span>one-time purchase · lifetime access</span></div>
       <ul class="incl">
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Listing &amp; Buying Wizards</li>
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Content Automation</li>
         <li><svg viewBox="0 0 20 20" fill="none"><path d="M4 10.5l4 4 8-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> New wizards added as they're built — free</li>
       </ul>
-      <button class="btn" id="buyBtn" type="button">Get lifetime access — $347</button>
+      <button class="btn" id="buyBtn" type="button">Get lifetime access — $297</button>
       <p class="gate-sub">Secure checkout by Stripe. By purchasing you agree to the <a href="#" data-modal="disclaimer">disclaimer</a>.</p>
       <p class="gate-sub" id="gateDemoNote" style="display:none">Demo mode — add your Supabase &amp; Stripe keys to enable real checkout.</p>
       <button class="gate-signout" id="gateSignout" type="button">Sign out</button>
@@ -649,7 +649,7 @@ buyBtn.addEventListener('click', async ()=>{
     const out=await res.json();
     if(out.url){ window.location=out.url; }
     else { throw new Error(out.error||'Could not start checkout'); }
-  }catch(e){ buyBtn.disabled=false; buyBtn.textContent='Get lifetime access — $347'; alert('Checkout error: '+e.message); }
+  }catch(e){ buyBtn.disabled=false; buyBtn.textContent='Get lifetime access — $297'; alert('Checkout error: '+e.message); }
 });
 
 /* ---- handle return from Stripe: poll until webhook lands ---- */
@@ -789,7 +789,7 @@ const MODALS = {
     <div class="qa"><p class="q">What exactly is Realtor Tutor?</p><p class="a">One-on-one style video guidance plus step-by-step wizards that walk you through listing procedures, buyer deals and marketing automations — so you're confident you know what to do.</p></div>
     <div class="qa"><p class="q">Do I need experience?</p><p class="a">No. The wizards assume you're newer and explain the why, not just the what. A few years in? You'll use them to move faster and stop second-guessing.</p></div>
     <div class="qa"><p class="q">How is this different from joining a team?</p><p class="a">A team typically takes 30–50% of every commission, forever. This is one payment for similar guidance — and you keep your full amount of what you close.</p></div>
-    <div class="qa"><p class="q">Is it really one payment?</p><p class="a">Yes. $347 once, plus 13% HST, lifetime access. No subscription and no per-deal cut, with access to any new wizards that may be added in the future.</p></div>
+    <div class="qa"><p class="q">Is it really one payment?</p><p class="a">Yes. $297 once, plus 13% HST, lifetime access. No subscription and no per-deal cut, with access to any new wizards that may be added in the future.</p></div>
     <div class="qa"><p class="q">Can I actually reach a human?</p><p class="a">Yes. Members can contact me, Rebecca Zak, Realtor, directly at <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a>.</p></div>
     <div class="qa"><p class="q">Have a question before you join?</p><p class="a">Email me anytime at <a href="mailto:rebecca@realtortutor.com" style="color:var(--green);font-weight:600">rebecca@realtortutor.com</a> — I'm here to help.</p></div>` },
   privacy:{ title:'Privacy policy', eyebrow:'Plain language', body:`
