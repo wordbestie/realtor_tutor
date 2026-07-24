@@ -13,7 +13,7 @@ const supabaseAdmin = createClient(
 );
 
 // --- price / branding (edit here) ---
-const PRICE_CENTS = 34900;      // $349.00
+const PRICE_CENTS = 29700;      // $297.00
 const CURRENCY    = 'cad';      // change to 'usd' if you prefer
 const PRODUCT_NAME = 'Realtor Tutor — Lifetime Access';
 // 13% HST is applied as a fixed Stripe Tax Rate. Create a 13% (exclusive) tax rate
