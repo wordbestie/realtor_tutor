@@ -41,7 +41,7 @@
   .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border:0;background:#fff;z-index:0}
   .hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(270deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.6) 38%,rgba(255,255,255,0) 72%)}
   .hero-content{position:relative;z-index:2;width:100%;max-width:1080px;margin:0 auto;padding:128px 24px 64px;text-align:right}
-  .hero-content h1{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,6vw,4rem);line-height:1.02;letter-spacing:-.025em;margin:0 0 0 auto;max-width:17ch}
+  .hero-content h1{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,6vw,4rem);line-height:1.02;letter-spacing:-.025em;margin:0 0 0 auto;max-width:17ch}.hl-howto{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='14' viewBox='0 0 120 14' preserveAspectRatio='none'><path d='M2 9 C 20 4, 40 12, 60 7 S 100 3, 118 8' stroke='%23E0A227' stroke-width='4' stroke-linecap='round' fill='none'/></svg>");background-repeat:no-repeat;background-position:center 92%;background-size:100% .32em;padding-bottom:.08em}
   .cut{position:relative;white-space:nowrap;color:var(--ink)}
   .cut::after{content:"";position:absolute;left:-4%;right:-4%;top:54%;height:8px;background:var(--gold);border-radius:6px;transform:rotate(-4deg);transform-origin:center}
   /* subtext + byline live below the hero, centered on paper */
@@ -304,7 +304,7 @@
       <source src="heroforsale.mp4" type="video/mp4">
     </video>
     <div class="hero-content">
-      <h1>How-To Help for Ontario Realtors</h1>
+      <h1><span class="hl-howto">How-To</span> Help for<br>Ontario Realtors</h1>
     </div>
   </div>
 
